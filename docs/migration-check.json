@@ -1,0 +1,1790 @@
+{
+  "sourceBaseline": "519ec9a3a5e9a2208cd65f8c6b6d48e6cbe5cd8a",
+  "performedAt": "2026-11-02T10:20:56.936Z",
+  "scope": "Migration integrity and standalone playback; no artwork, copy, timing, font rebuild, video export or tourism-fact revalidation.",
+  "unchanged": {
+    "viz": {
+      "byteIdenticalToBaseline": true,
+      "changedFiles": []
+    },
+    "output": {
+      "byteIdenticalToBaseline": true,
+      "changedFiles": []
+    },
+    "data": {
+      "byteIdenticalToBaseline": true,
+      "changedFiles": []
+    }
+  },
+  "archiveBranches": [
+    {
+      "source": "claude/adoring-darwin-982h4c",
+      "sha": "519ec9a3a5e9a2208cd65f8c6b6d48e6cbe5cd8a",
+      "archive": "archive/source/claude/adoring-darwin-982h4c",
+      "exactTipPreserved": true
+    },
+    {
+      "source": "gpt/three-films-copy",
+      "sha": "83393b4cfcf6bfaf16240169818c6af6c4a8f9aa",
+      "archive": "archive/source/gpt/three-films-copy",
+      "exactTipPreserved": true
+    },
+    {
+      "source": "gpt/yahiko-refine-2026-10-24",
+      "sha": "03d13b6d37f093488f3c07feea69ee4e13e13a63",
+      "archive": "archive/source/gpt/yahiko-refine-2026-10-24",
+      "exactTipPreserved": true
+    },
+    {
+      "source": "gpt/yahiko-v11-refine",
+      "sha": "d369de8b414320d6a305288faecbfb6e30a60996",
+      "archive": "archive/source/gpt/yahiko-v11-refine",
+      "exactTipPreserved": true
+    },
+    {
+      "source": "gpt/yuzawa-ski-3d",
+      "sha": "5c575b30eee16f88f7f99782e1ec532b87fa14c7",
+      "archive": "archive/source/gpt/yuzawa-ski-3d",
+      "exactTipPreserved": true
+    },
+    {
+      "source": "gpt/yuzawa-ski-sns",
+      "sha": "a95ecb8afbdf384d5b29837723bb1383f73ccdba",
+      "archive": "archive/source/gpt/yuzawa-ski-sns",
+      "exactTipPreserved": true
+    },
+    {
+      "source": "gpt/yuzawa-visual-refine",
+      "sha": "032bf6ec4cfbbe7c71a1a504f97b8c9098dfe9fd",
+      "archive": "archive/source/gpt/yuzawa-visual-refine",
+      "exactTipPreserved": true
+    },
+    {
+      "source": "main",
+      "sha": "c41d6674a1a6537a708bc92fdb280a2a50447421",
+      "archive": "archive/source/main",
+      "exactTipPreserved": true
+    }
+  ],
+  "documentationLinks": [
+    {
+      "document": "README.md",
+      "target": "viz/spring/takada-yozakura-v2.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "viz/spring/takada-yozakura-v2-tw.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "viz/summer/nagaoka-hanabi-a.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "viz/summer/nagaoka-hanabi-a-tw.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "viz/autumn/yahiko-v16.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "viz/winter/yuzawa-yukiguni.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "viz/winter/yuzawa-yukiguni-tw.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "viz/autumn/yahiko-v11-refined.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "viz/autumn/yahiko-v11-refined-tw.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "viz/autumn/yahiko-v12.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "viz/autumn/yahiko-v12-tw.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "viz/autumn/yahiko-v13.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "viz/autumn/yahiko-v13-tw.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "viz/autumn/yahiko-v14.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "viz/autumn/yahiko-v15.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "viz/summer/sado-taraibune.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "viz/winter/yuzawa-yukiguni-ja.html",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "docs/migration-check.json",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "CLAUDE.md",
+      "exists": true
+    },
+    {
+      "document": "README.md",
+      "target": "docs/MIGRATION.md",
+      "exists": true
+    },
+    {
+      "document": "docs/MIGRATION.md",
+      "target": "migration-check.json",
+      "exists": true
+    }
+  ],
+  "scriptCompilation": {
+    "pages": 33,
+    "scripts": 95,
+    "errors": []
+  },
+  "pages": [
+    {
+      "page": "viz/spring/takada-yozakura-v2.html",
+      "isolatedSingleFile": true,
+      "errors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "failedRequests": [],
+      "renderedTimes": [
+        0,
+        0.5,
+        1,
+        1.5,
+        2,
+        2.5,
+        3,
+        3.5,
+        4,
+        4.5,
+        5,
+        5.5,
+        6,
+        6.5,
+        7,
+        7.5,
+        8,
+        8.5,
+        9,
+        9.5,
+        10,
+        10.5,
+        11,
+        11.5,
+        12,
+        12.5,
+        13,
+        13.5,
+        14,
+        14.5,
+        15,
+        15.5,
+        16,
+        16.5,
+        17,
+        17.5,
+        18,
+        18.5,
+        19,
+        19.5,
+        19.99
+      ],
+      "duration": 20,
+      "fonts": [
+        {
+          "family": "Sora",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        }
+      ],
+      "canvases": [
+        {
+          "width": 1080,
+          "height": 1920
+        }
+      ],
+      "passed": true
+    },
+    {
+      "page": "viz/spring/takada-yozakura-v2-tw.html",
+      "isolatedSingleFile": true,
+      "errors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "failedRequests": [],
+      "renderedTimes": [
+        0,
+        0.5,
+        1,
+        1.5,
+        2,
+        2.5,
+        3,
+        3.5,
+        4,
+        4.5,
+        5,
+        5.5,
+        6,
+        6.5,
+        7,
+        7.5,
+        8,
+        8.5,
+        9,
+        9.5,
+        10,
+        10.5,
+        11,
+        11.5,
+        12,
+        12.5,
+        13,
+        13.5,
+        14,
+        14.5,
+        15,
+        15.5,
+        16,
+        16.5,
+        17,
+        17.5,
+        18,
+        18.5,
+        19,
+        19.5,
+        19.99
+      ],
+      "duration": 20,
+      "fonts": [
+        {
+          "family": "Sora",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        }
+      ],
+      "canvases": [
+        {
+          "width": 1080,
+          "height": 1920
+        }
+      ],
+      "passed": true
+    },
+    {
+      "page": "viz/summer/nagaoka-hanabi-a.html",
+      "isolatedSingleFile": true,
+      "errors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "failedRequests": [],
+      "renderedTimes": [
+        0,
+        0.5,
+        1,
+        1.5,
+        2,
+        2.5,
+        3,
+        3.5,
+        4,
+        4.5,
+        5,
+        5.5,
+        6,
+        6.5,
+        7,
+        7.5,
+        8,
+        8.5,
+        9,
+        9.5,
+        10,
+        10.5,
+        11,
+        11.5,
+        12,
+        12.5,
+        13,
+        13.5,
+        14,
+        14.5,
+        15,
+        15.5,
+        16,
+        16.5,
+        17,
+        17.5,
+        18,
+        18.5,
+        19,
+        19.5,
+        19.99
+      ],
+      "duration": 20,
+      "fonts": [
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "Sora",
+          "status": "loaded"
+        }
+      ],
+      "canvases": [
+        {
+          "width": 1080,
+          "height": 1920
+        }
+      ],
+      "passed": true
+    },
+    {
+      "page": "viz/summer/nagaoka-hanabi-a-tw.html",
+      "isolatedSingleFile": true,
+      "errors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "failedRequests": [],
+      "renderedTimes": [
+        0,
+        0.5,
+        1,
+        1.5,
+        2,
+        2.5,
+        3,
+        3.5,
+        4,
+        4.5,
+        5,
+        5.5,
+        6,
+        6.5,
+        7,
+        7.5,
+        8,
+        8.5,
+        9,
+        9.5,
+        10,
+        10.5,
+        11,
+        11.5,
+        12,
+        12.5,
+        13,
+        13.5,
+        14,
+        14.5,
+        15,
+        15.5,
+        16,
+        16.5,
+        17,
+        17.5,
+        18,
+        18.5,
+        19,
+        19.5,
+        19.99
+      ],
+      "duration": 20,
+      "fonts": [
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "Sora",
+          "status": "loaded"
+        }
+      ],
+      "canvases": [
+        {
+          "width": 1080,
+          "height": 1920
+        }
+      ],
+      "passed": true
+    },
+    {
+      "page": "viz/autumn/yahiko-v16.html",
+      "isolatedSingleFile": true,
+      "errors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "failedRequests": [],
+      "renderedTimes": [
+        0,
+        0.5,
+        1,
+        1.5,
+        2,
+        2.5,
+        3,
+        3.5,
+        4,
+        4.5,
+        5,
+        5.5,
+        6,
+        6.5,
+        7,
+        7.5,
+        8,
+        8.5,
+        9,
+        9.5,
+        10,
+        10.5,
+        11,
+        11.5,
+        12,
+        12.5,
+        13,
+        13.5,
+        14,
+        14.5,
+        15,
+        15.5,
+        16,
+        16.5,
+        17,
+        17.5,
+        18,
+        18.5,
+        19,
+        19.5,
+        20,
+        20.5,
+        21,
+        21.5,
+        22,
+        22.5,
+        22.79
+      ],
+      "duration": 22.8,
+      "fonts": [
+        {
+          "family": "Sora",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        }
+      ],
+      "canvases": [
+        {
+          "width": 1080,
+          "height": 1920
+        }
+      ],
+      "passed": true
+    },
+    {
+      "page": "viz/autumn/yahiko-v11-refined.html",
+      "isolatedSingleFile": true,
+      "errors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "failedRequests": [],
+      "renderedTimes": [
+        0,
+        0.5,
+        1,
+        1.5,
+        2,
+        2.5,
+        3,
+        3.5,
+        4,
+        4.5,
+        5,
+        5.5,
+        6,
+        6.5,
+        7,
+        7.5,
+        8,
+        8.5,
+        9,
+        9.5,
+        10,
+        10.5,
+        11,
+        11.5,
+        12,
+        12.5,
+        13,
+        13.5,
+        14,
+        14.5,
+        15,
+        15.5,
+        16,
+        16.5,
+        17,
+        17.5,
+        18,
+        18.5,
+        19,
+        19.5,
+        20,
+        20.5,
+        21,
+        21.39
+      ],
+      "duration": 21.4,
+      "fonts": [
+        {
+          "family": "Sora",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        }
+      ],
+      "canvases": [
+        {
+          "width": 1080,
+          "height": 1920
+        }
+      ],
+      "passed": true
+    },
+    {
+      "page": "viz/autumn/yahiko-v11-refined-tw.html",
+      "isolatedSingleFile": true,
+      "errors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "failedRequests": [],
+      "renderedTimes": [
+        0,
+        0.5,
+        1,
+        1.5,
+        2,
+        2.5,
+        3,
+        3.5,
+        4,
+        4.5,
+        5,
+        5.5,
+        6,
+        6.5,
+        7,
+        7.5,
+        8,
+        8.5,
+        9,
+        9.5,
+        10,
+        10.5,
+        11,
+        11.5,
+        12,
+        12.5,
+        13,
+        13.5,
+        14,
+        14.5,
+        15,
+        15.5,
+        16,
+        16.5,
+        17,
+        17.5,
+        18,
+        18.5,
+        19,
+        19.5,
+        20,
+        20.5,
+        21,
+        21.39
+      ],
+      "duration": 21.4,
+      "fonts": [
+        {
+          "family": "Sora",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        }
+      ],
+      "canvases": [
+        {
+          "width": 1080,
+          "height": 1920
+        }
+      ],
+      "passed": true
+    },
+    {
+      "page": "viz/winter/yuzawa-yukiguni.html",
+      "isolatedSingleFile": true,
+      "errors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "failedRequests": [],
+      "renderedTimes": [
+        0,
+        0.5,
+        1,
+        1.5,
+        2,
+        2.5,
+        3,
+        3.5,
+        4,
+        4.5,
+        5,
+        5.5,
+        6,
+        6.5,
+        7,
+        7.5,
+        8,
+        8.5,
+        9,
+        9.5,
+        10,
+        10.5,
+        11,
+        11.5,
+        12,
+        12.5,
+        13,
+        13.5,
+        14,
+        14.5,
+        15,
+        15.5,
+        16,
+        16.5,
+        17,
+        17.5,
+        18,
+        18.5,
+        19,
+        19.5,
+        19.99
+      ],
+      "duration": 20,
+      "fonts": [
+        {
+          "family": "Sora",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans SC\"",
+          "status": "loaded"
+        }
+      ],
+      "canvases": [
+        {
+          "width": 1080,
+          "height": 1920
+        }
+      ],
+      "passed": true
+    },
+    {
+      "page": "viz/winter/yuzawa-yukiguni-tw.html",
+      "isolatedSingleFile": true,
+      "errors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "failedRequests": [],
+      "renderedTimes": [
+        0,
+        0.5,
+        1,
+        1.5,
+        2,
+        2.5,
+        3,
+        3.5,
+        4,
+        4.5,
+        5,
+        5.5,
+        6,
+        6.5,
+        7,
+        7.5,
+        8,
+        8.5,
+        9,
+        9.5,
+        10,
+        10.5,
+        11,
+        11.5,
+        12,
+        12.5,
+        13,
+        13.5,
+        14,
+        14.5,
+        15,
+        15.5,
+        16,
+        16.5,
+        17,
+        17.5,
+        18,
+        18.5,
+        19,
+        19.5,
+        19.99
+      ],
+      "duration": 20,
+      "fonts": [
+        {
+          "family": "Sora",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        },
+        {
+          "family": "\"Source Han Sans TC\"",
+          "status": "loaded"
+        }
+      ],
+      "canvases": [
+        {
+          "width": 1080,
+          "height": 1920
+        }
+      ],
+      "passed": true
+    },
+    {
+      "page": "viz/summer/sado-taraibune.html",
+      "isolatedSingleFile": true,
+      "errors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "failedRequests": [],
+      "renderedTimes": [
+        0,
+        0.5,
+        1,
+        1.5,
+        2,
+        2.5,
+        3,
+        3.5,
+        4,
+        4.5,
+        5,
+        5.5,
+        6,
+        6.5,
+        7,
+        7.5,
+        8,
+        8.5,
+        9,
+        9.5,
+        10,
+        10.5,
+        11,
+        11.5,
+        11.99
+      ],
+      "duration": 12,
+      "fonts": [],
+      "canvases": [
+        {
+          "width": 1080,
+          "height": 1920
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "playback": [
+    {
+      "page": "viz/spring/takada-yozakura-v2.html",
+      "errors": [],
+      "frames": 1130,
+      "observedSeconds": 21,
+      "passed": true
+    },
+    {
+      "page": "viz/summer/nagaoka-hanabi-a.html",
+      "errors": [],
+      "frames": 927,
+      "observedSeconds": 21,
+      "passed": true
+    },
+    {
+      "page": "viz/autumn/yahiko-v16.html",
+      "errors": [],
+      "frames": 881,
+      "observedSeconds": 23.8,
+      "passed": true
+    },
+    {
+      "page": "viz/winter/yuzawa-yukiguni.html",
+      "errors": [],
+      "frames": 448,
+      "observedSeconds": 21,
+      "passed": true
+    }
+  ],
+  "visualReview": "Reviewed a four-panel contact sheet with a sampled rendered frame from each primary episode (Takada, Nagaoka, Yahiko v16, Yuzawa); content is visible, no blank frames. This does not constitute full human motion/design sign-off.",
+  "passed": true,
+  "browser": {
+    "engine": "Google Chrome headless",
+    "viewport": {
+      "width": 360,
+      "height": 640
+    },
+    "disableGpu": true,
+    "softwareWebGL": true
+  },
+  "documentationLinksRecheckedAfterReportCreation": true
+}

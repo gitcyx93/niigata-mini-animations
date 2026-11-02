@@ -1,78 +1,66 @@
-# niigata-data-viz
+# Niigata Mini Animations
 
-## 当前文字版：高田 / 弥彦 / 汤泽
+新潟小动画：用网页绘制的新潟旅行短片。高田夜樱、长冈花火、弥彦红叶与山海、越后汤泽滑雪和温泉。
 
-分支 `gpt/three-films-copy`。三个简体页面已应用用户新稿并补字体，台湾繁体版为对应的 `-tw.html`。不改现有画面：高田20秒、弥彦21.4秒、汤泽20秒，汤泽保留SNS快速运镜。
+这是**动画作品与制作工程**，不是统计看板。2026-11-02 从 [`gitcyx93/niigata-data-viz`](https://github.com/gitcyx93/niigata-data-viz) 的动画工作分支迁出，保留原提交历史、试作版本、共用代码、工具、资料与视频。
 
-核实后将GALA站“只在雪季”更正为“主要在雪季”，汤泽雪场按官方目录去重计约11座。详情见 [新稿与繁体版说明](stories/three-films-copy.md) 和 [事实来源](data/SOURCES.md)。
+## 从这里打开
 
-仅做无截图脚本/字体检查：[结果](reference/three-films-copy/script-check.json)。重新检查：`node viz/tools/check-copy-pages.cjs`，通过 `BROWSER_EXE` 指定Chrome。
+GitHub 文件页显示源码，不会直接播放 HTML。克隆或下载本仓库后，双击下面的 HTML；也可以在仓库根目录运行 `python3 -m http.server 8000`，通过 `http://localhost:8000/viz/` 打开。
 
-## 当前试作：汤泽滑雪 SNS 快节奏运镜
+| 季节 | 作品入口 | 说明 |
+|---|---|---|
+| 春 | [高田夜樱 v2](viz/spring/takada-yozakura-v2.html) · [台湾繁体](viz/spring/takada-yozakura-v2-tw.html) | 当前 v2 页面与新稿 |
+| 夏 | [长冈花火 A](viz/summer/nagaoka-hanabi-a.html) · [台湾繁体](viz/summer/nagaoka-hanabi-a-tw.html) | 保留原已发布版本，不改画面或文案 |
+| 秋 | [弥彦 v16](viz/autumn/yahiko-v16.html) | 迁移基线分支中编号最新的试作，**不等于已经定稿** |
+| 冬 | [越后汤泽](viz/winter/yuzawa-yukiguni.html) · [台湾繁体](viz/winter/yuzawa-yukiguni-tw.html) | 三维滑雪、SNS 运镜与新稿；保留原 20 秒循环 |
 
-分支 `gpt/yuzawa-ski-sns`。保留已认可三维版 `5c575b3`，仅把3.3–8.7秒滑雪改为三段取景：0.42秒快速推进、4.8秒切侧向跟拍、6.5秒切近横刹与举手收尾。人物动作速度、文字、其他镜头和20秒循环不改。
+其他版本：
 
-- [改动与验证说明](stories/yuzawa-ski-sns.md)
-- [稳版与快速版对照](reference/yuzawa-ski-sns/comparison.png) · [连续滑雪采样](reference/yuzawa-ski-sns/ski-motion.png)
-- 检查：`node viz/tools/check-yuzawa-sns.cjs`，使用 `BROWSER_EXE` 指定Chrome。
+- [弥彦 v11 精修](viz/autumn/yahiko-v11-refined.html) · [对应台湾繁体](viz/autumn/yahiko-v11-refined-tw.html)：繁体版不是 v16 的翻译。
+- [弥彦 v12](viz/autumn/yahiko-v12.html) · [对应台湾繁体](viz/autumn/yahiko-v12-tw.html)、[v13](viz/autumn/yahiko-v13.html) · [对应台湾繁体](viz/autumn/yahiko-v13-tw.html)、[v14](viz/autumn/yahiko-v14.html)、[v15](viz/autumn/yahiko-v15.html)：保留作比较，不自动选定最终版本。
+- [佐渡木盆船](viz/summer/sado-taraibune.html)：早期试作。
+- [汤泽日文试作](viz/winter/yuzawa-yukiguni-ja.html)：已有历史版本，不代表系列改为维护日文。
+- 其他旧版保留在各季目录；未把不同分支的试作擅自合并。
 
-## 三维基础版（保留）：汤泽滑雪三维重做
+## 文件放在哪里
 
-分支 `gpt/yuzawa-ski-3d`，基线 `8184a23`。仅替换 `viz/winter/yuzawa-yukiguni.html` 的3.3–8.7秒滑雪场景，使用内嵌Three.js绘制立体人物、双板、地形和雪树。文字、其他镜头、动作阶段时序和20秒循环不改。HTML无需联网，推荐开启硬件加速的Chrome/Edge；WebGL2不可用时回退旧滑雪效果。
+| 路径 | 内容 |
+|---|---|
+| `viz/spring/`、`summer/`、`autumn/`、`winter/` | 动画 HTML 及独立场景源文件 |
+| `viz/common/series.js` | 系列共用绘制代码 |
+| `viz/tools/` | 字体内嵌、繁体转换、构建、检查与录制工具 |
+| `stories/` | 每集调研、分镜、文案和试作记录 |
+| `data/` | 事实来源与研究用数据快照；保留原出处与核验提醒 |
+| `reference/` | 动画比较图、播放采样与旧检查结果，不是作品入口 |
+| `output/` | 已有 MP4、发布文案与评审预览 |
+| `docs/` | 迁移记录与本次检查结果 |
 
-- [制作与自检记录](stories/yuzawa-ski3d.md)
-- [修改前后对照](reference/yuzawa-ski3d/comparison.png) · [滑雪连续采样](reference/yuzawa-ski3d/ski-motion.png)
-- [检查结果](reference/yuzawa-ski3d/validation.json)
-- 后台检查：`node viz/tools/check-yuzawa-ski3d.cjs`（用 `BROWSER_EXE` 指定Chrome）。
+原统计看板 `dashboard/`、它的 `scripts/` 和 `reference/niigata-cinema-zh.html` **不属于本项目的当前工作树**，继续留在原数据仓库。为了完整保留历史，它们仍可能出现在旧提交或归档分支中。
 
-## 当前弥彦：新文案 + 21.4秒
+保留 `viz/` 路径是为了不破坏生成脚本、历史版本比对和文档引用；不在迁移时批量改文件名、重嵌字体或重建动画。
 
-当前整合分支：`claude/adoring-darwin-982h4c`。保留 `e9b561a` 的弥彦/高田新稿和 `032bf6e` 的汤泽画面修改。
+## 使用与制作
 
-弥彦鸟居延长至3.2秒，看海收尾缩至6秒，全片21.4秒。其他镜头内容不变，新稿不删改，只同步出现时间。[时间表与检查说明](stories/yahiko-timing-21s.md)。三种译版尚未生成。
-
-## 汤泽画面精修（当前分支）
-
-分支 `gpt/yuzawa-visual-refine`，从 `a4c0381` 新建。只修改 `viz/winter/yuzawa-yukiguni.html` 的画面：滑雪环境提亮、雪痕与飞雪细化、温泉近景背景和持杯关系改善。
-
-**文字全部不改，20秒循环、镜头时间、滑雪轨迹和回隧道运镜保留。** 其他三季未修改。
-
-- [画面精修记录](stories/yuzawa-visual-refine.md)
-- [修改前后对照](reference/yuzawa-visual-refine/comparison.png) · [关键帧](reference/yuzawa-visual-refine/keyframes.png)
-- [验证结果](reference/yuzawa-visual-refine/validation.json)
-- 后台检查：`node viz/tools/check-yuzawa-visual.cjs`，通过 `BROWSER_EXE` 指定Chrome。
-
-## 高田夜樱：仅去掉重复全景
-
-`viz/spring/takada-yozakura-v2.html` **恢复并保留原 13–20 秒的全景花吹雪/花筏高潮**；仅将 0–5 秒换成樱花框住三重橹的建筑近景，把完整护城河全景留到后半段。极乐桥、仰看樱花、文案、花瓣算法和 20 秒总长保留；19.9 秒不提前重现封面大字。之前的水面近景替换方案已撤回。
-
-- [修改前后对照](reference/takada-dedup/comparison.png) · [检查记录](reference/takada-dedup/validation.json) · [制作记录](stories/takada.md)
-- 后台验证：`node viz/tools/check-takada-dedup.cjs`（用 `BROWSER_EXE` 指定 Chrome）。
-
-## 弥彦 V11 精修
-
-本分支 `gpt/yahiko-v11-refine` 从原 V11 `d2d2c18` 分出，原版保留。
-
-- **新版 HTML**：[yahiko-v11-refined.html](viz/autumn/yahiko-v11-refined.html)
-- **A 空间关系修正前后**：[A-layout-comparison.png](reference/yahiko-v11-refined/A-layout-comparison.png)
-- **A 日夜切镜**：[A-night-cut.png](reference/yahiko-v11-refined/A-night-cut.png)
-- **开场 A/C 对照图**：[openings.png](reference/yahiko-v11-refined/openings.png)
-- **原 V11**：[yahiko-reviewed-v11.html](viz/autumn/yahiko-reviewed-v11.html)
-- **修改前后对照图**：[comparison.png](reference/yahiko-v11-refined/comparison.png)
-- **改动与检查记录**：[yahiko-v11-refined.md](stories/yahiko-v11-refined.md)
-
-HTML 下载后可直接打开，字体与动画均内嵌。GitHub 文件页展示的是源码，不是动画预览。
-
-已选定 **A · 风景导览**；**C · 山海全景** 仅保留作历史对照。A 当前已将远海与公园水面分开，补齐桥台岸坡，将神社与索道设施分区，并让桥的主要轮廓在 2.2 秒日夜切镜时对齐，不再叠出两座桥。两者均为风格化构图，不是精确导航图或同一实景机位复刻。
-
-页面按钮可切换历史对照；切换回到第 0 秒，保留当前播放/暂停状态，也可用 `?opening=C` 直接打开 C。
-
-桥上飞叶为**一阵连续增强、向右下飘落的风**：逐渐增多、加速，跨入鸟居后自然退场，不再上扬、分两阵或中途留白。2.2 秒之后两方案共用同一动画。当前鸟居5.6–8.8秒、神社8.8–12.2秒、缆车12.2–15.4秒、日落15.4–21.4秒。文字采用e9b561a新稿，末三句旁白在压缩后的看海段内完整保留，阅读节奏比原25.2秒版紧。
-
-检查（Node 22+，本机需有 Chrome/Chromium）：
+- **看动画无需安装依赖**。本次入口页面的字体和运行代码均已内嵌；验证范围见 [检查结果](docs/migration-check.json)。
+- 修改作品前读 [`CLAUDE.md`](CLAUDE.md) 与该集的 `stories/` 记录。迁移没有重新确认旧文档中的待办、最终版本选择或发布状态。
+- 原系列共用代码更新后，按对应版本说明重新内嵌；不要用旧的公共生成流程覆盖独立版本。
+- 工具要求 Node.js 22+、Python 3；录制还需要 FFmpeg、Playwright 与 Chromium。字体处理需要 `fonttools` / `brotli`。三维构建及繁体生成的精确依赖见相应脚本和制作记录，**仅观看时不需要安装**。
+- 某些历史检查工具通过 `git show <旧提交>:<文件>` 做回归比较；本仓库保留原提交，因此这些基线仍可访问。旧检查结果是当时的证据，不代表本次全部重跑。
 
 ```sh
-node viz/tools/check-yahiko-timing.cjs
+# 无 npm 依赖的原三集脚本/字体检查；需要本机 Chrome/Chromium
+node viz/tools/check-copy-pages.cjs
+
+# 使用其他 Chrome/Chromium 路径
+BROWSER_EXE=/path/to/chrome node viz/tools/check-copy-pages.cjs
 ```
 
-默认使用 macOS Chrome 或 `/usr/bin/chromium`；其他位置通过 `BROWSER_EXE` 指定。检查使用 headless 浏览器与独立临时配置，不操作用户鼠标键盘或连接日常浏览器。当前检查以 `b8d9dc9` 为基线，比对17个源时间场景帧、完整文案和21.4秒播放控制；旧的25.2秒检查脚本仅适用于历史版本。
+## 版本与来源
+
+- 主分支以源仓库 `519ec9a3a5e9a2208cd65f8c6b6d48e6cbe5cd8a` 为迁移基线；没有用落后的源仓库 `main` 覆盖动画。
+- 所有源分支 tip 保存为 `archive/source/*`。存在尚未合入基线的弥彦试作，保留归档，不自动合并。
+- [迁移说明与完整分支映射](docs/MIGRATION.md)
+- [迁移前的项目 README](https://github.com/gitcyx93/niigata-mini-animations/blob/519ec9a3a5e9a2208cd65f8c6b6d48e6cbe5cd8a/README.md)
+
+本仓库未新增许可证；作品、字体和第三方库的权利及许可声明保持原状。
