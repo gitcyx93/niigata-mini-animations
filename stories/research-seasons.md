@@ -9,7 +9,7 @@
   - **A**：摘录来自官方或一手机构（JMA、JR 东日本新闻稿、县官网、县观光协会），数字很可能正确，但发布前仍建议打开链接看一眼。
   - **B**：来自二手媒体或业界网站，有具体出处可追，建议对照一手资料。
   - **C**：来源只有商业或宣传页，或各家说法不一，**先标「待定」**，不要直接上画面。
-- 月度外国人住宿数据来自 Chen 那版（[原数据仓库的 `reference/niigata-cinema-zh.html`](https://github.com/gitcyx93/niigata-data-viz/blob/c41d6674a1a6537a708bc92fdb280a2a50447421/reference/niigata-cinema-zh.html)，注明出处是观光厅《2025年 宿泊旅行統計報告書》），CLAUDE.md 里写了「还没对照原始资料核过」。我做了一个内部检查：12 个月加起来 = 848,870 人泊，和 `data/zh/tourism.json` 里的全年外国人住宿总数完全一致。原表仍需 Chen 下载 PDF 核对。
+- 月度外国人住宿数据来自 Chen 那版（[原数据仓库的 `reference/niigata-cinema-zh.html`](https://github.com/gitcyx93/niigata-data-archive/blob/c41d6674a1a6537a708bc92fdb280a2a50447421/reference/niigata-cinema-zh.html)，注明出处是观光厅《2025年 宿泊旅行統計報告書》），CLAUDE.md 里写了「还没对照原始资料核过」。我做了一个内部检查：12 个月加起来 = 848,870 人泊，和 `data/zh/tourism.json` 里的全年外国人住宿总数完全一致。原表仍需 Chen 下载 PDF 核对。
 
 ### 三集共用的数据：新潟县 2025 年外国人住宿，按月
 

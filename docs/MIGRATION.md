@@ -5,7 +5,7 @@
 ## 名称与边界
 
 - 新仓库：`gitcyx93/niigata-mini-animations`，中文名“新潟小动画”。
-- 源仓库：`gitcyx93/niigata-data-viz`。
+- 源仓库原名：`gitcyx93/niigata-data-viz`；同日整理后现名为 [`gitcyx93/niigata-data-archive`](https://github.com/gitcyx93/niigata-data-archive)，只读归档。
 - 对象是四季旅行动画，而不是默认分支中的统计交互页。原默认分支没有动画工程，不能只复制它。
 - 新 `main` 以源动画整合分支 `claude/adoring-darwin-982h4c` 的 `519ec9a3a5e9a2208cd65f8c6b6d48e6cbe5cd8a` 为基线。它包含当前四季动画、三维汤泽滑雪、三集新稿及弥彦 v16；采用这份快照不是替用户选定最新试作即最终成品。
 
@@ -20,9 +20,9 @@
 
 ## 分支与历史
 
-不重写原提交。每个源分支的 tip 原样保存为新仓库的 `archive/source/<源分支名>`，其 SHA 应与下面相同。
+不重写原提交。每个源分支的 tip 最初保存为新仓库的 `archive/source/<源分支名>` 快照分支；2026-11-02 在用户批准整理后，转为**同名附注标签**，再移除分支名。标签剥离后的提交 SHA 与下表完全相同；独立试作没有丢失。
 
-| 源分支 | 固定 tip | 新仓库归档分支 |
+| 源分支 | 固定 tip | 新仓库归档标签 |
 |---|---|---|
 | `main` | `c41d6674a1a6537a708bc92fdb280a2a50447421` | `archive/source/main` |
 | `claude/adoring-darwin-982h4c` | `519ec9a3a5e9a2208cd65f8c6b6d48e6cbe5cd8a` | `archive/source/claude/adoring-darwin-982h4c` |
@@ -40,10 +40,11 @@
 
 都已保留完整历史，没有因为“不是主版本”而删除，也没有未经比较就混入主分支。
 
-示例：查看归档分支，或回溯到特定版本。
+示例：查看归档标签，或回溯到特定版本。
 
 ```sh
-git switch --detach origin/archive/source/gpt/yahiko-v11-refine
+git fetch --tags origin
+git switch --detach refs/tags/archive/source/gpt/yahiko-v11-refine
 git show 5c575b3:viz/winter/yuzawa-yukiguni.html
 ```
 
@@ -53,4 +54,4 @@ git show 5c575b3:viz/winter/yuzawa-yukiguni.html
 
 ## 验证
 
-机器可读检查记录见 [`migration-check.json`](migration-check.json)。验证区分原样复制、脚本/依赖检查、逐时刻渲染和实时播放采样；旧 `reference/` 检查结果不冒充本次检查。迁移不会自动修复历史试作自身的缺陷或重新核验旅游事实。
+原迁移阶段的机器可读检查记录见 [`migration-check.json`](migration-check.json)；其中分支检查记录描述的是转为标签之前的状态。当前归档引用以本文的标签说明为准。验证区分原样复制、脚本/依赖检查、逐时刻渲染和实时播放采样；旧 `reference/` 检查结果不冒充本次检查。迁移不会自动修复历史试作自身的缺陷或重新核验旅游事实。

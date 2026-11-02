@@ -1,6 +1,6 @@
 # Niigata Mini Animations · 新潟旅行小动画
 
-本项目于 2026-11-02 从 `gitcyx93/niigata-data-viz` 迁出；动画的后续维护在 `gitcyx93/niigata-mini-animations`。作品入口见 `README.md`，原分支、迁移边界和保留版本见 `docs/MIGRATION.md`。下文保留原制作约定；旧状态与待办不是新的用户授权。迁移本身不修改文案、画面、时序或版本选择。
+本项目于 2026-11-02 从 `gitcyx93/niigata-data-viz`（现名 `gitcyx93/niigata-data-archive`）迁出；动画的后续维护在 `gitcyx93/niigata-mini-animations`。作品入口见 `README.md`，原分支、迁移边界和保留版本见 `docs/MIGRATION.md`。下文保留原制作约定；旧状态与待办不是新的用户授权。迁移本身不修改文案、画面、时序或版本选择。
 
 做一系列竖屏动画（1080×1920，导出 MP4），发小红书（简体）、Facebook 和 Instagram（繁体），让华语游客想去新潟。重点是画面和体验，不是数据。
 

@@ -3,4 +3,4 @@
 当前作品入口见仓库根目录 README.md；成片和发布文案在 output/。
 
 统计交互页 niigata-cinema-zh.html 属于原数据仓库，未迁入本项目当前工作树：
-https://github.com/gitcyx93/niigata-data-viz/blob/c41d6674a1a6537a708bc92fdb280a2a50447421/reference/niigata-cinema-zh.html
+https://github.com/gitcyx93/niigata-data-archive/blob/c41d6674a1a6537a708bc92fdb280a2a50447421/reference/niigata-cinema-zh.html

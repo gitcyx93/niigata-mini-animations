@@ -2,7 +2,7 @@
 
 新潟小动画：用网页绘制的新潟旅行短片。高田夜樱、长冈花火、弥彦红叶与山海、越后汤泽滑雪和温泉。
 
-这是**动画作品与制作工程**，不是统计看板。2026-11-02 从 [`gitcyx93/niigata-data-viz`](https://github.com/gitcyx93/niigata-data-viz) 的动画工作分支迁出，保留原提交历史、试作版本、共用代码、工具、资料与视频。
+这是**动画作品与制作工程**，不是统计看板。2026-11-02 从旧数据仓库（现名 [`gitcyx93/niigata-data-archive`](https://github.com/gitcyx93/niigata-data-archive)）的动画工作分支迁出，保留原提交历史、试作版本、共用代码、工具、资料与视频。
 
 ## 从这里打开
 
@@ -36,7 +36,7 @@ GitHub 文件页显示源码，不会直接播放 HTML。克隆或下载本仓�
 | `output/` | 已有 MP4、发布文案与评审预览 |
 | `docs/` | 迁移记录与本次检查结果 |
 
-原统计看板 `dashboard/`、它的 `scripts/` 和 `reference/niigata-cinema-zh.html` **不属于本项目的当前工作树**，继续留在原数据仓库。为了完整保留历史，它们仍可能出现在旧提交或归档分支中。
+原统计看板 `dashboard/`、它的 `scripts/` 和 `reference/niigata-cinema-zh.html` **不属于本项目的当前工作树**，继续留在原数据仓库。为了完整保留历史，它们仍可能出现在旧提交或归档标签所指向的历史中。
 
 保留 `viz/` 路径是为了不破坏生成脚本、历史版本比对和文档引用；不在迁移时批量改文件名、重嵌字体或重建动画。
 
@@ -59,7 +59,8 @@ BROWSER_EXE=/path/to/chrome node viz/tools/check-copy-pages.cjs
 ## 版本与来源
 
 - 主分支以源仓库 `519ec9a3a5e9a2208cd65f8c6b6d48e6cbe5cd8a` 为迁移基线；没有用落后的源仓库 `main` 覆盖动画。
-- 所有源分支 tip 保存为 `archive/source/*`。存在尚未合入基线的弥彦试作，保留归档，不自动合并。
+- 所有源分支 tip 保存为同名归档标签 `archive/source/*`；迁移时最初保留的 8 个快照分支现已转为标签，工作分支只保留 `main`。存在尚未合入基线的弥彦试作，提交完整保留，不自动合并。
+- 恢复示例：`git fetch --tags origin`，再执行 `git switch --detach refs/tags/archive/source/gpt/yahiko-v11-refine`。
 - [迁移说明与完整分支映射](docs/MIGRATION.md)
 - [迁移前的项目 README](https://github.com/gitcyx93/niigata-mini-animations/blob/519ec9a3a5e9a2208cd65f8c6b6d48e6cbe5cd8a/README.md)
 
