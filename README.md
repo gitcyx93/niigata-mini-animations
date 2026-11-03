@@ -12,8 +12,10 @@ GitHub 文件页显示源码，不会直接播放 HTML。克隆或下载本仓�
 |---|---|---|
 | 春 | [高田夜樱 v2](viz/spring/takada-yozakura-v2.html) · [台湾繁体](viz/spring/takada-yozakura-v2-tw.html) | 当前 v2 页面与新稿 |
 | 夏 | [长冈花火 A](viz/summer/nagaoka-hanabi-a.html) · [台湾繁体](viz/summer/nagaoka-hanabi-a-tw.html) | 保留原已发布版本，不改画面或文案 |
-| 秋 | [弥彦 v16](viz/autumn/yahiko-v16.html) | 迁移基线分支中编号最新的试作，**不等于已经定稿** |
+| 秋 | [弥彦 v16 修订版](viz/autumn/yahiko-v16-travel.html) · [原始 v16](viz/autumn/yahiko-v16.html) | 基于 v16 删除开场两角前景树、更新交通与神社字幕；保留原版，不含后续山体／小镇／配乐试作 |
 | 冬 | [越后汤泽](viz/winter/yuzawa-yukiguni.html) · [台湾繁体](viz/winter/yuzawa-yukiguni-tw.html) | 三维滑雪、SNS 运镜与新稿；保留原 20 秒循环 |
+
+修订范围与字幕来源见 [v16 修订记录](stories/yahiko-v16-travel.md)。
 
 其他版本：
 

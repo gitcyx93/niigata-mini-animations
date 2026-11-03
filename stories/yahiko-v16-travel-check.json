@@ -1,0 +1,43 @@
+{
+  "page": "viz/autumn/yahiko-v16-travel.html",
+  "sha256": "52c3429bf0bbb79b6e8ce2a9acbdc233148957526d92bcff42cabc1a72e03f7c",
+  "exactCopyOfReviewedLocalPreview": true,
+  "engine": "Headless Google Chrome",
+  "framesRendered": [
+    0,
+    2.8,
+    3.6,
+    7,
+    8.5,
+    11.7,
+    14.8,
+    18.5,
+    21.5
+  ],
+  "captions": [
+    [
+      7,
+      10.2,
+      "新潟出发，在吉田换乘弥彦线。"
+    ],
+    [
+      10.2,
+      13.4,
+      "到神社，全程约1.5–2.5小时。"
+    ]
+  ],
+  "playback": {
+    "time": 0.48239999999973315,
+    "duration": 22.8,
+    "playing": true
+  },
+  "paused": true,
+  "mobile": {
+    "viewport": 390,
+    "documentWidth": 390,
+    "canvasWidth": 390
+  },
+  "pageErrors": [],
+  "externalRequests": [],
+  "limitations": "Key-frame inspection and full-loop runtime test, not continuous visual motion review. No physical-phone, MP4 or traditional-Chinese export test."
+}
