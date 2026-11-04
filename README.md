@@ -12,12 +12,23 @@ GitHub 文件页显示源码，不会直接播放 HTML。克隆或下载本仓�
 |---|---|---|
 | 春 | [高田夜樱 v2](viz/spring/takada-yozakura-v2.html) · [台湾繁体](viz/spring/takada-yozakura-v2-tw.html) | 当前 v2 页面与新稿 |
 | 夏 | [长冈花火 A](viz/summer/nagaoka-hanabi-a.html) · [台湾繁体](viz/summer/nagaoka-hanabi-a-tw.html) | 保留原已发布版本，不改画面或文案 |
-| 秋 | [弥彦 v16 修订版](viz/autumn/yahiko-v16-travel.html) · [原始 v16](viz/autumn/yahiko-v16.html) | 基于 v16 删除开场两角前景树、更新交通与神社字幕；保留原版，不含后续山体／小镇／配乐试作 |
+| 秋 | [弥彦最新画面·无声](viz/autumn/yahiko-v16-travel.html) · [环境音版](viz/autumn/yahiko-v16-travel-sound.html) | 同一份 v16 修订画面；有声版加入远景轻声与上山鸟鸣，**没有背景音乐**；未合入其他山体／小镇试作 |
 | 冬 | [越后汤泽](viz/winter/yuzawa-yukiguni.html) · [台湾繁体](viz/winter/yuzawa-yukiguni-tw.html) | 三维滑雪、SNS 运镜与新稿；保留原 20 秒循环 |
 
-修订范围与字幕来源见 [v16 修订记录](stories/yahiko-v16-travel.md)。
+画面修订与字幕来源见 [v16 修订记录](stories/yahiko-v16-travel.md)；声音及导出范围见 [环境音版记录](stories/yahiko-v16-travel-sound.md)。
+
+### 弥彦：视频与可编辑的声音源码
+
+- [最新画面 MP4（无声）](output/autumn/yahiko-v16-travel/yahiko-v16-travel-silent.mp4)
+- [最新画面＋环境音 MP4](output/autumn/yahiko-v16-travel/yahiko-v16-travel-ambience.mp4)：22.8 秒，1080×1920，30fps。
+- [声音配置 `mix.json`](viz/autumn/audio/yahiko-v16-travel/mix.json)：能直接看到音轨、素材来源、音量和鸟鸣时间点。
+- [声音播放／同步代码](viz/autumn/yahiko-v16-travel-sound.js) · [分轨、重建说明与授权](viz/autumn/audio/yahiko-v16-travel/README.md)
+
+环境音 HTML 已内嵌音频，下载后可以独立打开，点击“有声播放”才出声。浏览器使用同一音频时钟驱动画面，支持暂停、拖动、章节跳转、音量、静音及循环。
 
 其他版本：
+
+- [原始弥彦 v16](viz/autumn/yahiko-v16.html)：保持不变，供历史对照。
 
 - [弥彦 v11 精修](viz/autumn/yahiko-v11-refined.html) · [对应台湾繁体](viz/autumn/yahiko-v11-refined-tw.html)：繁体版不是 v16 的翻译。
 - [弥彦 v12](viz/autumn/yahiko-v12.html) · [对应台湾繁体](viz/autumn/yahiko-v12-tw.html)、[v13](viz/autumn/yahiko-v13.html) · [对应台湾繁体](viz/autumn/yahiko-v13-tw.html)、[v14](viz/autumn/yahiko-v14.html)、[v15](viz/autumn/yahiko-v15.html)：保留作比较，不自动选定最终版本。
@@ -57,6 +68,21 @@ node viz/tools/check-copy-pages.cjs
 # 使用其他 Chrome/Chromium 路径
 BROWSER_EXE=/path/to/chrome node viz/tools/check-copy-pages.cjs
 ```
+
+### 重建弥彦声音与视频
+
+需要 Python 3、FFmpeg；浏览器检查和录制另需可解析的 `playwright` 包及浏览器（可用 `BROWSER_EXE` 指定本机 Chrome）。
+
+```sh
+# 从已剪辑的无损分轨重建混音和独立有声 HTML
+python3 viz/tools/build-yahiko-travel-sound.py
+# 画面一致性、声音媒体时钟、完整播放和控制检查
+node viz/tools/check-yahiko-sound.cjs
+# 同时导出无声与环境音 MP4；--force 仅替换这两个生成的视频
+node viz/tools/record-yahiko-sound.cjs --force
+```
+
+`mix.json` 的 `start_seconds`、`gain_db`、`enabled` 和 `master_gain_db` 会实际影响重建；`baked_processing` 是已经应用到分轨的处理说明，不会被重复执行。
 
 ## 版本与来源
 

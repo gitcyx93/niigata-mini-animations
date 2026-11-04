@@ -1,0 +1,92 @@
+{
+  "visual": "viz/autumn/yahiko-v16-travel.html",
+  "generated": "viz/autumn/yahiko-v16-travel-sound.html",
+  "engine": "Headless Chromium with software rasterization",
+  "parity": [
+    {
+      "time": 0,
+      "sha256": "6bad743916cc5ca3b9a47d04194bbeddd52a107e217ef955e546848c7a6bfb71",
+      "match": true
+    },
+    {
+      "time": 2.8,
+      "sha256": "41c2101938cb76d932b8e150322efe7c6aeaaf284cc3ed2137b933d56c6bd341",
+      "match": true
+    },
+    {
+      "time": 3.6,
+      "sha256": "cca082cdd101d60e8106cfedf817ad024825d931130a624ddde4926d86e1f770",
+      "match": true
+    },
+    {
+      "time": 7,
+      "sha256": "b201544bccffe31f428b9c823d7925644aeae0f8cf4b746a4b3245813bd4e024",
+      "match": true
+    },
+    {
+      "time": 8.5,
+      "sha256": "f9fb7bed6d1112b60a9fceffcb869cc5951e8c4bd8174ea68fded36d64f441e8",
+      "match": true
+    },
+    {
+      "time": 11.7,
+      "sha256": "fd18828ed2e4a05c1b3a844f678914c4a75f0eb7e353bcc197c24b1a1b8cac7a",
+      "match": true
+    },
+    {
+      "time": 14.8,
+      "sha256": "cfac33702091880d2fe8e1c1264d464cee4d4b225690e5892a652f478f55e2e5",
+      "match": true
+    },
+    {
+      "time": 18.5,
+      "sha256": "b065c80e325d7d1baac9bf9baf273a4d733c96057bb00a6a58869b3c5c5a6398",
+      "match": true
+    },
+    {
+      "time": 21.5,
+      "sha256": "115172985a6300a6a3b2070a766aeb308dc6bd89b355f1459b6ba57b1ab7845c",
+      "match": true
+    }
+  ],
+  "firstPlay": {
+    "time": 1.160313,
+    "paused": false,
+    "duration": 22.8,
+    "renderedTime": 1.14079,
+    "sourceClockPlaying": false,
+    "muted": false,
+    "loop": true,
+    "volume": 1
+  },
+  "fullPlayback": {
+    "time": 22.8,
+    "paused": true,
+    "duration": 22.8,
+    "renderedTime": 22.79999,
+    "sourceClockPlaying": false,
+    "muted": false,
+    "loop": false,
+    "volume": 0.5
+  },
+  "loopPlayback": {
+    "time": 0.646882,
+    "paused": false,
+    "duration": 22.8,
+    "renderedTime": 0.62799,
+    "sourceClockPlaying": false,
+    "muted": false,
+    "loop": true,
+    "volume": 0.5
+  },
+  "chapterSeeking": true,
+  "pauseStable": true,
+  "muteAndVolume": true,
+  "mobile": {
+    "viewport": 390,
+    "width": 390
+  },
+  "pageErrors": [],
+  "externalRequests": [],
+  "limitations": "Real browser clock/control/full-cycle tests and key-frame parity, not human auditory or continuous visual review."
+}

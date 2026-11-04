@@ -1,0 +1,63 @@
+{
+  "exports": [
+    {
+      "file": "output/autumn/yahiko-v16-travel/yahiko-v16-travel-silent.mp4",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 1080,
+            "height": 1920,
+            "duration": "22.800000",
+            "nb_frames": "684"
+          }
+        ],
+        "format": {
+          "duration": "22.800000",
+          "size": "22044908"
+        }
+      },
+      "full_decode_ok": true
+    },
+    {
+      "file": "output/autumn/yahiko-v16-travel/yahiko-v16-travel-ambience.mp4",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 1080,
+            "height": 1920,
+            "duration": "22.800000",
+            "nb_frames": "684"
+          },
+          {
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "sample_rate": "48000",
+            "channels": 2,
+            "duration": "22.800000",
+            "nb_frames": "1070"
+          }
+        ],
+        "format": {
+          "duration": "22.800000",
+          "size": "22713026"
+        }
+      },
+      "full_decode_ok": true
+    }
+  ],
+  "video_bitstreams_identical": true,
+  "video_packet_sha256": "SHA256=66c0d1d5172de301ea22205f38b82405b5f60df7497e55c909761c9240ea5361",
+  "master_samples": 1094400,
+  "master_peak_dBFS": -26.252,
+  "max_difference_from_latest_local_mix": 1.1920928955078125e-07,
+  "difference_note": "At most a few 24-bit quantization steps when reconstructing from separately quantized lossless stems; not an intentional sound change.",
+  "auditory_review": false
+}
