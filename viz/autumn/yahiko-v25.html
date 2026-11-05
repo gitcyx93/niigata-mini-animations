@@ -1399,7 +1399,7 @@ function nightShot(b,t){valleyShot(b,t,'reveal');}
 function nightEnd(b,t){valleyShot(b,t-21,'reveal');}   // v4：入夜的红叶谷放到最后（看完夕阳下山，5 点开始点灯）
 // 文字（全系列统一，见 CLAUDE.md「文字」）：左上角旁白讲信息（背景、实用信息，整句带标点），每个镜头一句，接得紧，全程有字；
 // 中下方大字讲这一镜头要记住的一句（不带标点，关键词换强调色），下面一行小字补一个具体细节
-const STORY_C=[[-2,3.4,'红叶最好看在 11 月上中旬。'],[3.2,6.6,'新潟坐电车，在吉田换乘弥彦线。'],[6.4,10.0,'新潟到弥彦，约一个半小时。'],[9.8,13.2,'弥彦山 634 米，和晴空塔一样高。'],[13.0,17.2,'天晴时，能看到佐渡岛。'],[NIGHT0,20.8,'神社附近的红叶谷，每晚点灯。'],[TOWN0,24.6,'老旅馆「みのや」，开了 300 多年。']];   // v18 按新顺序
+const STORY_C=[[-2,3.4,'红叶最好看在 11 月上中旬。'],[3.2,6.6,'新潟坐电车，在吉田换乘弥彦线。'],[6.4,10.0,'新潟到弥彦，约一个半小时。'],[9.8,13.2,'弥彦山 634 米，和晴空塔一样高。'],[13.0,17.2,'天晴时，能看到佐渡岛。'],[NIGHT0,20.8,'神社附近的红叶谷，每晚点灯。'],[TOWN0,24.6,'下山后，住一晚弥彦温泉。']];   // v18 按新顺序
 // Local narration adapter: a readable opening phrase is always present;
 // the remaining characters appear progressively. No overlapping sentences.
 drawStory = function(t, story, color=NARRATION, bar=TYPE.accent, shadow=STORY_SHADOW){

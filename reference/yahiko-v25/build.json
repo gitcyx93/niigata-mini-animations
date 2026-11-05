@@ -5,14 +5,16 @@
   "reference_sha256": "58499c30e49011caddcd9589897eea7040ade001e4d9be67c2ceae09920374aa",
   "town_source_sha256": "5dfac34b997a63aadc97da784a2b0c8d4d7ec4b550c350ab41a0cb879c95fbc8",
   "rendering": "native-canvas",
-  "visual_sha256": "e6bb515c3c76fe4b8627d451166800ef2f8b6ba06f7fe24b66079652b21c8188",
-  "sound_html_sha256": "81c577cc443d02219676b9f131ecb1d0cd266d135bba291d6609fd1c0bd2793c",
+  "visual_sha256": "bc9b296075eadca9e30ea9696365144a56a62818d935a01cf8d09a223150c082",
+  "sound_html_sha256": "99fb9426894116ad40e20f7d25289903d28f172e7433bf8a01e01337a50abb25",
   "audio_payload_sha256": "b8189dca6e4c23ed905c81b8fb3db67612ff890efc31685b0562652cb4364e8e",
   "duration_seconds": 24.6,
   "town_interval": [
     20.6,
     24.6
   ],
-  "caption_changes": false,
+  "caption_changes": [
+    "town narration: 下山后，住一晚弥彦温泉。"
+  ],
   "audio_changes": false
 }
