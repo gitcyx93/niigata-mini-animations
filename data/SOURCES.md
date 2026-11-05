@@ -112,3 +112,8 @@
 - 「新潟坐电车，在吉田换乘弥彦线」「新潟到弥彦，约一个半小时」：驿探 新潟→弥彦 吉田换乘一次 1 小时 25–34 分（越后线新潟→吉田约 52 分，弥彦线吉田→弥彦约 9 分）https://ekitan.com/transit/route/sf-3654/st-3770 ；NEWT 称新潟站到弥彦神社电车约 1 小时 30 分 https://newt.net/jpn/niigata/mag-666661396 。实际按班次与候车变化。
 - 「缆车 5 分钟到山顶」「走表参道上山 约 90 分钟」：新潟县观光协会登山路线页（表参道上行约 1 小时 30 分）https://niigata-kankou.or.jp/course/detail_14.html ；弥彦山页 https://niigata-kankou.or.jp/spot/7462 ；缆车山麓站—山顶站约 5 分 https://www.driveplaza.com/sapa/1080/1080316/1/concierge/amp/2025/05/ 。
 - 「下山后，住一晚弥彦温泉」：弥彦温泉街位于弥彦站、彌彦神社之间（弥彦站步行 5–15 分），新潟县观光协会弥彦温泉页 https://niigata-kankou.or.jp/spot/11600 。画面是风格化的温泉街，不对应具体街道或旅馆。
+
+### 弥彦 v18：温泉街画面参考（2026-11-05 查）
+
+- 弥彦温泉沿彌彦神社参道，旅馆、土产店相连，背后是弥彦山；弥彦站前「湯のわ」与「おもてなし広場」有足汤；弥彦温泉距 JR 弥彦站步行约 10 分钟。新潟县观光协会 https://niigata-kankou.or.jp/blog/699 ；东北观光 https://www.tohokukanko.jp/attractions/detail_1744.html ；JR 东日本 https://media.jreast.co.jp/articles/5269 。
+- 画面是风格化的夜景：参道、两三层木造旅馆和土产店、檐下灯笼、横跨道路的大红鸟居、神社杉林和弥彦山、前景足汤小亭。不对应具体旅馆或真实机位；大鸟居按「路上有很大的红色鸟居」概括，未按实际位置比例重现。
