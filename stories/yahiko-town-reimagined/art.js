@@ -138,38 +138,80 @@ function second(){
  shrubs(65,1430,180,160,['#172f35','#2c4540','#4d5b41']);shrubs(820,1500,150,180,['#1d3538','#3c5145']);stones(110,1390,30,1.2);
  steam(760,883,.7);groundLeaves(1280,65);
 }
-function seated(x,y,s,coat){ellipse(x,y-41*s,7*s,8*s,'#29343a');poly([[x-10*s,y-32*s],[x+10*s,y-32*s],[x+12*s,y],[x-12*s,y]],coat);line([[x-6*s,y],[x-8*s,y+23*s]],'#b09b81',5*s);line([[x+6*s,y],[x+8*s,y+23*s]],'#b09b81',5*s);line([[x-11*s,y],[x+12*s,y]],'#333b39',3*s);}
+function seated(x,y,s,coat){
+ // Bent thighs, clothed shins and shoes touching the paving, not dangling over water.
+ ellipse(x+4*s,y+36*s,23*s,6*s,'rgba(18,32,38,.28)');
+ line([[x-7*s,y-5*s],[x-11*s,y+8*s],[x-8*s,y+33*s]],'#38454b',7*s);
+ line([[x+5*s,y-5*s],[x+12*s,y+7*s],[x+16*s,y+31*s]],'#34434a',7*s);
+ ellipse(x-5*s,y+34*s,8*s,3.3*s,'#202f38');ellipse(x+20*s,y+32*s,8*s,3.3*s,'#202f38');
+ poly([[x-10*s,y-39*s],[x+9*s,y-39*s],[x+14*s,y-3*s],[x-13*s,y-3*s]],coat);
+ line([[x-9*s,y-32*s],[x-15*s,y-15*s],[x-6*s,y-10*s]],coat,6*s);
+ line([[x+9*s,y-31*s],[x+17*s,y-17*s],[x+11*s,y-12*s]],coat,6*s);
+ ellipse(x+1*s,y-49*s,7*s,8*s,'#30383b');ellipse(x+5*s,y-47*s,3*s,4*s,'#bca082');
+ line([[x-7*s,y-38*s],[x+8*s,y-37*s]],'#b9b3a1',2*s);
+}
 function third(){
  sky(3);
- // The ending is about resting, not touring: a small public footbath in a tucked-away courtyard.
- poly([[0,1050],[900,980],[900,1600],[0,1600]],gradient(980,1600,'#687671','#3c5358'));
- for(let i=0;i<35;i++){const y=1060+i*17;line([[0,y],[900,y-50]],'rgba(33,59,62,.24)',1);}
- for(let i=0;i<26;i++){const x=i*45;line([[x,1000],[450+(x-450)*2,1600]],'rgba(33,59,62,.2)',1);}
- house(95,1030,210,185,58,20,{entry:.63,tone:2,bays:3,bright:.48,sign:'茶'});
- house(490,1015,275,260,85,-23,{entry:.35,tone:1,bays:3,bright:.72,curtain:'#5c7170'});
- // Low plaster wall, gate recess and quiet golden maple are the middle-distance hinge.
- poly([[320,1000],[461,986],[461,1041],[320,1059]],'#89928a');poly([[312,992],[461,977],[472,987],[320,1008]],'#30474c');
- maple(403,1065,540,245);pine(855,1000,240,'#264038');
- // The basin is small and visibly a footbath, with a thick timber rim.
- poly([[180,1250],[570,1150],[795,1268],[378,1405]],'#263f46');
- poly([[196,1253],[570,1170],[768,1268],[380,1382]],gradient(1170,1390,'#4e8286','#42666d'));
- poly([[180,1250],[378,1405],[378,1438],[180,1283]],'#735a42');poly([[378,1405],[795,1268],[795,1301],[378,1438]],'#51493b');
- poly([[155,1240],[570,1134],[600,1150],[182,1263]],'#a38861');poly([[570,1134],[816,1265],[795,1286],[570,1157]],'#9f845f');
- poly([[155,1240],[378,1386],[378,1417],[155,1271]],'#a18a69');poly([[378,1386],[816,1265],[816,1294],[378,1417]],'#baa17b');
- for(let i=0;i<55;i++){const y=1190+rand()*160,x=360+rand()*270;line([[x,y],[x+5+rand()*25,y-4]],'rgba(194,218,204,.14)',1);}
- // Bench, two seated travellers, a pair of shoes: the small details explain the scene.
- poly([[197,1200],[487,1127],[507,1145],[214,1221]],'#b7976d');
- for(let j=0;j<3;j++){line([[201,1201+j*5],[487,1130+j*5]],'rgba(72,62,46,.3)',1);}
- ellipse(677,1336,18,9,'#846c48');ellipse(677,1331,18,7,'#bba278');ellipse(677,1331,12,4,'#73654b');
- line([[220,1215],[220,1240]],'#574a3c',8);line([[465,1154],[465,1184]],'#574a3c',8);
- seated(330,1183,1.25,'#6b8988');seated(383,1171,1.3,'#d1b387');
- ellipse(265,1265,12,5,'#273943');ellipse(283,1278,12,5,'#293e45');poly([[457,1141],[481,1135],[487,1147],[463,1154]],'#d3d5be');
- steam(430,1260,1.25);steam(560,1254,1);steam(630,1223,.72);
- // A short old stone lantern belongs to the garden rather than to a city street.
- poly([[100,1288],[133,1288],[125,1181],[110,1181]],'#5b6e6e');poly([[92,1180],[142,1180],[135,1137],[100,1137]],'#52686a');poly([[83,1136],[150,1136],[130,1118],[104,1118]],'#81918a');
- poly([[109,1148],[125,1148],[125,1172],[109,1172]],'#f0c889');glow(116,1158,60,60,'241,190,113',.2);glow(120,1290,100,25,'230,173,94',.13);
- lamp(790,1110,.85);shrubs(870,1410,120,120,['#243e3d','#40594b','#657354']);shrubs(0,1440,150,150,['#193739','#345044']);groundLeaves(1100,150);
+ // Three separate spaces: a dry garden bench, an unobstructed path, and the inn's attached bath wing.
+ poly([[0,1040],[900,975],[900,1600],[0,1600]],gradient(980,1600,'#626f69','#344d53'));
+ for(let i=0;i<32;i++){const y=1060+i*18;line([[0,y],[900,y-55]],'rgba(33,59,62,.17)',1);}
+ for(let i=0;i<24;i++){const x=i*48;line([[x,1000],[450+(x-450)*2,1600]],'rgba(33,59,62,.13)',1);}
+ // A lighter route bends past the seating area toward the main entrance, not through the bath.
+ g.beginPath();g.moveTo(570,1510);g.bezierCurveTo(510,1320,475,1170,505,970);g.lineTo(460,950);g.bezierCurveTo(405,1130,415,1360,455,1540);g.closePath();g.fillStyle='rgba(162,165,143,.13)';g.fill();
+ pine(870,1010,300,'#263e3c');
+ house(90,1025,175,155,45,10,{entry:.65,tone:2,bays:2,bright:.4,sign:'茶'});
+ house(435,955,345,270,65,-22,{entry:.23,tone:1,bays:4,bright:.65,curtain:'#5c7170',sign:'湯宿'});
+ poly([[270,1020],[411,990],[411,1041],[270,1074]],'#7e8c80');poly([[264,1011],[413,980],[424,990],[270,1028]],'#30474c');
+ shrubs(360,1022,40,22,['#30473a','#5b6745','#807952']);
+ // The bath pavilion physically overlaps the inn's ground floor and sits on a raised stone foundation.
+ poly([[550,990],[850,944],[850,1060],[550,1102]],'#293e40');
+ poly([[550,1090],[850,1048],[850,1070],[550,1113]],'#62726b');
+ line([[551,1090],[850,1048]],'#98a493',2);
+ poly([[568,902],[834,863],[834,976],[568,1015]],'#695b43');
+ for(let x=575;x<830;x+=12){const yy=902-(x-568)*.146;line([[x,yy],[x,yy+109]],'rgba(27,33,28,.4)',2);}
+ glow(703,944,137,100,'249,192,107',.18);
+ // A real contained pool is visible inside the pavilion, above the low privacy screen.
+ poly([[583,970],[785,941],[827,989],[617,1024]],'#a79b7c');
+ poly([[595,972],[780,950],[813,986],[620,1014]],gradient(946,1018,'#648f89','#497b7d'));
+ for(let i=0;i<46;i++){const u=rand(),v=rand();const x=595+u*182+v*25,y=972-u*22+v*40;line([[x,y],[x+8+rand()*13,y-1.4]],'rgba(223,223,177,.2)',1);}
+ steam(644,985,.84);steam(703,971,1.04);steam(757,967,.7);
+ // Visible wisps begin at the bath water; the foreground bench never emits vapor.
+ g.save();g.filter='blur(2px)';g.lineCap='round';
+ for(const [x,y,h,sg] of [[647,989,92,1],[707,978,103,-1],[763,966,77,1]]){
+  const vapor=g.createLinearGradient(0,y,0,y-h);vapor.addColorStop(0,'rgba(226,240,229,.09)');vapor.addColorStop(.5,'rgba(235,242,231,.34)');vapor.addColorStop(1,'rgba(230,240,232,0)');
+  g.strokeStyle=vapor;g.lineWidth=12;g.beginPath();g.moveTo(x,y);g.bezierCurveTo(x-18*sg,y-h*.3,x+23*sg,y-h*.55,x+5*sg,y-h);g.stroke();
+ }
+ g.restore();
+ // Front screens keep the bathing area separate from the public courtyard.
+ poly([[550,1025],[850,983],[850,1057],[550,1099]],'#3c514b');
+ for(let x=560;x<848;x+=10){const yy=1025-(x-550)*.14;line([[x,yy],[x,yy+74]],'#778271',2.5);}
+ line([[546,1023],[853,980]],'#a4ab91',5);
+ for(const [x,y] of [[554,1097],[846,1056]]){line([[x,y],[x,y-205]],'#34433a',11);line([[x-3,y],[x-3,y-205]],'#8b8b6a',1.4);}
+ // Roof is painted over the upper steam: the vapor remains in the open bay, never through solid tiles.
+ poly([[533,900],[870,852],[833,813],[565,851]],gradient(813,900,'#63777b','#2d4348'));
+ for(let k=1;k<7;k++){const t=k/7;line([[mix(533,565,t),mix(900,851,t)],[mix(870,833,t),mix(852,813,t)]],'rgba(18,33,36,.55)',2);}
+ for(let k=0;k<28;k++){const t=k/28;line([[mix(533,870,t),mix(900,852,t)],[mix(565,833,t),mix(851,813,t)]],'rgba(165,182,176,.21)',1);}
+ line([[533,900],[870,852]],'#233a40',9);line([[534,896],[869,848]],'#8d9e95',1.6);
+ lantern(575,958,.62);lantern(825,923,.62);
+ poly([[841,930],[869,926],[869,980],[841,984]],'#345653');g.font='20px serif';g.fillStyle='#e8d5a6';g.textAlign='center';g.fillText('湯',855,963);
+ shrubs(826,1132,65,28,['#2f483c','#526447','#6c7550']);
+ maple(190,1125,580,235);
+ // Bench is in the foreground, with dry paving clearly visible between it and the bath.
+ ellipse(359,1355,190,35,'rgba(18,34,39,.22)');
+ for(const [x,y] of [[211,1310],[509,1262]]){line([[x,y],[x-5,y+57]],'#34413c',10);line([[x+29,y-14],[x+30,y+42]],'#39443c',8);}
+ poly([[192,1303],[517,1248],[545,1270],[215,1327]],'#b89a70');
+ for(let k=0;k<4;k++)line([[199+k*5,1307+k*5],[523+k*5,1252+k*5]],'rgba(71,63,46,.45)',1.4);
+ seated(305,1294,1.6,'#68898b');seated(382,1281,1.65,'#cdb28c');
+ // The near-side backrest occludes the lower backs, so the people read as seated on the same bench.
+ for(const [x,y] of [[211,1320],[528,1267]])line([[x,y+4],[x-4,y-68]],'#5c5744',8);
+ for(let k=0;k<3;k++){const y=1263+k*15;poly([[202,y],[530,y-55],[530,y-44],[202,y+11]],'#a78b64');line([[203,y],[529,y-55]],'#d0b484',1.3);}
+ line([[192,1284],[232,1277]],'#bba27d',6);line([[506,1231],[545,1225]],'#bba27d',6);
+ // A small overnight bag reinforces that this is a rest before staying at the inn.
+ poly([[557,1312],[589,1305],[593,1342],[560,1350]],'#866a4b');line([[565,1310],[565,1300],[580,1297],[582,1307]],'#b29b75',2);
+ lamp(414,1110,.82);glow(385,1270,180,36,'222,175,100',.08);
+ shrubs(840,1465,170,140,['#243e3d','#40594b','#657354']);shrubs(0,1450,140,140,['#193739','#345044']);groundLeaves(1115,130);
 }
+
 function render(canvas,id){if(![1,2,3].includes(id))throw Error('Unknown concept');canvas.width=W;canvas.height=H;g=canvas.getContext('2d',{willReadFrequently:true});seed=3400+id*37;g.lineJoin='round';[first,second,third][id-1]();const vign=g.createRadialGradient(470,1030,380,450,900,1100);vign.addColorStop(0,'rgba(9,20,31,0)');vign.addColorStop(1,'rgba(8,17,29,.2)');g.fillStyle=vign;g.fillRect(0,0,W,H);grain();}
 window.renderConcept=render;
 for(const c of document.querySelectorAll('canvas[data-concept]'))render(c,Number(c.dataset.concept));
