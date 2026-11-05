@@ -117,3 +117,14 @@
 
 - 弥彦温泉沿彌彦神社参道，旅馆、土产店相连，背后是弥彦山；弥彦站前「湯のわ」与「おもてなし広場」有足汤；弥彦温泉距 JR 弥彦站步行约 10 分钟。新潟县观光协会 https://niigata-kankou.or.jp/blog/699 ；东北观光 https://www.tohokukanko.jp/attractions/detail_1744.html ；JR 东日本 https://media.jreast.co.jp/articles/5269 。
 - 画面是风格化的夜景：参道、两三层木造旅馆和土产店、檐下灯笼、横跨道路的大红鸟居、神社杉林和弥彦山、前景足汤小亭。不对应具体旅馆或真实机位；大鸟居按「路上有很大的红色鸟居」概括，未按实际位置比例重现。
+
+## 弥彦 v21（温泉街重画与文字，2026-11-05 查）
+
+- 「みのや」（四季の宿 みのや）：创业 300 年以上的老旅馆，在彌彦神社门前；准确创业年份未查到，画面只写「300 多年」。
+  - 新潟県観光協会 blog：https://niigata-kankou.or.jp/blog/detail_1414.html （标题「創業300年以上の老舗宿を起点に巡る大人のモデルコース」；摘要称该宿在神社红鸟居正前方）
+  - icotto：https://icotto.jp/hotels/8417 ；じゃらん：https://www.jalan.net/yad335689/
+- 温泉街是彌彦神社的门前町：https://tohokukanko.jp/en/attractions/print_1744.html
+- 足汤：温泉街中心「おもてなし広場」有免费足汤、手汤；JR 弥彦站前「湯のわ」有足汤：https://www.tohokukanko.jp/attractions/detail_1744.html 、https://niigata-kankou.or.jp/blog/detail_102.html
+- 弥彦站站房仿神社建筑：https://media.jreast.co.jp/articles/5269
+- 弥彦大鸟居（30.16 m）在县道 29 号上，离神社入口约 3 km，不在温泉街里；v21 街尽头画的是神社的鸟居，不是大鸟居：https://tabi-mag.jp/ng0235/
+- 土产店、浴衣散步的样子按一般温泉街画，未对应具体店铺。
