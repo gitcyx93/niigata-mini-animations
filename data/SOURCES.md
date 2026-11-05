@@ -103,3 +103,28 @@
 
 - 高田城址公园观樱会：日本三大夜樱之一；内堀、外堀周边约 4,000 棵樱花；2026 年第 101 届 4/3–4/19，亮灯 18:00–21:00（盛开期到 22:00）；JR 高田站步行约 15 分钟。新潟县观光协会 https://niigata-kankou.or.jp/event/2332 （2026-10-23 查）
   - 画面上写「4 月上旬到中旬」「傍晚 6 点到 9 点亮灯」「从 JR 高田站走过去约 15 分钟」「从 1926 年办到现在，已经一百多届」（第 101 届是 2026 年）。
+
+### 弥彦 v17：红叶、交通、登山与温泉街（2026-11-05 查）
+
+对应 `viz/autumn/yahiko-v17.html` 新增／替换的字幕。
+
+- 「红叶最好看在 11 月上中旬」：新潟县观光协会弥彦公园页「例年の見ごろ」11 月上旬～下旬 https://niigata-kankou.or.jp/spot/detail_7482.html ；弥彦观光协会（经旅行社活动页转载）称例年见顷 11 月 10 日前后，2026 年红叶谷点灯 10/31–11/29、17:00–21:00 https://www.nta.co.jp/kokunai/special/eventinfo/10647049.htm 。用户原想写「中下旬」，资料不支持，改为「上中旬」。
+- 「新潟坐电车，在吉田换乘弥彦线」「新潟到弥彦，约一个半小时」：驿探 新潟→弥彦 吉田换乘一次 1 小时 25–34 分（越后线新潟→吉田约 52 分，弥彦线吉田→弥彦约 9 分）https://ekitan.com/transit/route/sf-3654/st-3770 ；NEWT 称新潟站到弥彦神社电车约 1 小时 30 分 https://newt.net/jpn/niigata/mag-666661396 。实际按班次与候车变化。
+- 「缆车 5 分钟到山顶」「走表参道上山 约 90 分钟」：新潟县观光协会登山路线页（表参道上行约 1 小时 30 分）https://niigata-kankou.or.jp/course/detail_14.html ；弥彦山页 https://niigata-kankou.or.jp/spot/7462 ；缆车山麓站—山顶站约 5 分 https://www.driveplaza.com/sapa/1080/1080316/1/concierge/amp/2025/05/ 。
+- 「下山后，住一晚弥彦温泉」：弥彦温泉街位于弥彦站、彌彦神社之间（弥彦站步行 5–15 分），新潟县观光协会弥彦温泉页 https://niigata-kankou.or.jp/spot/11600 。画面是风格化的温泉街，不对应具体街道或旅馆。
+
+### 弥彦 v18：温泉街画面参考（2026-11-05 查）
+
+- 弥彦温泉沿彌彦神社参道，旅馆、土产店相连，背后是弥彦山；弥彦站前「湯のわ」与「おもてなし広場」有足汤；弥彦温泉距 JR 弥彦站步行约 10 分钟。新潟县观光协会 https://niigata-kankou.or.jp/blog/699 ；东北观光 https://www.tohokukanko.jp/attractions/detail_1744.html ；JR 东日本 https://media.jreast.co.jp/articles/5269 。
+- 画面是风格化的夜景：参道、两三层木造旅馆和土产店、檐下灯笼、横跨道路的大红鸟居、神社杉林和弥彦山、前景足汤小亭。不对应具体旅馆或真实机位；大鸟居按「路上有很大的红色鸟居」概括，未按实际位置比例重现。
+
+## 弥彦 v21（温泉街重画与文字，2026-11-05 查）
+
+- 「みのや」（四季の宿 みのや）：创业 300 年以上的老旅馆，在彌彦神社门前；准确创业年份未查到，画面只写「300 多年」。
+  - 新潟県観光協会 blog：https://niigata-kankou.or.jp/blog/detail_1414.html （标题「創業300年以上の老舗宿を起点に巡る大人のモデルコース」；摘要称该宿在神社红鸟居正前方）
+  - icotto：https://icotto.jp/hotels/8417 ；じゃらん：https://www.jalan.net/yad335689/
+- 温泉街是彌彦神社的门前町：https://tohokukanko.jp/en/attractions/print_1744.html
+- 足汤：温泉街中心「おもてなし広場」有免费足汤、手汤；JR 弥彦站前「湯のわ」有足汤：https://www.tohokukanko.jp/attractions/detail_1744.html 、https://niigata-kankou.or.jp/blog/detail_102.html
+- 弥彦站站房仿神社建筑：https://media.jreast.co.jp/articles/5269
+- 弥彦大鸟居（30.16 m）在县道 29 号上，离神社入口约 3 km，不在温泉街里；v21 街尽头画的是神社的鸟居，不是大鸟居：https://tabi-mag.jp/ng0235/
+- 土产店、浴衣散步的样子按一般温泉街画，未对应具体店铺。

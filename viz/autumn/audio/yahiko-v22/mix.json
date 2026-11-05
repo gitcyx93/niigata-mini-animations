@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "name": "弥彦 v22 · 按一天的时间顺序 · 环境音",
+  "visual_source": "viz/autumn/yahiko-v22.html",
+  "visual_source_sha256": "cd4cea193597e35238d18b7f3688bdaa4548faa4c4369d04dd75934acd5bffa8",
+  "duration_seconds": 24.6,
+  "sample_rate": 48000,
+  "channels": 2,
+  "music": false,
+  "master_gain_db": 0,
+  "note": "由 v16 修订版的四条已处理分轨按新的镜头顺序剪切、重排（每段两端加了淡入淡出）；没有新增素材。夜景和温泉街目前只有静场铺底，其他音效另加。",
+  "derived_from": "viz/autumn/audio/yahiko-v16-travel/mix.json",
+  "tracks": [
+    {
+      "id": "overview",
+      "label": "白天导览：低动态森林静场（原开场分轨前 3.5 秒）",
+      "file": "stems/overview-quiet.flac",
+      "start_seconds": 0,
+      "gain_db": 0,
+      "enabled": true
+    },
+    {
+      "id": "forest",
+      "label": "鸟居、拜殿：杉林（原 environment 6.6–13.5 秒）",
+      "file": "stems/forest.flac",
+      "start_seconds": 3.0,
+      "gain_db": 0,
+      "enabled": true
+    },
+    {
+      "id": "ascent",
+      "label": "缆车：周围空气（原 environment 13.4–17.2 秒）",
+      "file": "stems/ascent-air.flac",
+      "start_seconds": 9.6,
+      "gain_db": 0,
+      "enabled": true
+    },
+    {
+      "id": "bird-01",
+      "label": "上山第一小句远处鸟鸣",
+      "file": "stems/bird-01.flac",
+      "start_seconds": 10.15,
+      "gain_db": 0,
+      "enabled": true
+    },
+    {
+      "id": "bird-02",
+      "label": "上山第二小句远处鸟鸣",
+      "file": "stems/bird-02.flac",
+      "start_seconds": 11.45,
+      "gain_db": 0,
+      "enabled": true
+    },
+    {
+      "id": "summit",
+      "label": "山顶风（原 environment 16.6–20.9 秒）",
+      "file": "stems/summit-wind.flac",
+      "start_seconds": 12.8,
+      "gain_db": 0,
+      "enabled": true
+    },
+    {
+      "id": "night",
+      "label": "入夜红叶谷：轻收的静场（原开场分轨 3.3–7.6 秒）",
+      "file": "stems/night-quiet.flac",
+      "start_seconds": 16.8,
+      "gain_db": 0,
+      "enabled": true
+    },
+    {
+      "id": "town",
+      "label": "温泉街：静场铺底（原开场分轨 0.2–4.4 秒），其他音效由 Chen 另加",
+      "file": "stems/town-quiet.flac",
+      "start_seconds": 20.4,
+      "gain_db": -2,
+      "enabled": true
+    }
+  ],
+  "sources": [
+    {
+      "id": "anna-forest",
+      "title": "Silence in the forest",
+      "author": "13F_Panska_Petruzelova_Anna",
+      "url": "https://freesound.org/people/13F_Panska_Petruzelova_Anna/sounds/379210/",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "borgory-leaves",
+      "title": "Soft Wind in the Trees - Leaves rustle",
+      "author": "Borgory",
+      "url": "https://freesound.org/people/Borgory/sounds/751473/",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "globofonia-wind",
+      "title": "wind open field",
+      "author": "Globofonia",
+      "url": "https://freesound.org/people/Globofonia/sounds/553733/",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "rawhiteman7-bird",
+      "title": "Bird1EQ.wav",
+      "author": "rawhiteman7",
+      "url": "https://freesound.org/people/rawhiteman7/sounds/389977/",
+      "license": "CC0-1.0"
+    }
+  ],
+  "note_v22": "混音与 v18–v21 完全相同（直接读 ../yahiko-v18/stems）；只换了画面。"
+}
