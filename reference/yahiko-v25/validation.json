@@ -1,0 +1,65 @@
+{
+  "edition": "v25-native-canvas",
+  "duration_seconds": 24.6,
+  "fps": 30,
+  "rendered_frames": 738,
+  "source_boundary_unchanged": true,
+  "existing_audio_identical": true,
+  "new_sound_effects_mixed": false,
+  "visual_sha256": "bc9b296075eadca9e30ea9696365144a56a62818d935a01cf8d09a223150c082",
+  "audio_sha256": "f4f0ae65c07b95147ef338eb9230248183ce8eb66aebc4f11555f149fb313e18",
+  "sound_movie_sha256": "2b8424155d6cbaaae5241cade1fb4f06958112d9a91f3b6f0f24d5749a0f9731",
+  "silent_movie_sha256": "7ec09defb13d433fd2a4867ea3b45d83a44b6b2f5d9cbf8b197436121b4d77f1",
+  "state": {
+    "duration": 24.6,
+    "plan": [
+      [
+        "overview",
+        0,
+        3.2
+      ],
+      [
+        "torii",
+        3.2,
+        6.4
+      ],
+      [
+        "glade",
+        6.4,
+        9.8
+      ],
+      [
+        "ascent",
+        9.8,
+        13
+      ],
+      [
+        "sunset",
+        13,
+        17
+      ],
+      [
+        "night",
+        17,
+        20.6
+      ],
+      [
+        "town",
+        20.6,
+        24.6
+      ]
+    ],
+    "rendering": "native-canvas"
+  },
+  "playback": {
+    "duration": 24.6,
+    "width": 1080,
+    "height": 1920,
+    "elapsedMs": 24963,
+    "timeUpdates": 93,
+    "totalVideoFrames": 738,
+    "droppedVideoFrames": 3,
+    "ended": true
+  },
+  "errors": []
+}

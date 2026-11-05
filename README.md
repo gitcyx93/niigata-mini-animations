@@ -28,7 +28,7 @@ GitHub 文件页显示源码，不会直接播放 HTML。克隆或下载本仓�
 
 其他版本：
 
-- **[弥彦 v25 温泉小镇画风试作·无声](viz/autumn/yahiko-v25.html) · [环境音版](viz/autumn/yahiko-v25-sound.html)**：基于 v24，以原片 Canvas 插画画风重画最后 4 秒，第三张参考图仅用于布局，不作背景贴图；[静帧](reference/yahiko-v25/frame-23-5.png) · [说明](stories/yahiko-v25.md)。画风待确认，仅小镇旁白改为泛称弥彦温泉，其他镜头、字幕位置和环境音不改，旧版保留。
+- **弥彦 v25 完整动画：[环境音 MP4](output/autumn/yahiko-v25/yahiko-v25-ambience.mp4) · [无声 MP4](output/autumn/yahiko-v25/yahiko-v25-silent.mp4)**，24.6 秒、1080×1920、30fps。基于 v24，以原片 Canvas 插画画风重画最后 4 秒，第三张参考图仅用于布局，不作背景贴图；[可编辑无声页面](viz/autumn/yahiko-v25.html) · [环境音页面](viz/autumn/yahiko-v25-sound.html) · [说明](stories/yahiko-v25.md)。仅小镇旁白改为泛称弥彦温泉，前段场景及原环境音保留；新风铃等候选另行下载，尚未混入。
 
 - [原始弥彦 v16](viz/autumn/yahiko-v16.html)：保持不变，供历史对照。
 
