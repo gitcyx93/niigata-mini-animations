@@ -1,0 +1,11 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>构图绘制自检</title><body><pre id="result">Testing…</pre><canvas data-concept="1" hidden></canvas><canvas data-concept="2" hidden></canvas><canvas data-concept="3" hidden></canvas><script src="art.js"></script><script>
+const assert=(v,m)=>{if(!v)throw Error(m);};
+const canvases=[...document.querySelectorAll('canvas')];
+assert(window.CONCEPTS_READY,'render did not finish');
+const pixels=canvases.map(c=>c.toDataURL());
+assert(new Set(pixels).size===3,'duplicate scenes');
+canvases.forEach((c,i)=>{assert(c.width===900&&c.height===1600,'dimensions');renderConcept(c,i+1);assert(c.toDataURL()===pixels[i],'not deterministic');});
+let rejected=false;try{renderConcept(canvases[0],0);}catch{rejected=true;}assert(rejected,'invalid scene accepted');
+document.getElementById('result').textContent='PASS: three distinct scenes, 900×1600, deterministic rendering, invalid ID rejected.';
+window.CHECK_PASSED=true;
+</script></body></html>
