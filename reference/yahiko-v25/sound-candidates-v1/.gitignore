@@ -1,0 +1,2 @@
+# Third-party page caches may contain embedded service tokens; keep them local.
+source-pages/
