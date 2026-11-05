@@ -1,0 +1,23 @@
+{
+  "visual_source": "viz/autumn/yahiko-v19.html",
+  "visual_sha256": "a51b111e4b803d357cb74c8d2fc073601d90bda8a1f1eba0e5a86cf8278400f9",
+  "controller_sha256": "3640982945192cc1943aac726598806e5c6cbcfeae60dc48a27a83ae685eca7c",
+  "mix_config_sha256": "ee88338f0bff09dc4c884417824a9717113c688eed0c3f8d7d5cea04bc5fcc55",
+  "stem_sha256": {
+    "stems/overview-quiet.flac": "273bee4cfbf1dc767e0b197ebaa76a21c0f8a8fc948df79a773251f824d40fa3",
+    "stems/forest.flac": "fc2127fd1d7a13f240c5ae47fc01be6f472ae65b3076dbaaf03d052aad84afd5",
+    "stems/ascent-air.flac": "85dbfe0457306dc0513a51b0af350f5e670e622ec53d5a1668d07020b9b82b46",
+    "stems/bird-01.flac": "53225819ef5cfa0dd88f7342f387da85e96570b08c90c09e29f4f927f2087b80",
+    "stems/bird-02.flac": "fe966a0b985a69253b705974f24eafe6cff454f6b493459824059bd1a086d1d1",
+    "stems/summit-wind.flac": "d5a98c213e8f79914d190dc995b9ea1ab95edcb8eb7cf4c3735637b986852a6a",
+    "stems/night-quiet.flac": "697e8c812397172d70c75311643fddaaf9a6a8f7c0725f4abb8a5696ff63268f",
+    "stems/town-quiet.flac": "3f8ebabe32f111f24d6b4e6a36b407bce665413c0170597690320c7e5bba750a"
+  },
+  "master_sha256": "1663d5b696f370bf8da17f0bc1e13f4e90992e60d6db54f8364756c72ae6f025",
+  "generated_html_sha256": "8365b62ddd54cc5325f4b7a7ecf21ad69512e8fed9051f9c370380dd3cf25980",
+  "duration_seconds": 24.6,
+  "sample_rate": 48000,
+  "samples": 1180800,
+  "music": false,
+  "note": "Mix reproduced from supplied edited FLAC stems; waveform/codec checks are not listening approval."
+}
