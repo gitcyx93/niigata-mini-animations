@@ -1,0 +1,8 @@
+{
+  "identical_video_stream": {
+    "02-B-water.mp4": true,
+    "00-original.mp4": true,
+    "01-A-air.mp4": true,
+    "03-C-ropeway.mp4": true
+  }
+}

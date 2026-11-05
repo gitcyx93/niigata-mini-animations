@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>弥彦 v25 · 三版配音试听</title><style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,sans-serif;background:#141918;color:#e9ece5}*{box-sizing:border-box}body{margin:0;padding:28px;max-width:1150px;margin:auto}header{margin-bottom:22px}h1{font-size:26px;font-weight:550;margin:8px 0}p{color:#b1beb5;line-height:1.75;font-size:14px}main{display:grid;grid-template-columns:minmax(240px,360px) 1fr;gap:32px}video{width:100%;max-height:76vh;background:#080c0b;border-radius:8px}button,a{touch-action:manipulation}button{border:1px solid #536257;background:#222d26;color:#e9ece5;padding:12px 15px;border-radius:6px;cursor:pointer;font:inherit}button:hover{background:#344638}button[aria-pressed=true]{background:#c4d3aa;color:#162016;border-color:#c4d3aa}.choices{display:grid;gap:8px}.choices button{text-align:left;line-height:1.6}.choices small{display:block;font-size:12px;opacity:.8}.jump{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.jump button{font-size:13px;padding:9px}#status{min-height:24px;color:#d5dfbc;font-size:14px}.note{border-left:2px solid #718368;padding-left:14px}a{color:#d1dda9}details{border-top:1px solid #39433b;padding:15px 0}summary{cursor:pointer}audio{width:100%;height:36px}label{font-size:13px}footer{margin-top:28px;font-size:12px;color:#a7b2a9;line-height:1.8}img{width:100%}@media(max-width:650px){body{padding:16px}main{grid-template-columns:1fr;gap:16px}video{max-height:53vh}h1{font-size:22px}}
+</style></head><body>
+<header><small>NIIGATA / YAHIKO / SOUND REVIEW</small><h1>同一段弥彦，三种声音安排</h1><p>v25 · 24.6 秒 · 原画面不变，无背景音乐。切换方案保留播放位置；先比较夜景与小镇，再听缆车。</p></header>
+<main><section><video id="video" controls playsinline preload="metadata" src="02-B-water.mp4"></video><p><a id="download" href="02-B-water.mp4" download>下载当前完整 MP4</a></p></section><section>
+<div class="choices" role="group" aria-label="选择混音方案">
+<button data-id="00-original" aria-pressed="false">0 · 原版对照<small>只有既有环境底声；也应用同样的 +6 dB 试听增益。</small></button>
+<button data-id="01-A-air" aria-pressed="false">A · 留白<small>17.15 秒起一阵风叶，20.45 秒起一声风铃。</small></button>
+<button data-id="02-B-water" aria-pressed="true">B · 温泉<small>A ＋ 20.6 秒起轻细水，稍偏右；风铃稍偏左。</small></button>
+<button data-id="03-C-ropeway" aria-pressed="false">C · 临场<small>B ＋ 9.8–13 秒压低、柔化的索道运行声。</small></button>
+</div>
+<div class="jump"><button data-time="0">从头播放</button><button data-time="9.3">听缆车</button><button data-time="16.5">听夜景＋小镇</button><button data-time="20.1">只听小镇</button></div>
+<label><input id="loop" type="checkbox"> 循环所选区间（切换方案保留）</label><p id="status" role="status" aria-live="polite">当前：B · 温泉。点击播放开始。</p>
+<p class="note">各版本统一 +6 dB，不分别做响度归一化；原版文件未改。所有新增声都做了波形裁切、淡入淡出、滤波和音量控制。波形不能辨认所有杂声，最终以你的试听为准。建议保持同一设备音量比较。</p>
+<details><summary>单独听四个已编辑音效</summary><p>与成片使用相同的增益，不额外放大。播放单轨时会暂停视频。</p>
+<label>风叶 · 3.45 秒<audio controls preload="none" src="stems/leaves.m4a"></audio></label>
+<label>风铃 · 3.78 秒<audio controls preload="none" src="stems/chime.m4a"></audio></label>
+<label>细水 · 4 秒<audio controls preload="none" src="stems/water.m4a"></audio></label>
+<label>索道 · 3.2 秒（可不采用）<audio controls preload="none" src="stems/ropeway.m4a"></audio></label></details>
+<details><summary>波形与编辑记录</summary><p><a href="source-waveforms.png" target="_blank">原素材全长与裁切区间</a> · <a href="edited-waveforms.png" target="_blank">编辑前后波形</a> · <a href="mix-manifest.json" target="_blank">精确参数和检查结果</a></p><img src="edited-waveforms.png" loading="lazy" alt="四种音效裁切前后峰值和RMS波形"></details>
+</section></main>
+<footer>素材均为公开 MP3 预览的处理版，非弥彦现场实录。无脚步、无第二声风铃、无全局长混响。<br>风铃：ayustat2001 / Freesound 501168；风叶：Garuda1982 / 575645；细水：kyles / 637977（均 CC0）。<br>索道：<a href="https://freesound.org/people/concretica/sounds/240532/">“09 - cableway - ropeway - ski-lift in the summer [.wav]” — concretica</a>，<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>。使用公开预览，裁切 1–4.2 秒，滤波、淡化、调整音量及声场宽度。原环境音来源见仓库原 mix.json。</footer>
+<script>
+const v=document.querySelector('video'),status=document.querySelector('#status'),loop=document.querySelector('#loop'),audios=[...document.querySelectorAll('audio')];let current='02-B-water',segmentStart=0,serial=0;const names={'00-original':'0 · 原版对照','01-A-air':'A · 留白','02-B-water':'B · 温泉','03-C-ropeway':'C · 临场'};
+function stopSolos(){audios.forEach(a=>a.pause())}
+async function play(){stopSolos();try{await v.play();status.textContent='播放中：'+names[current]}catch(e){if(e.name!=='AbortError')status.textContent='请点击视频播放按钮：'+e.message}}
+document.querySelectorAll('[data-id]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.id;if(id===current)return;const t=v.currentTime||0,resume=!v.paused;const token=++serial;v.pause();current=id;document.querySelectorAll('[data-id]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));v.src=id+'.mp4';document.querySelector('#download').href=id+'.mp4';status.textContent='当前：'+names[id];v.addEventListener('loadedmetadata',()=>{if(token!==serial)return;v.currentTime=Math.min(t,24.59);if(resume)play()},{once:true});v.load()});
+document.querySelectorAll('[data-time]').forEach(btn=>btn.onclick=()=>{segmentStart=Number(btn.dataset.time);v.currentTime=segmentStart;play()});
+v.addEventListener('ended',()=>{if(loop.checked){v.currentTime=segmentStart;play()}else status.textContent='播放结束：'+names[current]});
+v.addEventListener('play',stopSolos);audios.forEach(a=>a.addEventListener('play',()=>{v.pause();audios.forEach(b=>{if(a!==b)b.pause()})}));
+v.addEventListener('error',()=>status.textContent='视频读取失败，请从完整交付目录打开此页。');
+</script></body></html>

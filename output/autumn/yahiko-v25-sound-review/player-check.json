@@ -1,0 +1,11 @@
+{
+  "tested_url": "http://127.0.0.1:61812/listen.html",
+  "duration": 24.6,
+  "switch_preserves_time": true,
+  "full_playback_ended": true,
+  "segment_loop": true,
+  "mobile_width": 390,
+  "no_horizontal_overflow": true,
+  "page_errors": [],
+  "aural_review": false
+}

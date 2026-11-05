@@ -1,0 +1,212 @@
+{
+  "source_commit": "77f5ec0e",
+  "baseline": "output/autumn/yahiko-v25/yahiko-v25-ambience.mp4",
+  "duration": 24.6,
+  "shared_master_gain_db": 6,
+  "per_variant_normalization": false,
+  "original_video_unchanged": true,
+  "aural_review": "pending user listening; waveform and numerical checks only",
+  "notes": [
+    "MP3 public previews, not original lossless recordings.",
+    "Natural source ambience is not Yahiko field recording.",
+    "No music, footsteps, global reverb or second chime.",
+    "No changes to original film or its published audio."
+  ],
+  "edits": [
+    {
+      "id": "leaves",
+      "file": "02-leaves/575645-leaves-preview.mp3",
+      "crop": [
+        24.5,
+        27.95
+      ],
+      "at": 17.15,
+      "fade": [
+        0.48,
+        0.7
+      ],
+      "hp": 180,
+      "lp": 6500,
+      "target_rms": -47.0,
+      "max_peak": -29.0,
+      "width": 0.8,
+      "pan": 0,
+      "gain_after_eq_db": 6.741289937004126,
+      "source_sha256": "639b5157d95033b224eb2f7a64b50ac439a305f8f418e0f2bf35762431c352ae",
+      "processed_pre_master": {
+        "peak_dbfs": -31.423924789298887,
+        "rms_dbfs": -47.0,
+        "duration_seconds": 3.45,
+        "clipped_samples": 0
+      }
+    },
+    {
+      "id": "chime",
+      "file": "01-wind-chime/501168-furin-preview.mp3",
+      "crop": [
+        0.4,
+        4.18
+      ],
+      "at": 20.45,
+      "fade": [
+        0.008,
+        0.4
+      ],
+      "hp": 650,
+      "lp": 6800,
+      "target_rms": -49.0,
+      "max_peak": -28.0,
+      "width": 0.45,
+      "pan": -0.16,
+      "gain_after_eq_db": -16.626222354186858,
+      "source_sha256": "238b7a20d51343bbc4d1bb1c2212ae71cd6e3e7e3a030425610d3763ecb1a4c9",
+      "processed_pre_master": {
+        "peak_dbfs": -28.0,
+        "rms_dbfs": -49.59732155551841,
+        "duration_seconds": 3.78,
+        "clipped_samples": 0
+      }
+    },
+    {
+      "id": "water",
+      "file": "03-water/637977-small-water-trickle-preview.mp3",
+      "crop": [
+        34,
+        38
+      ],
+      "at": 20.6,
+      "fade": [
+        0.6,
+        0.65
+      ],
+      "hp": 220,
+      "lp": 4200,
+      "target_rms": -51.0,
+      "max_peak": -33.0,
+      "width": 0,
+      "pan": 0.14,
+      "gain_after_eq_db": -12.332519591293401,
+      "source_sha256": "01f349df8341ac646b1139cc47c10d0af97ab5318db4d6bf99607fdf8aedadf9",
+      "processed_pre_master": {
+        "peak_dbfs": -33.0,
+        "rms_dbfs": -53.17684502004046,
+        "duration_seconds": 4.0,
+        "clipped_samples": 0
+      }
+    },
+    {
+      "id": "ropeway",
+      "file": "05-ropeway/240532-ropeway-preview.mp3",
+      "crop": [
+        1,
+        4.2
+      ],
+      "at": 9.8,
+      "fade": [
+        0.45,
+        0.65
+      ],
+      "hp": 100,
+      "lp": 1300,
+      "target_rms": -51.0,
+      "max_peak": -35.0,
+      "width": 0.35,
+      "pan": 0,
+      "gain_after_eq_db": -4.234633943625539,
+      "source_sha256": "42fd2ce38d688aec83b81f1729de80f36d50ad676f4dbbf58d0d2185691b1964",
+      "processed_pre_master": {
+        "peak_dbfs": -36.56018945977824,
+        "rms_dbfs": -51.00000000000001,
+        "duration_seconds": 3.2,
+        "clipped_samples": 0
+      }
+    }
+  ],
+  "variants": [
+    {
+      "id": "00-original",
+      "title": "原版对照",
+      "tracks": [],
+      "pcm": {
+        "peak_dbfs": -18.662046016410567,
+        "rms_dbfs": -39.22241077288286,
+        "duration_seconds": 24.6,
+        "clipped_samples": 0
+      },
+      "encoded_aac": {
+        "peak_dbfs": -18.67008993327339,
+        "rms_dbfs": -39.2443193754842,
+        "duration_seconds": 24.6,
+        "clipped_samples": 0
+      },
+      "full_decode": "passed"
+    },
+    {
+      "id": "01-A-air",
+      "title": "A · 风叶与风铃",
+      "tracks": [
+        "leaves",
+        "chime"
+      ],
+      "pcm": {
+        "peak_dbfs": -18.662046016410567,
+        "rms_dbfs": -38.61017179597595,
+        "duration_seconds": 24.6,
+        "clipped_samples": 0
+      },
+      "encoded_aac": {
+        "peak_dbfs": -18.67008993327339,
+        "rms_dbfs": -38.6408010835757,
+        "duration_seconds": 24.6,
+        "clipped_samples": 0
+      },
+      "full_decode": "passed"
+    },
+    {
+      "id": "02-B-water",
+      "title": "B · 加温泉细水",
+      "tracks": [
+        "leaves",
+        "chime",
+        "water"
+      ],
+      "pcm": {
+        "peak_dbfs": -18.662046016410567,
+        "rms_dbfs": -38.51363272053467,
+        "duration_seconds": 24.6,
+        "clipped_samples": 0
+      },
+      "encoded_aac": {
+        "peak_dbfs": -18.67008993327339,
+        "rms_dbfs": -38.54510656502014,
+        "duration_seconds": 24.6,
+        "clipped_samples": 0
+      },
+      "full_decode": "passed"
+    },
+    {
+      "id": "03-C-ropeway",
+      "title": "C · 再加索道低鸣",
+      "tracks": [
+        "leaves",
+        "chime",
+        "water",
+        "ropeway"
+      ],
+      "pcm": {
+        "peak_dbfs": -18.662046016410567,
+        "rms_dbfs": -38.388856525352544,
+        "duration_seconds": 24.6,
+        "clipped_samples": 0
+      },
+      "encoded_aac": {
+        "peak_dbfs": -18.67009048854943,
+        "rms_dbfs": -38.42143300321521,
+        "duration_seconds": 24.6,
+        "clipped_samples": 0
+      },
+      "full_decode": "passed"
+    }
+  ],
+  "license_ropeway": "concretica, Freesound 240532, CC BY 4.0; preview cropped 1.0–4.2s, filtered, faded, stereo narrowed and gain adjusted. https://freesound.org/people/concretica/sounds/240532/ https://creativecommons.org/licenses/by/4.0/"
+}
