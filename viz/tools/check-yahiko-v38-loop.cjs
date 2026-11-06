@@ -9,6 +9,7 @@ for(const key of ['x','y','size','spin','pitch','yaw','fold','alpha'])assert(Mat
 const pile=html.slice(html.indexOf('const TITLE_PILE='),html.indexOf('function windMomentTime(t){'));
 ctx.ease=u=>u*u*(3-2*u);ctx.windField=()=>[0,0];vm.runInContext(pile,ctx);
 for(let i=0;i<11;i++){const a=ctx.titleLeafState(27.8-1e-7,i),b=ctx.titleLeafState(0,i);for(const key of ['x','y','spin','alpha'])assert(Math.abs(a[key]-b[key])<.001,`Title pile loop: ${i}/${key}`);assert.equal(b.alpha,1);}
+const middle=ctx.titleLeafState(2,0),waiting=ctx.titleLeafState(2,10);assert(middle.y>330&&waiting.y<320,'Leaves release at staggered times');assert.equal(ctx.titleLeafState(2.4,0).y,middle.y,'Leaf rests in the middle of the lettering');
 const wav=fs.readFileSync(path.join(__dirname,'../autumn/audio/yahiko-v38/master.wav'));assert.equal(wav.toString('ascii',0,4),'RIFF');assert.equal((wav.length-44)/wav.readUInt32LE(28),27.8);
 assert(html.includes('audio.loop = true'));assert(html.includes('playing = false'));
 console.log('PASS: script syntax; hero leaf position, rotation, fold and alpha across loop; 27.8s soundtrack.');

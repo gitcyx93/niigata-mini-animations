@@ -1,21 +1,23 @@
 {
   "duration": 27.8,
   "sampleRate": 32000,
-  "peak": 0.16382147371768951,
+  "peak": 0.1649920493364334,
+  "effectsRmsDb": -37.99356538106086,
+  "musicRmsDb": -45.66404999650799,
+  "musicBelowEffectsDb": 7.670484615447128,
+  "musicType": "original synthesized felt-piano/pad reference, not a sampled recording",
+  "musicBpm": 69.06474820143885,
   "catAt": 23.45,
   "catSourceOffset": 0.008375,
   "catLength": 1.25,
   "leafGain": 2.4422519530077196,
   "wrapWind": true,
-  "noiseDip": [
-    3,
-    5.2
-  ],
+  "noiseDip": null,
   "shrineChimes": [
-    3.25,
-    5.45,
-    7.6
+    3.3,
+    8.65378125
   ],
+  "chimeSourceDuration": 5.35378125,
   "forestWind": [
     3.2,
     9.9

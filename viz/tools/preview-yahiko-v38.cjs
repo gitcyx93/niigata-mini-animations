@@ -1,6 +1,7 @@
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'../autumn');
 const routes={'/':['yahiko-v38.html','text/html; charset=utf-8'],'/yahiko':['yahiko-v38.html','text/html; charset=utf-8'],'/audio/yahiko-v38/master.wav':['audio/yahiko-v38/master.wav','audio/wav'],'/audio/yahiko-v38/LICENSES.md':['audio/yahiko-v38/LICENSES.md','text/plain; charset=utf-8']};
+for(const name of ['effects.wav','music.wav','audition-base-3-6.wav','audition-shrine-chime.wav','audition-shrine-wind.wav'])routes['/audio/yahiko-v38/'+name]=['audio/yahiko-v38/'+name,'audio/wav'];
 http.createServer((req,res)=>{
  const item=routes[req.url.split('?')[0]];if(!item){res.writeHead(404);return res.end('Not found');}
  const file=path.join(root,item[0]);fs.stat(file,(error,stat)=>{
