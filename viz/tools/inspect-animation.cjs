@@ -109,8 +109,9 @@ async function frame(page, time, details = true) {
     const state = {}, missing = [];
     const shot = typeof shotAt === 'function' ? shotAt(time) : null;
     if (shot === null) missing.push('scene_id');
-    if (typeof camAt === 'function') state.camera = camAt(time);
-    else missing.push('actual_camera'); // cameraState in Yahiko also serves obsolete shots; do not guess.
+    if (typeof camAt === 'function') state.baseCamera = camAt(time);
+    // Close-ups or WebGL shots can replace the panorama described by camAt.
+    missing.push('actual_camera'); // No generic active-camera interface is exposed.
     if (typeof SKI3D !== 'undefined' && typeof SKI3D.getInfo === 'function' && time >= 3.3 && time < 8.7) {
       const info = SKI3D.getInfo();
       if (info && (info.webgl === false || Math.abs(info.time - time) < 1e-5)) state.ski = info;
@@ -183,7 +184,7 @@ function compare(current, baseline) {
 
 (async () => {
   let opt, browser;
-  const report = {schemaVersion: 1, createdAt: new Date().toISOString(), status: 'failed',
+  const report = {schemaVersion: 2, createdAt: new Date().toISOString(), status: 'failed',
     scope: {sampled_only: true, audio_not_tested: true, visual_quality_not_judged: true,
       continuous_playback_not_tested: true, standalone_offline_not_tested: true,
       missing_capability_is_not_a_pass: true, pixel_hash: 'SHA-256 of all RGBA bytes'},
