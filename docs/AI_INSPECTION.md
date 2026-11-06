@@ -28,6 +28,8 @@ node viz/tools/inspect-animation.cjs viz/autumn/yahiko-v25.html --compare viz/au
 
 ## JSON 能告诉 AI 什么
 
+报告格式为 `schemaVersion: 2`。第 1 版的 `samples[].state.camera` 已更名为 `samples[].state.baseCamera`：它只保存页面 `camAt(t)` 的返回值，不保证是当前镜头实际使用的相机。
+
 | 字段 | 实际证据 |
 |---|---|
 | `source` | 输入文件 SHA-256、文件大小、所在工作树的 Git HEAD。文件哈希才代表实际被检查的内容；HEAD 不表示文件没有未提交修改 |
@@ -35,7 +37,7 @@ node viz/tools/inspect-animation.cjs viz/autumn/yahiko-v25.html --compare viz/au
 | `metadata.capabilities` | 页面实际暴露了哪些接口；缺失能力会保留为缺失，不记成通过 |
 | `metadata.timeline / narration / textWindows` | 已存在的分镜、旁白和文字时段；未暴露时返回 `null`，不会从截图猜测 |
 | `samples[].shot / sourceTime` | 通过现有函数得到当前镜头和映射后的源时间 |
-| `samples[].state` | 已有相机、汤泽滑雪接地/屏幕边界/绘制统计，或新版弥彦小镇的风、脚、窗、猫、落叶状态 |
+| `samples[].state` | 页面提供的基础相机、汤泽滑雪接地/屏幕边界/绘制统计，或新版弥彦小镇的风、脚、窗、猫、落叶状态；基础相机不代表当前镜头相机 |
 | `samples[].sha256` | 整张 Canvas 的全部 RGBA 字节哈希；三色与透明度全部参与，不是仅比较红色通道 |
 | `samples[].determinism` | 同一时间先渲染、跳到另一时间、再返回，检验是否得到同一帧 |
 | `samples[].renderMs / readbackMs` | 无头环境的同步渲染调用与像素回读耗时；它们不是实际显示帧率或用户设备性能 |
@@ -45,7 +47,8 @@ node viz/tools/inspect-animation.cjs viz/autumn/yahiko-v25.html --compare viz/au
 
 - 顶层 `const`（如 `PLAN`、`STORY_C`、`SKI3D`）不一定属于 `window`，检查器在页面 JavaScript 环境中直接读取。
 - 汤泽仅在三维滑雪时段读取 `SKI3D.getInfo()`，并检查返回的 `time`，避免把缓存的旧帧状态误报为当前状态。`webgl:false` 会保留其回退信息。
-- 弥彦的旧 `cameraState(t, mode)` 不能代表所有新版镜头，因此检查器不会拿它冒充当前相机。没有可靠相机接口时输出 `actual_camera` 不可用。
+- 高田的桥与樱花特写、汤泽的滑雪镜头会覆盖全景，`camAt(t)` 在这些时段仍可返回未参与最终画面的全景相机。其原值只记为 `state.baseCamera`，通用 `actual_camera` 始终列在 `unavailable` 中；汤泽滑雪自身返回的 `state.ski.camera` 等信息保留在该场景的作用域内。
+- 弥彦的旧 `cameraState(t, mode)` 也不能代表所有新版镜头，因此检查器不会拿它冒充当前相机。
 - 弥彦小镇状态使用 `t - TOWN0` 作为局部时间；画面中不同对象的坐标仍按原函数的定义，工具不会自行声称它们都在同一坐标系。
 - `render(t)` 不一定更新播放器的 `playTime`；报告的采样时间明确来自调用参数，不用播放器 UI 推断。
 
