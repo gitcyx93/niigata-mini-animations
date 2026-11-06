@@ -12,14 +12,16 @@ GitHub 文件页显示源码，不会直接播放 HTML。克隆或下载本仓�
 |---|---|---|
 | 春 | [高田夜樱 v2](viz/spring/takada-yozakura-v2.html) · [台湾繁体](viz/spring/takada-yozakura-v2-tw.html) | 当前 v2 页面与新稿 |
 | 夏 | [长冈花火 A](viz/summer/nagaoka-hanabi-a.html) · [台湾繁体](viz/summer/nagaoka-hanabi-a-tw.html) | 保留原已发布版本，不改画面或文案 |
-| 秋 | [弥彦 V38 · 当前有声网页](viz/autumn/yahiko-v38.html) | 27.8 秒首尾循环，红叶谷与温泉街风叶互动；环境音、海浪、风铃、猫叫与窗框声，参考伴奏可关闭 |
+| 秋 | [弥彦 V38](viz/autumn/yahiko-v38.html) · [English](viz/autumn/yahiko-v38-en.html) · [繁體](viz/autumn/yahiko-v38-tw.html) | 27.8 秒首尾循环，红叶谷与温泉街风叶互动；环境音、海浪、风铃、鸟鸣、猫叫与窗框声，**无配乐** |
 | 冬 | [越后汤泽](viz/winter/yuzawa-yukiguni.html) · [台湾繁体](viz/winter/yuzawa-yukiguni-tw.html) | 三维滑雪、SNS 运镜与新稿；保留原 20 秒循环 |
 
 ### 弥彦 V38：当前版本
 
 - [完整动画](viz/autumn/yahiko-v38.html) · [本轮记录](stories/yahiko-v38.md) · [音效来源与授权](viz/autumn/audio/yahiko-v38/LICENSES.md)。
-- 保留 `viz/autumn/audio/yahiko-v38/` 目录；运行 `node viz/tools/preview-yahiko-v38.cjs` 后打开 **http://127.0.0.1:8941/yahiko**。点击“有声播放”，可关闭参考伴奏、按时间表单听音效。
-- [纯音效](viz/autumn/audio/yahiko-v38/effects.wav) · [带参考伴奏](viz/autumn/audio/yahiko-v38/master.wav) · [混音参数](viz/autumn/audio/yahiko-v38/mix.json)。当前 V38 尚未导出 MP4，下面的视频均是历史版本。
+- 保留 `viz/autumn/audio/yahiko-v38/` 目录；运行 `node viz/tools/preview-yahiko-v38.cjs` 后打开 **http://127.0.0.1:8941/yahiko**。点击“有声播放”，可按时间表单听音效。英文预览 `/en`，繁体预览 `/tw`。
+- 英文与繁体发布 MP4 正在本地录制，按用户要求稍后单独上传；当前先发布双语网页、无配乐母带及制作源码。目标规格：1080×1920、30fps、H.264＋AAC、27.8 秒。
+- [发布说明与音效署名](output/autumn/yahiko-v38-social/PUBLISHING.md)。下方 v16/v25 视频是历史版本，不要误用。
+- [纯音效／发布母带](viz/autumn/audio/yahiko-v38/master.wav) · [混音参数](viz/autumn/audio/yahiko-v38/mix.json)。
 - [快改流程与已确认经验](docs/YAHIKO_ITERATION.md)。
 
 ### 弥彦 v16：历史视频与声音源码
@@ -80,7 +82,9 @@ BROWSER_EXE=/path/to/chrome node viz/tools/check-copy-pages.cjs
 
 ### 重建弥彦声音与视频
 
-V38：已有 Playwright 安装时运行 `PLAYWRIGHT_MODULE=/path/to/playwright node viz/tools/build-yahiko-v38-audio.cjs`；快速检查为 `node viz/tools/check-yahiko-v38-loop.cjs`。其音频构建使用浏览器解码与 WAV 输出，不需要 FFmpeg。
+V38 语言版：`NODE_PATH=/path/to/font-and-opencc/node_modules node viz/tools/build-yahiko-v38-locales.cjs`。发布录制：`PLAYWRIGHT_MODULE=/path/to/playwright FFMPEG=/path/to/ffmpeg node viz/tools/record-yahiko-v38-social.cjs`（已有输出须显式加 `--force`）。
+
+V38 声音：已有 Playwright 安装时运行 `PLAYWRIGHT_MODULE=/path/to/playwright node viz/tools/build-yahiko-v38-audio.cjs`；快速检查为 `node viz/tools/check-yahiko-v38-loop.cjs`。其音频构建使用浏览器解码与 WAV 输出，不需要 FFmpeg。
 
 以下命令针对历史 v16，不能用于覆盖 V38。需要 Python 3、FFmpeg；浏览器检查和录制另需可解析的 `playwright` 包及浏览器（可用 `BROWSER_EXE` 指定本机 Chrome）。
 

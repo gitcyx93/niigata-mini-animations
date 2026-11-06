@@ -2,6 +2,15 @@
 
 入口：`viz/autumn/yahiko-v38.html`。27.8 秒，音频时钟驱动，默认循环；需点击“有声播放”启用声音。
 
+## 英文與繁體社交發布版
+
+- 已移除參考配樂；發布用 `master.wav` 與純音效 `effects.wav` 完全相同。
+- 原 CC0 遠處鳥鳴分軌延續到溫泉街 21.6、22.7、25.1、26.25 秒，音量較日間克制並避開貓叫。未確認鳥種，不把聽感當成物種鑑定。
+- `viz/autumn/yahiko-v38-en.html`：英文字幕；`viz/autumn/yahiko-v38-tw.html`：臺灣繁體用語與嵌入的繁體字形字體。
+- 發布 MP4、規格與署名：`output/autumn/yahiko-v38-social/`。兩版共用相同無配樂音軌；錄製、解碼與文字檢查結果由 `exports.json` 記錄。
+- 本機構建：`NODE_PATH=/path/to/font-and-opencc/node_modules node viz/tools/build-yahiko-v38-locales.cjs`；匯出：`PLAYWRIGHT_MODULE=/path/to/playwright FFMPEG=/path/to/ffmpeg node viz/tools/record-yahiko-v38-social.cjs`。
+- 預覽伺服器提供 `/en`、`/tw`；已存在的成品預設不覆蓋，重新匯出須明確加 `--force`。
+
 ## 合入 main 前的最后修订
 
 - 12.8–17.1 秒原“海景声”经源清单核对实际是开阔地风。只替换这段底轨为 Luftrum 的海浪录音，经滤波、减小音量和淡化做远景氛围；授权署名已补齐。未声称已证明原素材存在编码失真。

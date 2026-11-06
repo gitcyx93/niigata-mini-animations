@@ -51,7 +51,13 @@ The base track around 4s has been restored unchanged. Solo excerpts preserve the
 - Changes: source 12.0–16.3s excerpt, 100Hz high-pass / 3200Hz low-pass, reduced level, 0.5s/0.65s fades, placed at 12.8–17.1s. The old open-field-wind bed is crossfaded out only in that interval. The intention is distant-sea sound design, not claiming surf is literally audible from this summit.
 - Diagnosis: the old source manifest identifies this section as open-field wind assembled from MP3 previews, not surf. Its identity and perspective are a confirmed mismatch; no claim is made that codec damage was proven.
 
-## Temporary reference music
+## Release audio: no background music
+
+The English and Traditional Chinese social exports use the ambience-only `master.wav`, byte-identical to `effects.wav`. The temporary music sketch has been removed from current release playback and exports.
+
+The already approved `bird-01.flac` and `bird-02.flac` phrases (rawhiteman7, CC0, listed above) are reused quietly at 21.6s, 22.7s, 25.1s and 26.25s in the town scene, avoiding the 23.45s cat cue. Bird species has not been identified; “cuckoo-like” is a listening description, not a claim about the source species. Background bird calls embedded in the original forest bed are not separately isolated stems and should be listed as part of that bed.
+
+## Historical temporary reference music (not used in the release)
 
 `music.wav` is an original programmatically synthesized felt-piano-like / warm-pad sketch, approximately 69 BPM, with no drums, vocals or third-party song samples. It is a style and mix-level reference, not a recording of an acoustic piano or a licensed commercial track.
 

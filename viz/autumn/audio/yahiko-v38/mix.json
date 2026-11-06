@@ -1,12 +1,16 @@
 {
   "duration": 27.8,
   "sampleRate": 32000,
-  "peak": 0.1649920493364334,
-  "effectsRmsDb": -40.388106257851646,
-  "musicRmsDb": -45.66404999650799,
-  "musicBelowEffectsDb": 5.275943738656343,
-  "musicType": "original synthesized felt-piano/pad reference, not a sampled recording",
-  "musicBpm": 69.06474820143885,
+  "peak": 0.16382147371768951,
+  "effectsRmsDb": -40.37749811184129,
+  "music": false,
+  "townBirds": [
+    21.6,
+    22.7,
+    25.1,
+    26.25
+  ],
+  "birdSpecies": "unconfirmed; reused original distant-bird stems",
   "catAt": 23.45,
   "catSourceOffset": 0.008375,
   "catLength": 1.25,
@@ -31,6 +35,5 @@
     "highpassHz": 100,
     "lowpassHz": 3200,
     "replaces": "old open-field wind in B mix"
-  },
-  "approvedMusicGainFrozen": true
+  }
 }
