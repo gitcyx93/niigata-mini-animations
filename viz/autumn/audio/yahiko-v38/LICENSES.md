@@ -19,6 +19,17 @@ The existing `output/autumn/yahiko-v25-sound-review/02-B-water.m4a` is retained 
 
 Ropeway: the prior cropped, filtered, narrowed and faded 1.0–4.2s excerpt is reused at 65% of its existing stem gain, at film time 9.8s. License: https://creativecommons.org/licenses/by/4.0/
 
+## Window-frame sound and shrine revision
+
+**Old Door Creaking — Stephan**, SoundBible, marked **Public Domain** on the source page:
+https://soundbible.com/1362-Old-Door-Creaking.html
+
+Download: https://soundbible.com/mp3/Old%20Door%20Creaking-SoundBible.com-1197162460.mp3
+
+`window-source.mp3` preserves this recording. It is used as window-frame Foley, not presented as an authentic window/location recording: high-pass at 160Hz, low-pass at 1900Hz, reduced gain, overlapping short excerpts, slight right pan. Its loudness follows the animation's actual hinge angular velocities and stops with the window. No new synthetic creak is claimed as a recording.
+
+The shrine sequence now overlaps the existing CC0 wind-chime tails at 3.25s, 5.45s and 7.6s, with the existing rustling-leaves recording underneath from 3.2–9.9s. The base track around 3.0–5.2s is ducked by up to 98% and replaced by the previously approved quiet ambience to suppress the reported noise around 4s. Other approved sound elements retain their timing and gain.
+
 ## New cat sound
 
 **Kitten Meow — Mike Koenig**, SoundBible, **Creative Commons Attribution 3.0**.

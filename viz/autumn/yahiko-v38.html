@@ -3218,17 +3218,21 @@ function openLeafState(l,t){
  return {x,y,spin,rest};
 }
 // 叶子从画面外飘落字沿；开场同一阵风达到阈值后，交给场景已有的落叶物理继续飞。
+const TITLE_PILE=[[98,306],[116,298],[136,305],[155,298],[178,308],[196,301],[254,305],[276,297],[296,306],[315,298],[334,309]];
 function titleLeafState(t,i){
- const born=.08+i*.18,land=.68+i*.2,x=116+i*192,y=305-i*2,ph=-.45+i*.7;
- if(t<born)return null;
- if(t<land){const u=clamp((t-born)/(land-born)),q=1-u;return {x:q*q*(-45+i*90)+2*q*u*(x-50)+u*u*x,y:q*q*170+2*q*u*220+u*u*y,spin:ph+q*.9,alpha:ease(clamp(u*4))};}
- let release=land+.25;while(release<3.2&&windField(x,y,release)[0]<180)release+=1/60;
- if(t<release)return {x,y,spin:ph+windField(x,y,t)[0]*.00012,alpha:1};
- const s=openLeafState({born:release,x,y,vx:20,vy:-60,ph,k:2.2,land:null},t);
- return {...s,alpha:1};
+ if(t>6.4&&t<26.6)return null;
+ const clock=t>=26.6?t-27.8:t,[x,y]=TITLE_PILE[i],ph=-.65+(i%4)*.4;
+ if(clock<0){const u=ease(clamp((clock+1.1-i*.035)/.5));return {x:x-200*(1-u),y:y+230*(1-u)-90*Math.sin(Math.PI*u),spin:ph-.8*(1-u),alpha:clamp(u*3)};}
+ let release=.5+i*.105;while(release<2.4&&windField(x,y,release)[0]<150+i*9)release+=1/60;
+ if(clock<release)return {x,y,spin:ph+windField(x,y,clock)[0]*.00008,alpha:1};
+ return {...openLeafState({born:release,x,y,vx:0,vy:15,ph,k:.75,land:null},clock),alpha:1};
 }
+
 function windMomentTime(t){return t<2.2?t+3.4:t>=24.4?t-24.4:t-17;}
-function drawTitleLeaves(b,t){drawWindTitleMoment(b,t);}
+function drawTitleLeaves(b,t){
+ drawWindTitleMoment(b,t);
+ for(let i=0;i<TITLE_PILE.length;i++){const s=titleLeafState(t,i);if(s&&s.x>-60&&s.x<W+60&&s.y>-60&&s.y<H+60)flyingLeaf(b,s.x,s.y,20+i%4*3,s.spin,2+i%5,s.alpha);}
+}
 function drawWindTitleMoment(b,t){
  const a=windMomentTime(t);if(a<0||a>(t<2.2||t>=24.4?5.6:3.4))return;
  const force=Math.pow(Math.sin(Math.PI*clamp((a-.5)/1.9)),2),fade=clamp(a/.25)*clamp(((t<2.2||t>=24.4?5.6:3.4)-a)/.3);
@@ -3338,7 +3342,7 @@ loadFonts().catch(()=>{}).then(()=>{paintToriiPlaque();update(playTime);window.R
   const note = document.createElement('p');
   note.className = 'intro';
   note.style.cssText = 'font-size:12px;line-height:1.8;margin:16px 0 8px';
-  note.textContent = '沿用环境音、鸟鸣、风铃和细水；新增猫叫、两处风叶与轻微索道低鸣。点击有声播放。';
+  note.textContent = '约4秒杂声已压低；神社段连续轻风铃＋树林风，片尾窗框响声跟随窗扇摆动。保留猫叫和循环风叶声，点击有声播放。';
   control.appendChild(note);
   const credits=document.createElement('p');credits.className='sources';credits.innerHTML='猫叫：Mike Koenig · CC BY 3.0；索道：concretica · CC BY 4.0。<a href="audio/yahiko-v38/LICENSES.md" target="_blank" rel="noopener">音效来源与授权</a>';control.appendChild(credits);
 

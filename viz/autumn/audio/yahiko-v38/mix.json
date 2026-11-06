@@ -1,10 +1,24 @@
 {
   "duration": 27.8,
   "sampleRate": 32000,
-  "peak": 0.16377899050712585,
+  "peak": 0.16382147371768951,
   "catAt": 23.45,
   "catSourceOffset": 0.008375,
   "catLength": 1.25,
   "leafGain": 2.4422519530077196,
-  "wrapWind": true
+  "wrapWind": true,
+  "noiseDip": [
+    3,
+    5.2
+  ],
+  "shrineChimes": [
+    3.25,
+    5.45,
+    7.6
+  ],
+  "forestWind": [
+    3.2,
+    9.9
+  ],
+  "windowMotionDriven": true
 }
