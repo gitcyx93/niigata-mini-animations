@@ -12,15 +12,22 @@ GitHub 文件页显示源码，不会直接播放 HTML。克隆或下载本仓�
 |---|---|---|
 | 春 | [高田夜樱 v2](viz/spring/takada-yozakura-v2.html) · [台湾繁体](viz/spring/takada-yozakura-v2-tw.html) | 当前 v2 页面与新稿 |
 | 夏 | [长冈花火 A](viz/summer/nagaoka-hanabi-a.html) · [台湾繁体](viz/summer/nagaoka-hanabi-a-tw.html) | 保留原已发布版本，不改画面或文案 |
-| 秋 | [弥彦最新画面·无声](viz/autumn/yahiko-v16-travel.html) · [环境音版](viz/autumn/yahiko-v16-travel-sound.html) | 同一份 v16 修订画面；有声版加入远景轻声与上山鸟鸣，**没有背景音乐**；未合入其他山体／小镇试作 |
+| 秋 | [弥彦 V38 · 当前有声网页](viz/autumn/yahiko-v38.html) | 27.8 秒首尾循环，红叶谷与温泉街风叶互动；环境音、海浪、风铃、猫叫与窗框声，参考伴奏可关闭 |
 | 冬 | [越后汤泽](viz/winter/yuzawa-yukiguni.html) · [台湾繁体](viz/winter/yuzawa-yukiguni-tw.html) | 三维滑雪、SNS 运镜与新稿；保留原 20 秒循环 |
+
+### 弥彦 V38：当前版本
+
+- [完整动画](viz/autumn/yahiko-v38.html) · [本轮记录](stories/yahiko-v38.md) · [音效来源与授权](viz/autumn/audio/yahiko-v38/LICENSES.md)。
+- 保留 `viz/autumn/audio/yahiko-v38/` 目录；运行 `node viz/tools/preview-yahiko-v38.cjs` 后打开 **http://127.0.0.1:8941/yahiko**。点击“有声播放”，可关闭参考伴奏、按时间表单听音效。
+- [纯音效](viz/autumn/audio/yahiko-v38/effects.wav) · [带参考伴奏](viz/autumn/audio/yahiko-v38/master.wav) · [混音参数](viz/autumn/audio/yahiko-v38/mix.json)。当前 V38 尚未导出 MP4，下面的视频均是历史版本。
+- [快改流程与已确认经验](docs/YAHIKO_ITERATION.md)。
+
+### 弥彦 v16：历史视频与声音源码
 
 画面修订与字幕来源见 [v16 修订记录](stories/yahiko-v16-travel.md)；声音及导出范围见 [环境音版记录](stories/yahiko-v16-travel-sound.md)。
 
-### 弥彦：视频与可编辑的声音源码
-
-- [最新画面 MP4（无声）](output/autumn/yahiko-v16-travel/yahiko-v16-travel-silent.mp4)
-- [最新画面＋环境音 MP4](output/autumn/yahiko-v16-travel/yahiko-v16-travel-ambience.mp4)：22.8 秒，1080×1920，30fps。
+- [v16 MP4（无声）](output/autumn/yahiko-v16-travel/yahiko-v16-travel-silent.mp4)
+- [v16 画面＋环境音 MP4](output/autumn/yahiko-v16-travel/yahiko-v16-travel-ambience.mp4)：22.8 秒，1080×1920，30fps。
 - [声音配置 `mix.json`](viz/autumn/audio/yahiko-v16-travel/mix.json)：能直接看到音轨、素材来源、音量和鸟鸣时间点。
 - [声音播放／同步代码](viz/autumn/yahiko-v16-travel-sound.js) · [分轨、重建说明与授权](viz/autumn/audio/yahiko-v16-travel/README.md)
 
@@ -73,7 +80,9 @@ BROWSER_EXE=/path/to/chrome node viz/tools/check-copy-pages.cjs
 
 ### 重建弥彦声音与视频
 
-需要 Python 3、FFmpeg；浏览器检查和录制另需可解析的 `playwright` 包及浏览器（可用 `BROWSER_EXE` 指定本机 Chrome）。
+V38：已有 Playwright 安装时运行 `PLAYWRIGHT_MODULE=/path/to/playwright node viz/tools/build-yahiko-v38-audio.cjs`；快速检查为 `node viz/tools/check-yahiko-v38-loop.cjs`。其音频构建使用浏览器解码与 WAV 输出，不需要 FFmpeg。
+
+以下命令针对历史 v16，不能用于覆盖 V38。需要 Python 3、FFmpeg；浏览器检查和录制另需可解析的 `playwright` 包及浏览器（可用 `BROWSER_EXE` 指定本机 Chrome）。
 
 ```sh
 # 从已剪辑的无损分轨重建混音和独立有声 HTML

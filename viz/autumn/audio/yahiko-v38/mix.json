@@ -2,9 +2,9 @@
   "duration": 27.8,
   "sampleRate": 32000,
   "peak": 0.1649920493364334,
-  "effectsRmsDb": -37.99356538106086,
+  "effectsRmsDb": -40.388106257851646,
   "musicRmsDb": -45.66404999650799,
-  "musicBelowEffectsDb": 7.670484615447128,
+  "musicBelowEffectsDb": 5.275943738656343,
   "musicType": "original synthesized felt-piano/pad reference, not a sampled recording",
   "musicBpm": 69.06474820143885,
   "catAt": 23.45,
@@ -22,5 +22,15 @@
     3.2,
     9.9
   ],
-  "windowMotionDriven": true
+  "windowMotionDriven": true,
+  "sea": {
+    "start": 12.8,
+    "end": 17.1,
+    "sourceOffset": 12,
+    "gain": 0.05983144987528529,
+    "highpassHz": 100,
+    "lowpassHz": 3200,
+    "replaces": "old open-field wind in B mix"
+  },
+  "approvedMusicGainFrozen": true
 }

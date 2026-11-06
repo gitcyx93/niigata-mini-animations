@@ -39,11 +39,23 @@ The base track around 4s has been restored unchanged. Solo excerpts preserve the
 - Saved as `windchimes-source.ogg`.
 - Changes: resampled, high-pass 350Hz / low-pass 6200Hz, reduced gain, short fades, slight left pan. One uninterrupted 5.354s recording is used at 3.3–8.654s. No repeated single-bell sampling.
 
+## Summit sea ambience replacement
+
+**Oceanwavescrushing — Luftrum**, **Creative Commons Attribution 3.0**.
+
+- Source/license page: https://commons.wikimedia.org/wiki/File:Oceanwavescrushing.ogg
+- Original recording: https://upload.wikimedia.org/wikipedia/commons/f/f1/Oceanwavescrushing.ogg
+- Description: waves at Kalundborg Fjord, Røsnæs, recorded from about 2m using a Zoom H2. This is not a Yahiko or Japan location recording.
+- License: https://creativecommons.org/licenses/by/3.0/
+- `sea-source.ogg` preserves the downloaded recording.
+- Changes: source 12.0–16.3s excerpt, 100Hz high-pass / 3200Hz low-pass, reduced level, 0.5s/0.65s fades, placed at 12.8–17.1s. The old open-field-wind bed is crossfaded out only in that interval. The intention is distant-sea sound design, not claiming surf is literally audible from this summit.
+- Diagnosis: the old source manifest identifies this section as open-field wind assembled from MP3 previews, not surf. Its identity and perspective are a confirmed mismatch; no claim is made that codec damage was proven.
+
 ## Temporary reference music
 
 `music.wav` is an original programmatically synthesized felt-piano-like / warm-pad sketch, approximately 69 BPM, with no drums, vocals or third-party song samples. It is a style and mix-level reference, not a recording of an acoustic piano or a licensed commercial track.
 
-`effects.wav` retains the music-free sound design. `master.wav` combines it with the reference sketch. Music is about 7.67dB lower than effects in whole-clip RMS level, with further gentle ducking around bells, cat and gusts. These are measured RMS levels, not a claim of LUFS normalization or platform loudness compliance.
+`effects.wav` retains the music-free sound design. `master.wav` combines it with the reference sketch. The previously approved music gain is frozen (music RMS about -45.66dBFS), including gentle ducking around bells, cat and gusts. After replacing the louder summit wind, whole-clip effects RMS is about -40.39dBFS, so their average difference is now about 5.28dB; the music itself was not turned up. These are measured RMS levels, not a claim of LUFS normalization or platform loudness compliance.
 
 ## New cat sound
 

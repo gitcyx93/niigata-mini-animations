@@ -191,7 +191,7 @@ const titleShadow = () => titleLayer('shadow', x => {
 });
 const silver = () => titleLayer('silver', x => {
   const top = TB - 112, m = x.createLinearGradient(0, top, 0, TB + 12);
-  m.addColorStop(0, '#fffaf0'); m.addColorStop(.55, '#e7e5df'); m.addColorStop(1, '#b9bdc3');
+  m.addColorStop(0, '#fff9ec'); m.addColorStop(.58, '#eddfc5'); m.addColorStop(1, '#c68b61');
   x.fillStyle = m; x.fillText(titleText, TX, TB);
 });
 const bevel = () => titleLayer('bevel', x => {
@@ -254,7 +254,7 @@ function drawHeader(t, L, header) {
   text(header.place, 80 + ew + 22, 262, 26, narr, 400, 'left', 4);
   const X = 74 - TX, Y = 404 - TB;
   g.drawImage(titleShadow(), X, Y);
-  g.drawImage(relief(), X, Y);
+  g.save();g.globalAlpha*=.55;g.drawImage(relief(), X, Y);g.restore();
   const w = titleWork.getContext('2d');
   w.setTransform(1, 0, 0, 1, 0, 0); w.globalCompositeOperation = 'source-over'; w.globalAlpha = 1; w.clearRect(0, 0, 860, 300);
   w.drawImage(silver(), 0, 0);
@@ -265,7 +265,7 @@ function drawHeader(t, L, header) {
     sc.drawImage(cv, ...header.sheen, 0, 0, 96, 24);
     w.imageSmoothingEnabled = true; w.imageSmoothingQuality = 'high';
     w.globalCompositeOperation = 'soft-light'; w.drawImage(sheen, TX - 20, TB - 130, 660, 160);
-    w.globalCompositeOperation = 'lighter'; w.globalAlpha = .14; w.drawImage(sheen, TX - 20, TB - 130, 660, 160);
+    w.globalCompositeOperation = 'lighter'; w.globalAlpha = .065; w.drawImage(sheen, TX - 20, TB - 130, 660, 160);
     w.globalAlpha = 1;
   }
   if (reflect && L.light > .03) {                                       // 高光：跟着光源的位置和颜色
@@ -274,9 +274,12 @@ function drawHeader(t, L, header) {
     w.drawImage(radialSprite(L.lc, 1.3), hx - 280, TB - 190, 560, 240);
     w.globalAlpha = 1;
   }
+  // 秋叶色漫反射跟随场景风力，不把纸片贴在文字上。
+  if(reflect){const clock=t>=26.8?t-27.8:t,a=windMomentTime(t),wind=clamp(Math.abs(windField(160,300,clock)[0])/900+Math.pow(Math.sin(Math.PI*clamp((a-.45)/1.9)),2));
+    w.save();w.globalCompositeOperation='soft-light';w.globalAlpha=.12+.16*wind;w.drawImage(radialSprite([242,149,76],1.3),TX-100+wind*220,TB-170,420,230);w.restore();}
   w.globalCompositeOperation = 'destination-in'; w.drawImage(mask(), 0, 0);
   w.globalCompositeOperation = 'source-over';
-  w.drawImage(bevel(), 0, 0);
+  w.save();w.globalAlpha=.65;w.drawImage(bevel(), 0, 0);w.restore();
   g.drawImage(titleWork, X, Y);
   drawStory(t, header.story, narr, accent, pick(header.storyShadow));
 }
@@ -1432,7 +1435,7 @@ function endCardC(t){
 }
 function titlesC(t){
   const sunset=ease(clamp((t-10.35)/1.8))*(1-ease(clamp((t-16.72)/.28))),lamps=ease(clamp((t-18.2)/1.8));
-  g.save();drawHeader(t,{light:.12+.55*sunset+.28*lamps,lc:sunset>0?[255,188,111]:lamps>0?[255,213,156]:[224,234,241],x:sunset>0?sunScreen(t)[0]:600},{title:'弥彦',place:'新潟县弥彦村',story:STORY_C,storyShadow:'rgba(8,16,26,.95)',sheen:[440,560,500,260],reflect:true,accent:'#deb985',storyColor:'#fff6e6'});drawTitleLeaves(g,t);g.restore();
+  g.save();drawHeader(t,{light:.12+.55*sunset+.28*lamps,lc:sunset>0?[255,188,111]:lamps>0?[255,213,156]:[224,234,241],x:sunset>0?sunScreen(t)[0]:600},{title:'弥彦',place:'新潟县弥彦村',story:STORY_C,storyShadow:'rgba(8,16,26,.95)',sheen:[440,560,500,260],reflect:true,accent:'#deb985',storyColor:'#fff6e6'});g.restore();
   headlineC(t<2.7?{p:1,out:clamp((2.7-t)/.35)}:0,[['上山看海 ',0],['入夜看秋',1]],'新潟 · 弥彦');
   headlineC(scene(t,18.6,20.4),[['弥彦公园 ',0],['红叶谷',1]],'观月桥');   // 第 0 秒就在（封面）
   headlineC(scene(t,4.2,6.3),[['一之鸟居',1]],'弥彦神社');
@@ -3217,31 +3220,7 @@ function openLeafState(l,t){
   if(l.land!==null&&tt>3.2&&y>=l.land){y=l.land;vx=0;vy=0;rest=true;}}
  return {x,y,spin,rest};
 }
-// 叶子从画面外飘落字沿；开场同一阵风达到阈值后，交给场景已有的落叶物理继续飞。
-const TITLE_PILE=[[98,306],[116,298],[136,305],[155,298],[178,308],[196,301],[254,305],[276,297],[296,306],[315,298],[334,309]];
-function titleLeafState(t,i){
- if(t>12&&t<26.6)return null;
- const clock=t>=26.6?t-27.8:t,[x,y]=TITLE_PILE[i],ph=-.65+(i%4)*.4;
- if(clock<0){const u=ease(clamp((clock+1.1-i*.035)/.5));return {x:x-200*(1-u),y:y+230*(1-u)-90*Math.sin(Math.PI*u),spin:ph-.8*(1-u),alpha:clamp(u*3)};}
- const release=.75+i*.34,landing=release+.85+(i%3)*.14,mx=x+(i%2?8:-5),my=346+i%3*12,restEnd=landing+1.15+(i%3)*.4;
- if(clock<release)return {x,y,spin:ph+Math.sin(clock*3+i)*.025*clamp(clock/.3),alpha:1};
- if(clock<landing){const u=clamp((clock-release)/(landing-release)),p=ease(u);return {x:lerp(x,mx,p)+Math.sin(Math.PI*u)*8,y:lerp(y,my,p),spin:ph+.45*p,alpha:1};}
- if(clock<restEnd)return {x:mx,y:my,spin:ph+.45,alpha:1};
- return {...openLeafState({born:restEnd,x:mx,y:my,vx:8,vy:20,ph:ph+.45,k:.55,land:null},clock),alpha:1};
-}
-
 function windMomentTime(t){return t<2.2?t+3.4:t>=24.4?t-24.4:t-17;}
-function drawTitleLeaves(b,t){
- drawWindTitleMoment(b,t);
- for(let i=0;i<TITLE_PILE.length;i++){const s=titleLeafState(t,i);if(s&&s.x>-60&&s.x<W+60&&s.y>-60&&s.y<H+60)flyingLeaf(b,s.x,s.y,20+i%4*3,s.spin,2+i%5,s.alpha);}
-}
-function drawWindTitleMoment(b,t){
- const a=windMomentTime(t);if(a<0||a>(t<2.2||t>=24.4?5.6:3.4))return;
- const force=Math.pow(Math.sin(Math.PI*clamp((a-.5)/1.9)),2),fade=clamp(a/.25)*clamp(((t<2.2||t>=24.4?5.6:3.4)-a)/.3);
- for(let i=0;i<2;i++){const release=1.05+i*.12,age=Math.max(0,a-release),x0=116+i*192;
-  const x=x0+45*age+210*age*age,y=303-105*age+28*age*age;
-  flyingLeaf(b,x,y,29-i*3,-.45+force*.2+age*1.5,3+i,fade);}
-}
 function drawWindSceneMoment(b,t){
  const a=windMomentTime(t);if(a<0||a>(t<2.2||t>=24.4?5.6:3.4))return;
  const right=t<2.2||t>=24.4,side=right?-1:1,force=q=>Math.pow(Math.sin(Math.PI*clamp((q-.45)/1.9)),2),fade=clamp(a/.3)*clamp(((right?5.6:3.4)-a)/.35);
@@ -3344,9 +3323,9 @@ loadFonts().catch(()=>{}).then(()=>{paintToriiPlaque();update(playTime);window.R
   const note = document.createElement('p');
   note.className = 'intro';
   note.style.cssText = 'font-size:12px;line-height:1.8;margin:16px 0 8px';
-  note.textContent = '约4秒已恢复原声，可在下方分轨定位。神社风铃改为一段自然连响实录。临时伴奏为原创合成的轻钢琴／氛围小样，可关闭；猫叫、窗框及循环音效保留。';
+  note.textContent = '海景已替换为轻、远的海浪氛围；原4秒底音保留。神社风铃、猫叫、窗框和循环风叶不变。参考伴奏可关闭，下方可单听海景分轨。';
   control.appendChild(note);
-  const credits=document.createElement('p');credits.className='sources';credits.innerHTML='猫叫：Mike Koenig · CC BY 3.0；索道：concretica · CC BY 4.0。<a href="audio/yahiko-v38/LICENSES.md" target="_blank" rel="noopener">音效来源与授权</a>';control.appendChild(credits);
+  const credits=document.createElement('p');credits.className='sources';credits.innerHTML='猫叫：Mike Koenig · CC BY 3.0；索道：concretica · CC BY 4.0；海浪：Luftrum · CC BY 3.0。<a href="audio/yahiko-v38/LICENSES.md" target="_blank" rel="noopener">音效来源与授权</a>';control.appendChild(credits);
 
   const soundControls = document.createElement('div');
   soundControls.style.cssText = 'display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:12px';
@@ -3379,9 +3358,9 @@ loadFonts().catch(()=>{}).then(()=>{paintToriiPlaque();update(playTime);window.R
   soundControls.append(muteButton, volumeLabel, loopLabel,musicButton);
   control.appendChild(soundControls);
   const sheet=document.createElement('details');sheet.open=true;sheet.style.marginTop='18px';
-  sheet.innerHTML='<summary>音效时间表与分轨试听</summary><p>4秒原声已恢复。先单听下面三层，确定哪一层不对；分轨保留成片音量。</p><div id="solo-buttons" style="display:flex;gap:5px;flex-wrap:wrap"></div><table style="width:100%;text-align:left;font-size:11px;line-height:1.8"><tbody><tr><td>0–3.5 秒</td><td>开场静场（与杉林底音交叠）</td></tr><tr><td>3.0–9.9 秒</td><td>原杉林环境底轨（含4秒原声）</td></tr><tr><td>3.2–9.9 秒</td><td>新增树林风</td></tr><tr><td>3.3–8.65 秒</td><td>自然风铃连响，一段实录、不循环</td></tr><tr><td>9.6–13.4 秒</td><td>缆车空气；9.8–13秒叠轻索道低鸣</td></tr><tr><td>10.15、11.45 秒</td><td>两句鸟鸣</td></tr><tr><td>12.8–17.1 秒</td><td>山顶风</td></tr><tr><td>16.8–21.1 秒</td><td>夜景静场；17.15–20.6秒叠风叶声</td></tr><tr><td>20.45–24.23 秒</td><td>原小镇单声风铃及尾音</td></tr><tr><td>20.6–27.8 秒</td><td>细水、窗框声（随窗扇动作）</td></tr><tr><td>23.45–24.70 秒</td><td>猫叫</td></tr><tr><td>25.8 秒→下一轮1.3秒</td><td>片尾跨循环风叶</td></tr><tr><td>全片</td><td>可关闭的合成轻钢琴／氛围参考伴奏</td></tr></tbody></table>';
+  sheet.innerHTML='<summary>音效时间表与分轨试听</summary><p>4秒原声已恢复。先单听下面三层，确定哪一层不对；分轨保留成片音量。</p><div id="solo-buttons" style="display:flex;gap:5px;flex-wrap:wrap"></div><table style="width:100%;text-align:left;font-size:11px;line-height:1.8"><tbody><tr><td>0–3.5 秒</td><td>开场静场（与杉林底音交叠）</td></tr><tr><td>3.0–9.9 秒</td><td>原杉林环境底轨（含4秒原声）</td></tr><tr><td>3.2–9.9 秒</td><td>新增树林风</td></tr><tr><td>3.3–8.65 秒</td><td>自然风铃连响，一段实录、不循环</td></tr><tr><td>9.6–13.4 秒</td><td>缆车空气；9.8–13秒叠轻索道低鸣</td></tr><tr><td>10.15、11.45 秒</td><td>两句鸟鸣</td></tr><tr><td>12.8–17.1 秒</td><td>轻远海浪，替换原开阔地风声</td></tr><tr><td>16.8–21.1 秒</td><td>夜景静场；17.15–20.6秒叠风叶声</td></tr><tr><td>20.45–24.23 秒</td><td>原小镇单声风铃及尾音</td></tr><tr><td>20.6–27.8 秒</td><td>细水、窗框声（随窗扇动作）</td></tr><tr><td>23.45–24.70 秒</td><td>猫叫</td></tr><tr><td>25.8 秒→下一轮1.3秒</td><td>片尾跨循环风叶</td></tr><tr><td>全片</td><td>可关闭的合成轻钢琴／氛围参考伴奏</td></tr></tbody></table>';
   const audition=document.createElement('audio');audition.controls=true;audition.preload='none';audition.style.cssText='width:100%;height:34px;margin:8px 0';audition.setAttribute('aria-label','音效分轨试听');sheet.insertBefore(audition,sheet.querySelector('table'));control.appendChild(sheet);
-  for(const [label,file]of [['原底轨：3–6秒','audition-base-3-6.wav'],['神社风铃','audition-shrine-chime.wav'],['神社树林风','audition-shrine-wind.wav'],['只听参考伴奏','music.wav']]){const button=document.createElement('button');button.textContent=label;button.onclick=()=>{audio.pause();audition.src='audio/yahiko-v38/'+file;audition.play().catch(()=>{message.textContent='请点击分轨播放器的播放键';});refresh();};sheet.querySelector('#solo-buttons').appendChild(button);}
+  for(const [label,file]of [['原底轨：3–6秒','audition-base-3-6.wav'],['神社风铃','audition-shrine-chime.wav'],['神社树林风','audition-shrine-wind.wav'],['只听海景','audition-sea.wav'],['只听参考伴奏','music.wav']]){const button=document.createElement('button');button.textContent=label;button.onclick=()=>{audio.pause();audition.src='audio/yahiko-v38/'+file;audition.play().catch(()=>{message.textContent='请点击分轨播放器的播放键';});refresh();};sheet.querySelector('#solo-buttons').appendChild(button);}
 
 
   const message = document.createElement('p');
