@@ -1,6 +1,6 @@
 # Niigata Mini Animations · 新潟旅行小动画
 
-本项目于 2026-11-02 从 `gitcyx93/niigata-data-viz`（现名 `gitcyx93/niigata-data-archive`）迁出；动画的后续维护在 `gitcyx93/niigata-mini-animations`。作品入口见 `README.md`，原分支、迁移边界和保留版本见 `docs/MIGRATION.md`。下文保留原制作约定；旧状态与待办不是新的用户授权。迁移本身不修改文案、画面、时序或版本选择。
+本项目于 2026-11-02 从 `gitcyx93/niigata-data-viz`（现名 `gitcyx93/niigata-data-archive`）迁出；动画的后续维护在 `gitcyx93/niigata-mini-animations`。作品入口见 `README.md`，迁移事实与来源映射见 `docs/MIGRATION.md`。2026-11-07 用户已撤销迁移时的全量历史留存要求；旧文件、试作副本、比较材料和旧分支不再因旧文档而必须保留。下文旧状态与待办不是新的用户授权；清理范围以用户当前指示为准。
 
 做一系列竖屏动画（1080×1920，导出 MP4），发小红书（简体）、Facebook 和 Instagram（繁体），让华语游客想去新潟。重点是画面和体验，不是数据。
 
@@ -86,7 +86,7 @@
 
 ## 协作
 
-- 目标不清楚时先对齐方向；Chen 已授权重构或确认方案后，直接完成。原版留存，另做可比较的版本，不对同一授权重复确认。
+- 目标不清楚时先对齐方向；Chen 已授权重构或确认方案后，直接完成，不对同一授权重复确认。不要自动要求在工作树中另存每次修改的原版或比较副本。
 - 一般文案与构图自行判断并给出完整结果；只有影响真实承诺或需要本人信息时再问 Chen。内部「待定」不混入展示画面。
 - 每次交付前做一次必要检查：能打开、无脚本错误、关键帧和文字可读、完整播放观察节奏与运镜。抽帧不能代替运动检查；无法实际播放时如实说明验证范围，不把截图当作播放证明。
 - 发网页、图片、视频时提供当前环境可打开的预览或文件链接；不依赖特定聊天工具命令。
@@ -97,4 +97,4 @@
 
 先读 [用户意见与未实现提案](stories/nagaoka-yuzawa-review-2026-10-23.md)，再看参考文件。用户认为 GPT 版整体不如原版；可参考小字放大加阴影、烟花更柔和自然，原版的画面抖动等特效更好。高潮提前尚未实现，只作提案；不能靠加速。各片选合适的固定字色。
 
-弥彦另见 [当前分镜与照片参考](stories/yahiko.md) 和 [本次交接](stories/yahiko-review-2026-10-23.md)。独立页面是 `viz/autumn/yahiko-autumn-night.html`；保留原作 viz/autumn/yahiko-momiji.html。弥彦这次完成了开场缩短与连续跟车；这不改变上段长冈/汤泽提案仍未实现的状态。
+上述 2026-10-23 历史阶段的分镜与交接见 [当时的分镜与照片参考](stories/yahiko.md) 和 [当时的交接](stories/yahiko-review-2026-10-23.md)，对应页面为 `viz/autumn/yahiko-autumn-night.html`，不是当前入口。当前弥彦入口与制作流程以 `README.md` 和 `docs/YAHIKO_ITERATION.md` 为准。
