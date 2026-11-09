@@ -8,6 +8,7 @@ if(experiment){
  assert.equal(experiment.start,12.8);assert.equal(experiment.end,17.1);
  assert(Number.isFinite(experiment.sourceOffset)&&experiment.sourceOffset>=0);
  assert(Number.isFinite(experiment.gain)&&experiment.gain>0&&experiment.gain<=100);
+ for(const key of ['fadeIn','fadeOut'])if(experiment[key]!==undefined)assert(Number.isFinite(experiment[key])&&experiment[key]>=0&&experiment[key]<=4.3);
  assert(path.isAbsolute(experiment.source)&&fs.statSync(experiment.source).isFile());
  assert(path.isAbsolute(experiment.output));out=path.resolve(experiment.output);
  assert(out!==sourceDir&&!out.startsWith(sourceDir+path.sep),'Experiment output must be separate');
@@ -36,7 +37,7 @@ const result=await page.evaluate(async({windowMotion,experiment})=>{
  // The 4s bed stays restored; only the 12.8–17.1s summit bed is replaced.
  if(experiment&&buffers.sea.duration<experiment.sourceOffset+4.3)throw Error('Sea candidate too short');
  const seaOffset=experiment?experiment.sourceOffset:Math.min(12,Math.max(0,buffers.sea.duration-4.3));let seaSquares=0,seaPeak=0;const seaSamples=Math.round(4.3*sr),seaData=buffers.sea.getChannelData(0);for(let i=0;i<seaSamples;i++){const x=seaData[Math.round(seaOffset*sr)+i]||0;seaSquares+=x*x;seaPeak=Math.max(seaPeak,Math.abs(x));}
- const seaGain=experiment?experiment.gain:Math.min(.0065/Math.max(1e-8,Math.sqrt(seaSquares/seaSamples)),.025/Math.max(1e-8,seaPeak));add('sea',12.8,seaOffset,4.3,seaGain,.5,.65);
+ const seaGain=experiment?experiment.gain:Math.min(.0065/Math.max(1e-8,Math.sqrt(seaSquares/seaSamples)),.025/Math.max(1e-8,seaPeak));add('sea',12.8,seaOffset,4.3,seaGain,experiment?.fadeIn??.5,experiment?.fadeOut??.65);
  add('quiet',24.4,20.8,3.4,2,.2,.12);
  add('water',24.2,.2,3.6,.85,.4,.2);
  add('ropeway',9.8,0,3.2,.65,.4,.6);
@@ -59,7 +60,7 @@ const result=await page.evaluate(async({windowMotion,experiment})=>{
  const mixed=channels,effectRms=rms(channels),max=peakOf(channels);if(!Number.isFinite(max)||max>=.95)throw Error('Unexpected mix headroom');
  function encode(cs,start=0,length=duration){const begin=Math.round(start*sr),n=Math.min(Math.round(length*sr),cs[0].length-begin),wav=new ArrayBuffer(44+n*4),v=new DataView(wav),str=(p,s)=>{for(let i=0;i<s.length;i++)v.setUint8(p+i,s.charCodeAt(i))};str(0,'RIFF');v.setUint32(4,wav.byteLength-8,true);str(8,'WAVE');str(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,2,true);v.setUint32(24,sr,true);v.setUint32(28,sr*4,true);v.setUint16(32,4,true);v.setUint16(34,16,true);str(36,'data');v.setUint32(40,n*4,true);for(let i=0;i<n;i++)for(let c=0;c<2;c++)v.setInt16(44+i*4+c*2,Math.round(cs[c][begin+i]*32767),true);const bytes=new Uint8Array(wav);let text='';for(let i=0;i<bytes.length;i+=32768)text+=String.fromCharCode(...bytes.subarray(i,i+32768));return btoa(text);}
  return {files:{'master.wav':encode(mixed),'effects.wav':encode(channels),'audition-base-3-6.wav':encode(layers.base,3,3),'audition-shrine-chime.wav':encode(layers.windchime,3.2,6.6),'audition-shrine-wind.wav':encode(layers.forest,3.2,6.7),'audition-sea.wav':encode(layers.sea,12.8,4.3)},duration,sampleRate:sr,peak:max,effectsRmsDb:20*Math.log10(effectRms),music:false,townBirds:[21.6,22.7,25.1,26.25],birdSpecies:'unconfirmed; reused original distant-bird stems',catAt:23.45,catSourceOffset:offset,catLength,leafGain,wrapWind:true,noiseDip:null,shrineChimes:[3.3,3.3+chimeLength],chimeSourceDuration:buffers.windchime.duration,forestWind:[3.2,9.9],windowMotionDriven:true,sea:{start:12.8,end:17.1,sourceOffset:seaOffset,gain:seaGain,highpassHz:100,lowpassHz:3200,replaces:'old open-field wind in B mix'}};
-},{windowMotion,experiment});fs.mkdirSync(out,{recursive:true});for(const [name,data]of Object.entries(result.files)){const wav=Buffer.from(data,'base64');assert.equal(wav.toString('ascii',0,4),'RIFF');if(['master.wav','effects.wav','music.wav'].includes(name))assert.equal(wav.length,44+Math.round(27.8*32000)*4);fs.writeFileSync(path.join(out,name),wav);}delete result.files;if(experiment)result.experiment=experiment;assert(result.peak<1);fs.writeFileSync(path.join(sourceDir,'mix.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result));
+},{windowMotion,experiment});fs.mkdirSync(out,{recursive:true});for(const [name,data]of Object.entries(result.files)){const wav=Buffer.from(data,'base64');assert.equal(wav.toString('ascii',0,4),'RIFF');if(['master.wav','effects.wav','music.wav'].includes(name))assert.equal(wav.length,44+Math.round(27.8*32000)*4);fs.writeFileSync(path.join(out,name),wav);}delete result.files;if(experiment)result.experiment=experiment;assert(result.peak<1);fs.writeFileSync(path.join(out,'mix.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result));
 
 }finally{if(browser)await browser.close();server.close()}})().catch(e=>{console.error(e);process.exitCode=1});
 

@@ -2,6 +2,49 @@
 
 2026-11-09。试点：V38 山顶看海段，12.8–17.1 秒。现有 V38 成品与音轨不变。
 
+## REAPER 两条路线已实测
+
+48GB Mac 上运行 REAPER 7.85 arm64，使用已有 Luftrum 海浪录音。Agent 提出“远景海浪降低 3dB、淡入延长到 0.8 秒、声音居中”，两套工具分别执行，然后读回参数、导出 4.3 秒 WAV。没有加载声音生成模型。
+
+| 工具 | 固定版本 | 实测结果 |
+|---|---|---|
+| [reaper-daemon](https://github.com/wretcher207/reaper-daemon) | b906ce476e28676d2fd860d1ba5a7257c595a89f | 音量、声像、项目保存和导出成功；片段位置与淡化通过它的 run_script 接口调用小段 ReaScript；自动导出需要 SWS，本次安装 2.14.0.7 |
+| [reaper-mcp](https://github.com/mthines/reaper-mcp) | npm @mthines/reaper-mcp 0.79.1 / d885ff8576a2f6ebc576c607b7cebf8d503c8f63 | 原生工具完成音量、声像、位置、长度、淡化、保存和导出，读回结果一致 |
+
+两套桥接代码均为 MIT；宿主 REAPER 使用官方评估版。当前试验直接调用 CLI / MCP SDK，不改用户的 Claude 或 Codex 配置。MCP 服务随调用启动，REAPER 内的两套 Lua 桥接保持运行。
+
+两份导出均为 32kHz、双声道、137600 帧；峰值 -35.4694 dBFS，RMS -55.2844 dBFS，浮点 PCM SHA256 都是 `8d8c1f581c42e84e2ff2f7ec313a06fbd362dfb6a5f01d8c33391f2ebfccf6d3`。相同处理方案得到相同采样；本次比较工具执行能力，音效方案由本次 Agent 制定。
+
+复现需要 Python 3.10+、Node 20+、FFmpeg、REAPER 和 SWS。将两套固定版本工具放在本机：
+
+```sh
+git clone https://github.com/wretcher207/reaper-daemon.git /path/to/reaper-daemon
+git -C /path/to/reaper-daemon checkout b906ce476e28676d2fd860d1ba5a7257c595a89f
+npm install --prefix /path/to/mcp-runtime @mthines/reaper-mcp@0.79.1
+```
+
+以下在本仓库根目录运行。`REAPER_TRIAL_RESOURCE` 指向实验用 REAPER 资源目录；本次使用位于 REAPER.app 旁边、有独立 reaper.ini 的便携目录。SWS 的 arm64 dylib 放入该目录的 UserPlugins，再启动 REAPER。
+
+```sh
+export REAPER_DAEMON=/path/to/reaper-daemon
+export REAPER_MCP=/path/to/mcp-runtime/node_modules/@mthines/reaper-mcp
+export REAPER_TRIAL_RESOURCE=/path/to/portable-reaper
+export REAPER_TRIAL_OUT="$PWD/output/audio-agent/reaper-sea-01"
+python3 experiments/audio-agent/reaper_trial.py --source viz/autumn/audio/yahiko-v38/sea-source.ogg --out "$REAPER_TRIAL_OUT"
+python3 experiments/audio-agent/install_reaper_bridges.py --daemon "$REAPER_DAEMON" --mcp "$REAPER_MCP" --resource "$REAPER_TRIAL_RESOURCE" --project "$REAPER_TRIAL_OUT/trial.rpp"
+# 启动这个便携 REAPER；自动打开 trial.rpp，并加载两套桥接。
+python3 "$REAPER_DAEMON/reaperd.py" status
+REAPER_RESOURCE_PATH="$REAPER_TRIAL_RESOURCE" REAPER_MCP_TELEMETRY=0 node "$REAPER_MCP/main.js" status
+python3 experiments/audio-agent/run_reaper_trial.py --daemon "$REAPER_DAEMON" --mcp "$REAPER_MCP" --resource "$REAPER_TRIAL_RESOURCE" --out "$REAPER_TRIAL_OUT"
+afplay "$REAPER_TRIAL_OUT/mcp.wav"
+```
+
+输入为真实录音与 V38 mix.json。输出为 trial.rpp、cue.json、两份 WAV、逐次调用记录、verified.json 和两份 mixer-input-*.json。生成的 mcp-servers.json 可供支持 stdio MCP 的客户端导入。REAPER 快速重启后，daemon 的旧锁可能需要约 60 秒才由自身 watchdog 接管；status 提示 CONNECTED 后再执行。
+
+接回原混音器：`YAHIKO_SEA_EXPERIMENT="$REAPER_TRIAL_OUT/mixer-input-mcp.json" PLAYWRIGHT_MODULE=/absolute/path/to/playwright node viz/tools/build-yahiko-v38-audio.cjs`。本次已验证两个 REAPER 导出和配置生成；整片 WebAudio 重建沿用下文所列的原工程运行环境。
+
+原混音器的实验入口增加可选 fadeIn / fadeOut，并修正 mix.json 写出位置；全部实验文件写入指定的新目录。
+
 ## 默认先用真实录音
 
 三个项目都是声音生成模型，不是 Agent。此试点默认选择仓库已有的 Luftrum 海浪实录；AudioLDM2 作为可选对照。Agent 的主要工作是需求、素材选择、剪辑时段与增益，而不是必须生成声音。本次没有实现联网素材库搜索，也没有自动听觉评分。
@@ -97,7 +140,7 @@ PYTORCH_ENABLE_MPS_FALLBACK=1 audioldm2 --model_name audioldm2-full --device mps
 
 原生命令参数按官方 README 核对；依赖安装、自动权重下载仍待联网 Mac 验证。当前仓库 requirements 与 setup.py 存在不同依赖版本，因此不优先同时维护这套环境。
 
-## 实际验证
+## 此前生成模型路线的验证
 
 - 当前执行环境 macOS arm64、torch 2.1.2，MPS False；未安装 diffusers，无模型缓存。
 - 终端 git clone 失败：Could not resolve host: github.com。通过 GitHub 连接器读取了源码、时间与授权记录；连接器无法 UTF-8 解码二进制音轨。
@@ -109,5 +152,5 @@ PYTORCH_ENABLE_MPS_FALLBACK=1 audioldm2 --model_name audioldm2-full --device mps
 
 可以复用需求 JSON、固定种子候选生成、来源与模型版本记录、候选试听和增益测量。下一部动画由 Agent 读取其分镜，输出新的 cue；不需要另建播放器。当前 plan 与 V38 混音入口针对一个镜头，尚不是任意镜头自动编排器。先用这次两条候选确认听感和耗时，再决定是否扩展事件表接口。
 
-最有价值的下一次反馈是：两条候选有没有一条可用、generation.json 的单条耗时、整片里是否听起来像远景。这三项会直接决定继续本机生成还是让 Agent 优先检索可商用素材。
+当前优先复用已经跑通的录音编排和混音控制接口。其他动画需要新的镜头 cue 与素材选择；现有播放器和混音引擎继续使用。
 
