@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>新潟美食 · 一粒米，变出一桌</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@500;700;900&family=Sora:wght@600;800&display=swap">
+<style>
+  html,body{margin:0;height:100%;background:#141b33}
+  body{display:flex;align-items:center;justify-content:center;overflow:hidden}
+  canvas{width:min(100vw,56.25vh);aspect-ratio:9/16;display:block;cursor:pointer}
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// 新潟美食（风格探索）——「一粒米，变出一桌」。俯拍餐桌 + 海报式动态排版。
+// 约定：render(t) 是确定性的（同一 t 同一帧，随机用种子哈希）；?record=1 时不自动播放，由外部调用 render(t)。
+'use strict';
+const SRC = document.currentScript.textContent;
+const W = 1080, H = 1920, T = 22.6, TAU = Math.PI * 2;
+const canvas = document.getElementById('c');
+let g = canvas.getContext('2d');
+const C = {cream: '#F4EAD3', red: '#E1452B', navy: '#1C2B57', must: '#EDB73C', pine: '#1E5B4B', white: '#FFFDF7'};
+const FF = '"Sora","Source Han Sans SC","Noto Sans SC","Noto Sans CJK SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+const font = (w, s) => `${w} ${s}px ${FF}`;
+
+// ======== 小工具 ========
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const prog = (a, s, d) => clamp((a - s) / d);
+const frac = x => x - Math.floor(x);
+const eOut = x => 1 - Math.pow(1 - x, 3);
+const eIO = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eExpo = x => x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
+const eBack = x => { const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+function rnd(i, s = 0) { const x = Math.sin(i * 127.1 + s * 311.7 + 17.3) * 43758.5453; return x - Math.floor(x); }
+const SPR = {};
+function sprite(key, w, h, draw) {
+  if (!SPR[key]) {
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const keep = g; g = c.getContext('2d'); g.translate(w / 2, h / 2); draw(); g = keep; SPR[key] = c;
+  }
+  return SPR[key];
+}
+function stamp(s, x = 0, y = 0) { g.drawImage(s, x - s.width / 2, y - s.height / 2); }
+function circ(x, y, r, fill) { g.beginPath(); g.arc(x, y, r, 0, TAU); g.fillStyle = fill; g.fill(); }
+function rrect(x, y, w, h, r) { g.beginPath(); g.roundRect(x, y, w, h, r); }
+
+// ======== 文字 ========
+function txt(s, x, y, size, color, o = {}) {
+  g.save(); g.font = font(o.w || 900, size); g.textAlign = o.align || 'left'; g.textBaseline = o.base || 'alphabetic';
+  if (o.ls != null && 'letterSpacing' in g) g.letterSpacing = o.ls + 'px';
+  let sc = o.scale || 1;
+  if (o.max) { const m = g.measureText(s).width; if (m > o.max) sc *= o.max / m; }
+  g.translate(x, y); if (o.rot) g.rotate(o.rot); g.scale(sc, sc);
+  if (o.alpha != null) g.globalAlpha *= o.alpha;
+  if (o.stroke) { g.lineWidth = o.lw || 6; g.strokeStyle = o.stroke; g.lineJoin = 'round'; g.strokeText(s, 0, 0); }
+  if (color) { g.fillStyle = color; g.fillText(s, 0, 0); }
+  g.restore();
+}
+// 砸进来：放大→原大
+function slam(s, x, y, size, color, a, o = {}) {
+  if (a <= 0) return; const p = prog(a, 0, o.dur || .3);
+  txt(s, x, y, size, color, {...o, scale: lerp(o.from || 1.6, 1, eExpo(p)), alpha: clamp(p * 5)});
+}
+// 逐字从遮罩下方顶上来
+function rise(s, x, y, size, color, a, o = {}) {
+  if (a <= 0) return;
+  g.save(); g.font = font(o.w || 900, size); g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+  const total = g.measureText(s).width; let sc = 1; if (o.max && total > o.max) sc = o.max / total;
+  const x0 = o.align === 'center' ? x - total * sc / 2 : o.align === 'right' ? x - total * sc : x;
+  g.translate(x0, y); g.scale(sc, sc);
+  g.beginPath(); g.rect(-30, -size * 1.1, total + 60, size * 1.4); g.clip();
+  g.fillStyle = color; let cx = 0, i = 0; const st = o.stagger ?? .045, d = o.dur ?? .36;
+  for (const ch of s) {
+    const p = eExpo(prog(a, i * st, d)), wch = g.measureText(ch).width;
+    if (p > 0) g.fillText(ch, cx, (1 - p) * size * 1.3); cx += wch; i++;
+  }
+  g.restore();
+}
+// 竖排，逐字弹出
+function vtxt(s, x, y, size, color, a, o = {}) {
+  let i = 0;
+  for (const ch of s) {
+    const p = prog(a, i * .07, .22);
+    if (p > 0) txt(ch, x, y + i * size * 1.12, size, color, {w: o.w || 900, align: 'center', scale: lerp(1.7, 1, eExpo(p)), alpha: clamp(p * 4)});
+    i++;
+  }
+}
+// 贴纸：锯齿圆 + 两行字，带一点晃
+function sticker(x, y, r, bg, fg, lines, a, o = {}) {
+  if (a <= 0) return; const sc = eBack(prog(a, 0, .34));
+  g.save(); g.translate(x, y); g.rotate((o.rot ?? -.2) + Math.sin(a * 2.4) * .045); g.scale(sc, sc);
+  g.beginPath(); const n = 18;
+  for (let i = 0; i < n * 2; i++) { const rr = i % 2 ? r : r * .9, an = i * Math.PI / n; g.lineTo(Math.cos(an) * rr, Math.sin(an) * rr); }
+  g.closePath(); g.fillStyle = 'rgba(0,0,0,.2)'; g.save(); g.translate(8, 11); g.fill(); g.restore();
+  g.fillStyle = bg; g.fill();
+  g.beginPath(); g.arc(0, 0, r * .78, 0, TAU); g.setLineDash([7, 9]); g.lineWidth = 3; g.strokeStyle = fg; g.globalAlpha = .55; g.stroke(); g.globalAlpha = 1; g.setLineDash([]);
+  const hTot = lines.reduce((s, l) => s + l[1] * 1.12, 0); let yy = -hTot / 2;
+  for (const [s, size] of lines) { yy += size * 1.12; txt(s, 0, yy - size * .22, size, fg, {align: 'center', max: r * 1.4}); }
+  g.restore();
+}
+// 胶囊标签
+function pill(s, x, y, size, bg, fg, a) {
+  if (a <= 0) return; const p = eExpo(prog(a, 0, .35));
+  g.save(); g.font = font(800, size); const w = g.measureText(s).width + size * 1.1, h = size * 1.7;
+  g.beginPath(); g.rect(x - 4, y - 4, (w + 8) * p, h + 8); g.clip();
+  rrect(x, y, w, h, h / 2); g.fillStyle = bg; g.fill();
+  g.restore(); g.save(); g.beginPath(); g.rect(x - 4, y - 4, (w + 8) * p, h + 8); g.clip();
+  txt(s, x + size * .55, y + h / 2 + size * .04, size, fg, {w: 800, base: 'middle'}); g.restore();
+}
+// 跑马灯色带
+function band(yc, h, rot, bg, fg, s, a, speed = 170) {
+  g.save(); g.translate(W / 2, yc); g.rotate(rot); g.fillStyle = bg; g.fillRect(-W, -h / 2, 2 * W, h);
+  g.font = font(800, h * .5); g.fillStyle = fg; g.textBaseline = 'middle'; g.textAlign = 'left';
+  const w = g.measureText(s).width;
+  for (let x = -((a * speed) % w) - W; x < W; x += w) g.fillText(s, x, h * .04);
+  g.restore();
+}
+// 漫画式冲击线
+function burst(x, y, r0, r1, n, color, p, lw = 8, rot = 0) {
+  if (p <= 0 || p >= 1) return;
+  g.save(); g.strokeStyle = color; g.lineWidth = lw; g.lineCap = 'round'; g.globalAlpha *= 1 - p * p;
+  const a0 = lerp(r0, r1, eOut(p)), a1 = lerp(r0, r1, eOut(clamp(p + .3)));
+  for (let i = 0; i < n; i++) { const an = rot + i * TAU / n; g.beginPath(); g.moveTo(x + Math.cos(an) * a0, y + Math.sin(an) * a0); g.lineTo(x + Math.cos(an) * a1, y + Math.sin(an) * a1); g.stroke(); }
+  g.restore();
+}
+
+// ======== 食物的零件 ========
+function steam(cx, cy, a, n, spread, alpha = .5, h = 300) {
+  g.save(); g.lineCap = 'round'; g.strokeStyle = '#fff'; const base = g.globalAlpha;
+  for (let i = 0; i < n; i++) {
+    const ph = frac(a * .34 + i / n + rnd(i, 7) * .3), al = Math.sin(Math.PI * ph) * alpha; if (al <= .01) continue;
+    const x = cx + (i - (n - 1) / 2) * spread + Math.sin(a * 1.1 + i * 2) * 10, y = cy - ph * h, sw = 24 * (i % 2 ? 1 : -1);
+    g.globalAlpha = base * al; g.lineWidth = 13 + ph * 11; g.beginPath();
+    g.moveTo(x, y); g.bezierCurveTo(x + sw, y - 38, x - sw, y - 80, x + sw * .4, y - 122); g.stroke();
+  }
+  g.restore();
+}
+function grainAt(x, y, l, rot, shade) {
+  g.save(); g.translate(x, y); g.rotate(rot);
+  g.beginPath(); g.ellipse(0, 0, l / 2, l * .25, 0, 0, TAU); g.fillStyle = shade; g.fill();
+  g.lineWidth = Math.max(1.2, l * .07); g.strokeStyle = 'rgba(126,108,72,.46)'; g.stroke();
+  g.beginPath(); g.ellipse(-l * .08, -l * .075, l * .22, l * .05, 0, 0, TAU); g.fillStyle = 'rgba(255,255,255,.95)'; g.fill();
+  g.restore();
+}
+const RICE_TONES = ['#FFFFFF', '#FCFAF3', '#F5F0E3', '#FFFFFF'];
+function riceSprite(R) {
+  return sprite('rice' + R, 2 * R + 60, 2 * R + 60, () => {
+    const gr = g.createRadialGradient(-R * .25, -R * .3, R * .1, 0, 0, R);
+    gr.addColorStop(0, '#FDFAF1'); gr.addColorStop(.65, '#F1EAD7'); gr.addColorStop(1, '#D8CEB2');
+    circ(0, 0, R * .96, gr);
+    const n = Math.round(R * R / 70), l = R * .105;
+    for (let i = 0; i < n; i++) {
+      const rad = R * Math.sqrt(rnd(i, 1)), an = rnd(i, 2) * TAU;
+      grainAt(Math.cos(an) * rad, Math.sin(an) * rad, l * (.85 + rnd(i, 3) * .3), rnd(i, 4) * TAU, RICE_TONES[i % 4]);
+    }
+    for (let i = 0; i < 40; i++) { const rad = R * .8 * Math.sqrt(rnd(i, 5)), an = rnd(i, 6) * TAU; circ(Math.cos(an) * rad - R * .1, Math.sin(an) * rad - R * .1, 2.2, 'rgba(255,255,255,.9)'); }
+  });
+}
+function sticks(tx, ty, ang, gap, col, tip, len = 1000) {
+  for (const pass of [0, 1]) for (const s of [-1, 1]) {
+    g.save(); g.translate(tx + (pass ? 0 : 16), ty + (pass ? 0 : 26)); g.rotate(ang + s * gap); g.translate(0, s * 5);
+    g.beginPath(); g.moveTo(0, -4.5); g.lineTo(len, -12); g.lineTo(len, 12); g.lineTo(0, 4.5); g.closePath();
+    g.fillStyle = pass ? col : 'rgba(0,0,0,.2)'; g.fill();
+    if (pass) { g.beginPath(); g.moveTo(0, -4.5); g.lineTo(150, -5.6); g.lineTo(150, 5.6); g.lineTo(0, 4.5); g.closePath(); g.fillStyle = tip; g.fill();
+      g.beginPath(); g.moveTo(8, -1.5); g.lineTo(len, -6); g.lineWidth = 2.5; g.strokeStyle = 'rgba(255,255,255,.35)'; g.stroke(); }
+    g.restore();
+  }
+}
+
+// ---- 01 白饭 ----
+function dishRice(a, still) {
+  const R = 370;
+  circ(22, 32, R, 'rgba(0,0,0,.24)');
+  circ(0, 0, R, '#FBF8F0'); circ(0, 0, R * .955, '#2A4596'); circ(0, 0, R * .865, '#FBF8F0');
+  g.save(); g.strokeStyle = '#FBF8F0'; g.lineWidth = 7; g.lineCap = 'round';
+  for (let i = 0; i < 40; i++) { const an = i * TAU / 40; g.beginPath(); g.arc(Math.cos(an) * R * .91, Math.sin(an) * R * .91, 11, an + .4, an + 2.7); g.stroke(); }
+  g.restore();
+  circ(0, 0, R * .82, '#CFC8B4'); circ(6, 10, R * .8, '#E6E0CF');
+  const lift = still ? 0 : eIO(prog(a, 1.5, .7)), px = lerp(70, 170, lift), py = lerp(30, -110, lift) + (still ? 0 : Math.sin(a * 2.2) * 8 * lift);
+  stamp(riceSprite(280));
+  if (!still && a > 1.45) { g.save(); g.globalAlpha = .13 * clamp((a - 1.45) * 4); g.beginPath(); g.ellipse(72, 36, 62, 46, .3, 0, TAU); g.fillStyle = '#5A4A22'; g.fill(); g.restore(); }
+  steam(-20, -40, a + 3, 4, 110, .5, 330);
+  if (still) return;
+  const inn = eExpo(prog(a, 1.0, .45)); if (inn <= 0) return;
+  const tx = lerp(700, px, inn), ty = lerp(620, py, inn);
+  if (lift > 0) {
+    g.save(); g.globalAlpha = .26 * lift; g.beginPath(); g.ellipse(px + 34 * lift, py + 84 * lift, 96, 68, .3, 0, TAU); g.fillStyle = '#000'; g.fill(); g.restore();
+    g.save(); g.translate(px, py); g.scale(1 + lift * .75, 1 + lift * .75);
+    g.beginPath(); g.ellipse(0, 6, 58, 42, .3, 0, TAU); g.fillStyle = '#EFE8D4'; g.fill(); g.lineWidth = 3; g.strokeStyle = 'rgba(120,102,66,.7)'; g.stroke();
+    for (let i = 0; i < 44; i++) { const rad = 56 * Math.sqrt(rnd(i, 21)), an = rnd(i, 22) * TAU; grainAt(Math.cos(an) * rad * 1.1, 6 + Math.sin(an) * rad * .8, 29, rnd(i, 23) * TAU, RICE_TONES[i % 4]); }
+    g.restore();
+  }
+  sticks(tx - 30, ty - 6, .78, .034 - .012 * lift, '#C8352A', '#3A1410');
+}
+
+// ---- 02 酱汁炸猪排饭 ----
+function katsuSprite(seed, rw, rh) {
+  return sprite('katsu' + seed, 2 * rw + 60, 2 * rh + 60, () => {
+    const path = k => { g.beginPath(); for (let i = 0; i <= 60; i++) { const th = i / 60 * TAU, r = k * (1 + .07 * Math.sin(3 * th + seed * 1.7) + .045 * Math.sin(5 * th + seed * 2.9) + .02 * Math.sin(17 * th + seed)); g.lineTo(rw * r * Math.cos(th), rh * r * Math.sin(th)); } g.closePath(); };
+    path(1.04); g.fillStyle = '#6A2E0C'; g.fill();
+    path(1); const gr = g.createRadialGradient(-rw * .2, -rh * .3, 5, 0, 0, rw); gr.addColorStop(0, '#CE7B2B'); gr.addColorStop(1, '#8C4514'); g.fillStyle = gr; g.fill();
+    g.save(); path(1); g.clip();
+    const tones = ['#E6A654', '#D88E3A', '#F2C27A', '#9B5318', '#B9691F'];
+    for (let i = 0; i < 260; i++) { const x = (rnd(i, seed) * 2 - 1) * rw, y = (rnd(i, seed + 9) * 2 - 1) * rh; g.beginPath(); g.ellipse(x, y, 2 + rnd(i, seed + 3) * 4.5, 1.6 + rnd(i, seed + 4) * 3, rnd(i, 5) * 3, 0, TAU); g.fillStyle = tones[i % 5]; g.fill(); }
+    // 甜咸酱汁的釉色：一侧更深
+    g.fillStyle = 'rgba(74,22,3,.22)'; g.fillRect(-rw * 2, -rh * 2, rw * 4, rh * 4);
+    for (let i = 0; i < 4; i++) { g.beginPath(); g.ellipse((rnd(i, seed + 30) - .3) * rw, (rnd(i, seed + 31) - .2) * rh, rw * (.3 + rnd(i, seed + 32) * .3), rh * (.22 + rnd(i, seed + 33) * .25), rnd(i, seed + 34) * 3, 0, TAU); g.fillStyle = 'rgba(66,18,2,.3)'; g.fill(); }
+    g.restore();
+    g.lineCap = 'round'; g.strokeStyle = 'rgba(255,244,220,.62)';
+    g.lineWidth = 9; g.beginPath(); g.ellipse(0, 0, rw * .68, rh * .62, 0, Math.PI * 1.08, Math.PI * 1.42); g.stroke();
+    g.lineWidth = 6; g.beginPath(); g.ellipse(0, 0, rw * .5, rh * .42, 0, Math.PI * 1.15, Math.PI * 1.36); g.stroke();
+    circ(-rw * .02, -rh * .6, 5, 'rgba(255,244,220,.7)');
+  });
+}
+const KATSU = [{x: -128, y: -98, r: -.5}, {x: 128, y: -112, r: .45}, {x: 150, y: 100, r: 1.9}, {x: -112, y: 124, r: 2.7}, {x: 8, y: 2, r: .12}];
+function dishKatsu(a, still) {
+  const R = 390;
+  circ(24, 34, R, 'rgba(0,0,0,.26)');
+  circ(0, 0, R, '#C9302A'); circ(0, 0, R * .955, '#141C3A');
+  g.save(); g.rotate(still ? .3 : a * .1);
+  g.strokeStyle = '#E8B23A'; g.lineWidth = 5;
+  for (let i = 0; i < 12; i++) { const an = i * TAU / 12; g.beginPath(); g.arc(0, 0, R * .9, an, an + .3); g.stroke(); }
+  circ(0, 0, R * .84, '#0C1228');
+  stamp(riceSprite(300));
+  // 酱汁渗进饭里
+  for (let i = 0; i < 9; i++) { const k = KATSU[i % 5]; g.beginPath(); g.ellipse(k.x * 1.25 + (rnd(i, 41) - .5) * 120, k.y * 1.25 + (rnd(i, 42) - .5) * 120, 34 + rnd(i, 43) * 30, 22 + rnd(i, 44) * 20, rnd(i, 45) * 3, 0, TAU); g.fillStyle = 'rgba(120,58,14,' + (.28 * (still ? 1 : prog(a, .5 + (i % 5) * .2, .3))) + ')'; g.fill(); }
+  KATSU.forEach((k, i) => {
+    const ai = still ? 9 : a - (.38 + .2 * i); if (ai <= 0) return;
+    const p = prog(ai, 0, .26), fall = p * p, land = Math.max(0, ai - .26);
+    const sc = lerp(2.1, 1, fall) * (1 - .07 * Math.exp(-land * 12) * Math.cos(land * 34));
+    g.save(); g.globalAlpha = clamp(ai * 9);
+    g.translate(k.x, k.y);
+    g.save(); g.translate(lerp(60, 9, fall), lerp(90, 13, fall)); g.rotate(k.r); g.scale(sc, sc); g.beginPath(); g.ellipse(0, 0, 128, 100, 0, 0, TAU); g.fillStyle = 'rgba(40,14,0,.3)'; g.fill(); g.restore();
+    g.rotate(k.r + (1 - fall) * .5); g.scale(sc, sc); stamp(katsuSprite(i + 1, 125, 98));
+    // 釉面的反光来回扫
+    g.rotate(-k.r); g.globalAlpha *= .25 + .25 * Math.sin(a * 3.2 + i * 1.7);
+    g.lineCap = 'round'; g.strokeStyle = '#FFF6E0'; g.lineWidth = 8; g.beginPath(); g.arc(8, 10, 70, Math.PI * 1.1, Math.PI * 1.45); g.stroke();
+    g.restore();
+    if (!still) burst(k.x, k.y, 120, 190, 10, '#FFF6E0', prog(ai, .26, .3), 7, i);
+  });
+  g.restore();
+  steam(0, -60, a + 1, 4, 120, still ? .4 : .5 * prog(a, 1.5, .6), 340);
+}
+
+// ---- 03 片木荞麦 ----
+function sobaBundle(x, y, seed, sc = 1) {
+  g.save(); g.translate(x, y); g.rotate((rnd(seed, 1) - .5) * .5 + (seed % 2 ? .25 : -.2)); g.scale(sc, sc); g.lineCap = 'round'; g.lineJoin = 'round';
+  // 一束面对折成圈：几根并排的面条沿同一条"α"形走线
+  const A = 46 + rnd(seed, 2) * 6, B = 64, TH = 2.45, N = 40, K = 8;
+  const pt = (f, k) => {
+    const th = lerp(-TH, TH, f), x0 = A * (Math.sin(th) - .47 * th), y0 = -B * Math.cos(th) - 8;
+    const dx = A * (Math.cos(th) - .47), dy = B * Math.sin(th), n = Math.hypot(dx, dy) || 1, d = (k - (K - 1) / 2) * 5.6 + Math.sin(f * 9 + k + seed) * 1.2;
+    return [x0 - dy / n * d, y0 + dx / n * d];
+  };
+  for (const [f0, f1] of [[0, .56], [.5, 1]]) for (const pass of [0, 1]) for (let k = 0; k < K; k++) {
+    g.beginPath(); for (let i = 0; i <= N; i++) { const [px, py] = pt(lerp(f0, f1, i / N), k); g.lineTo(px, py); }
+    g.lineWidth = pass ? 4.6 : 8; g.strokeStyle = pass ? (k % 2 ? '#B9B08A' : '#9C946C') : '#57513A'; g.stroke();
+  }
+  g.restore();
+}
+function sobaHang(x, y, len, a) {
+  g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+  for (const pass of [0, 1]) for (let k = 0; k < 11; k++) {
+    const ox = (k - 5) * 7, L = len * (.82 + rnd(k, 51) * .18);
+    g.beginPath(); g.moveTo(x + ox * .35, y);
+    for (let j = 1; j <= 7; j++) { const f = j / 7; g.lineTo(x + ox * (.35 + f * .75) + Math.sin(a * 5.5 + k * .9 + j * .8) * 7 * f, y + L * f); }
+    g.lineWidth = pass ? 6 : 10; g.strokeStyle = pass ? (k % 2 ? '#B4AC84' : '#9A936B') : '#55503A'; g.stroke();
+  }
+  g.restore();
+}
+function sobaTray() {
+  return sprite('tray', 860, 680, () => {
+    const w = 780, h = 600;
+    rrect(-w / 2, -h / 2, w, h, 14); g.fillStyle = '#A87A45'; g.fill();
+    rrect(-w / 2 + 8, -h / 2 + 8, w - 16, h - 16, 10); g.fillStyle = '#C59658'; g.fill();
+    g.fillStyle = '#8E6535'; g.fillRect(-w / 2 + 34, -h / 2 + 34, w - 68, h - 68);
+    g.fillStyle = '#E2C08A'; g.fillRect(-w / 2 + 40, -h / 2 + 44, w - 80, h - 84);
+    g.save(); g.beginPath(); g.rect(-w / 2 + 40, -h / 2 + 44, w - 80, h - 84); g.clip();
+    for (let i = 0; i < 26; i++) { const y = -h / 2 + 50 + i * 20 + rnd(i, 61) * 10; g.beginPath(); g.moveTo(-w / 2, y); g.bezierCurveTo(-w / 6, y + (rnd(i, 62) - .5) * 26, w / 6, y + (rnd(i, 63) - .5) * 26, w / 2, y + (rnd(i, 64) - .5) * 12); g.lineWidth = 2 + rnd(i, 65) * 2; g.strokeStyle = 'rgba(160,112,56,.42)'; g.stroke(); }
+    g.restore();
+    g.strokeStyle = 'rgba(120,80,36,.55)'; g.lineWidth = 2;
+    for (let i = 0; i < 9; i++) { g.beginPath(); g.moveTo(-w / 2 + 12, -h / 2 + 20 + i * 70); g.lineTo(-w / 2 + 30, -h / 2 + 30 + i * 70); g.moveTo(w / 2 - 12, -h / 2 + 20 + i * 70); g.lineTo(w / 2 - 30, -h / 2 + 30 + i * 70); g.stroke(); }
+  });
+}
+const SOBA_PICK = 13;                         // 被夹走的那一束：第 3 行第 4 列
+const sobaCell = i => ({x: -280 + (i % 5) * 140, y: -176 + Math.floor(i / 5) * 172});
+function dishSoba(a, still) {
+  g.save(); g.fillStyle = 'rgba(0,0,0,.2)'; rrect(-390 + 22, -300 + 30, 780, 600, 14); g.fill(); g.restore();
+  stamp(sobaTray());
+  for (let i = 0; i < 15; i++) {
+    const c = sobaCell(i), ai = still ? 9 : a - (.12 + i * .035); if (ai <= 0) continue;
+    if (i === SOBA_PICK && (still || a > 1.5)) continue;
+    const squash = i === SOBA_PICK ? 1 - .12 * prog(a, 1.3, .2) : 1;
+    g.save(); g.fillStyle = 'rgba(90,60,20,.22)'; g.beginPath(); g.ellipse(c.x + 7, c.y + 10, 62, 82, 0, 0, TAU); g.fill(); g.restore();
+    sobaBundle(c.x, c.y, i + 3, eBack(prog(ai, 0, .3)) * squash);
+  }
+}
+function sobaCup(a) {
+  circ(12, 18, 120, 'rgba(0,0,0,.22)');
+  circ(0, 0, 120, '#22387A'); circ(0, 0, 108, '#FBF8F0'); circ(0, 0, 98, '#2B180C'); circ(3, 5, 94, '#3B2212');
+  g.save(); g.strokeStyle = 'rgba(255,240,210,.35)'; g.lineWidth = 5; g.lineCap = 'round'; g.beginPath(); g.arc(0, 0, 76, Math.PI * 1.1, Math.PI * 1.5); g.stroke();
+  g.strokeStyle = '#8BC255'; g.lineWidth = 5;
+  for (let i = 0; i < 8; i++) { const an = rnd(i, 71) * TAU + Math.sin(a * .8 + i) * .12, rad = 30 + rnd(i, 72) * 48; g.beginPath(); g.arc(Math.cos(an) * rad, Math.sin(an) * rad, 8, 0, TAU); g.stroke(); }
+  g.restore();
+}
+
+// ---- 04 笹团子 ----
+function zaru() {
+  const R = 395;
+  return sprite('zaru', 2 * R + 80, 2 * R + 80, () => {
+    circ(0, 0, R, '#9A7436'); circ(0, 0, R - 8, '#D9B872');
+    g.save(); g.beginPath(); g.arc(0, 0, R - 30, 0, TAU); g.clip();
+    g.fillStyle = '#E4C683'; g.fillRect(-R, -R, 2 * R, 2 * R);
+    const s = 30;
+    for (let i = -14; i < 14; i++) for (let j = -14; j < 14; j++) {
+      const x = i * s, y = j * s, hz = (i + j) & 1;
+      g.fillStyle = hz ? '#EDD49A' : '#CFA85C';
+      if (hz) g.fillRect(x - 3, y + 4, s + 6, s - 8); else g.fillRect(x + 4, y - 3, s - 8, s + 6);
+      g.fillStyle = 'rgba(120,84,30,.22)'; if (hz) g.fillRect(x - 3, y + s - 7, s + 6, 3); else g.fillRect(x + s - 7, y - 3, 3, s + 6);
+    }
+    g.restore();
+    g.strokeStyle = '#B58B45'; g.lineWidth = 24; g.beginPath(); g.arc(0, 0, R - 20, 0, TAU); g.stroke();
+    g.strokeStyle = 'rgba(110,76,26,.55)'; g.lineWidth = 3;
+    for (let i = 0; i < 72; i++) { const an = i * TAU / 72; g.beginPath(); g.moveTo(Math.cos(an) * (R - 31), Math.sin(an) * (R - 31)); g.lineTo(Math.cos(an + .04) * (R - 9), Math.sin(an + .04) * (R - 9)); g.stroke(); }
+  });
+}
+function leafPath(L, Wd) { g.beginPath(); g.moveTo(0, 0); g.bezierCurveTo(L * .28, -Wd * .55, L * .72, -Wd * .46, L, 0); g.bezierCurveTo(L * .72, Wd * .46, L * .28, Wd * .55, 0, 0); g.closePath(); }
+function leaf(L, Wd, c1, c2) {
+  leafPath(L, Wd); const gr = g.createLinearGradient(0, -Wd / 2, 0, Wd / 2); gr.addColorStop(0, c1); gr.addColorStop(1, c2);
+  g.fillStyle = gr; g.fill(); g.lineWidth = 4; g.strokeStyle = '#2C5A1E'; g.stroke();
+  g.save(); leafPath(L, Wd); g.clip(); g.strokeStyle = 'rgba(190,225,140,.6)'; g.lineWidth = 2.5;
+  for (let k = -3; k <= 3; k++) { g.beginPath(); g.moveTo(0, 0); g.bezierCurveTo(L * .3, k * Wd * .15, L * .7, k * Wd * .15, L, 0); g.stroke(); }
+  g.restore();
+}
+function wrapSprite(seed, L, Wd) {
+  return sprite('wrap' + seed, L + 220, Wd + 120, () => {
+    // 两头露出来的叶尖
+    for (const s of [-1, 1]) for (const an of [-.42, 0, .42]) { g.save(); g.translate(s * L * .44, 0); g.rotate((s < 0 ? Math.PI : 0) + an); leaf(86, 40, '#6C9E40', '#4C7C2E'); g.restore(); }
+    const body = () => { g.beginPath(); g.moveTo(-L / 2, 0); g.bezierCurveTo(-L * .3, -Wd * .72, L * .3, -Wd * .72, L / 2, 0); g.bezierCurveTo(L * .3, Wd * .72, -L * .3, Wd * .72, -L / 2, 0); g.closePath(); };
+    body(); const gr = g.createLinearGradient(0, -Wd / 2, 0, Wd / 2); gr.addColorStop(0, '#7DB04C'); gr.addColorStop(.55, '#5A8E36'); gr.addColorStop(1, '#3F7028'); g.fillStyle = gr; g.fill();
+    g.save(); body(); g.clip();
+    g.strokeStyle = 'rgba(200,232,150,.55)'; g.lineWidth = 2.5;
+    for (let k = -4; k <= 4; k++) { g.beginPath(); g.moveTo(-L / 2, 0); g.bezierCurveTo(-L * .25, k * Wd * .16, L * .25, k * Wd * .16, L / 2, 0); g.stroke(); }
+    g.beginPath(); g.moveTo(-L * .5, -Wd * .1); g.bezierCurveTo(-L * .1, Wd * .28, L * .2, Wd * .2, L * .5, -Wd * .05); g.lineTo(L * .5, Wd); g.lineTo(-L * .5, Wd); g.closePath(); g.fillStyle = 'rgba(28,70,22,.26)'; g.fill();
+    g.lineCap = 'round'; g.strokeStyle = 'rgba(255,255,255,.3)'; g.lineWidth = 8; g.beginPath(); g.moveTo(-L * .26, -Wd * .3); g.quadraticCurveTo(0, -Wd * .44, L * .2, -Wd * .33); g.stroke();
+    g.restore();
+    body(); g.lineWidth = 4; g.strokeStyle = '#2C5A1E'; g.stroke();
+    // 草绳：两头扎紧，中间斜着绕
+    g.lineCap = 'round';
+    const tie = (x0, y0, x1, y1) => { g.strokeStyle = '#9C7F3E'; g.lineWidth = 9; g.beginPath(); g.moveTo(x0 + 2, y0 + 3); g.lineTo(x1 + 2, y1 + 3); g.stroke(); g.strokeStyle = '#EBD69C'; g.lineWidth = 6.5; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); };
+    for (const s of [-1, 1]) { tie(s * L * .4, -Wd * .27, s * L * .4, Wd * .27); tie(s * L * .425, -Wd * .2, s * L * .425, Wd * .2); }
+    for (let k = -2; k <= 2; k++) tie(k * L * .14 - L * .07, -Wd * .5, k * L * .14 + L * .07, Wd * .5);
+    g.strokeStyle = '#EBD69C'; g.lineWidth = 5; g.beginPath(); g.moveTo(L * .41, -Wd * .26); g.quadraticCurveTo(L * .5, -Wd * .6, L * .56, -Wd * .42); g.stroke();
+  });
+}
+function dangoBody(L, Wd, bite, a) {
+  const rx = L * .34, ry = Wd * .44, cut = rx * .3;
+  g.save();
+  if (bite > 0) { g.beginPath(); g.rect(-rx - 20, -ry - 20, rx + 20 + cut, 2 * ry + 40); g.clip(); }
+  g.beginPath(); g.ellipse(6, 9, rx, ry, 0, 0, TAU); g.fillStyle = 'rgba(20,40,10,.3)'; g.fill();
+  g.beginPath(); g.ellipse(0, 0, rx, ry, 0, 0, TAU); const gr = g.createRadialGradient(-rx * .3, -ry * .4, 4, 0, 0, rx); gr.addColorStop(0, '#6E9440'); gr.addColorStop(1, '#3B5C22'); g.fillStyle = gr; g.fill();
+  g.lineWidth = 3.5; g.strokeStyle = '#263F14'; g.stroke();
+  for (let i = 0; i < 36; i++) { const an = rnd(i, 81) * TAU, rad = Math.sqrt(rnd(i, 82)) * .9; circ(Math.cos(an) * rx * rad, Math.sin(an) * ry * rad, 1.6 + rnd(i, 83) * 2, 'rgba(34,58,18,.6)'); }
+  g.lineCap = 'round'; g.strokeStyle = 'rgba(255,255,255,' + (.4 + .12 * Math.sin(a * 3)) + ')'; g.lineWidth = 8; g.beginPath(); g.ellipse(0, 0, rx * .72, ry * .62, 0, Math.PI * 1.1, Math.PI * 1.45); g.stroke();
+  g.restore();
+  if (bite > 0) {
+    const s = eBack(bite);
+    g.save(); g.translate(cut, 0); g.scale(s, 1);
+    g.beginPath(); g.ellipse(0, 0, 30, ry * .97, 0, 0, TAU); g.fillStyle = '#8FB158'; g.fill(); g.lineWidth = 3.5; g.strokeStyle = '#263F14'; g.stroke();
+    g.beginPath(); g.ellipse(1, 0, 20, ry * .66, 0, 0, TAU); g.fillStyle = '#4A1A22'; g.fill();
+    for (let i = 0; i < 12; i++) circ((rnd(i, 91) - .5) * 24, (rnd(i, 92) - .5) * ry * 1.05, 3.4, i % 2 ? '#6E303A' : '#32101A');
+    g.strokeStyle = 'rgba(255,220,220,.5)'; g.lineWidth = 3; g.beginPath(); g.ellipse(0, 0, 13, ry * .5, 0, Math.PI * 1.05, Math.PI * 1.4); g.stroke();
+    g.restore();
+  }
+}
+function dishDango(a, still) {
+  circ(24, 34, 395, 'rgba(0,0,0,.24)'); stamp(zaru());
+  const pop = i => still ? 1 : eBack(prog(a, .15 + i * .12, .34));
+  const put = (x, y, r, i, f) => { const s = pop(i); if (s <= 0) return; g.save(); g.translate(x, y); g.rotate(r + (still ? 0 : Math.sin(a * 1.7 + i * 2) * .025)); g.scale(s, s); f(); g.restore(); };
+  const shadow = (L, Wd) => { g.beginPath(); g.ellipse(12, 18, L * .52, Wd * .6, 0, 0, TAU); g.fillStyle = 'rgba(70,45,10,.28)'; g.fill(); };
+  put(-70, -212, -.22, 0, () => { shadow(300, 118); stamp(wrapSprite(1, 300, 118)); });
+  put(-40, 218, .1, 2, () => { shadow(300, 118); stamp(wrapSprite(2, 300, 118)); });
+  put(10, 6, .1, 1, () => {
+    const L = 340, Wd = 132, u = still ? 1 : eOut(prog(a, 1.05, .5)), bite = still ? 1 : prog(a, 2.0, .28);
+    if (u <= 0) { shadow(L, Wd); stamp(wrapSprite(3, L, Wd)); return; }
+    g.save(); g.translate(-L * .5, 0);
+    g.save(); g.rotate(-.06); leaf(L * 1.12, Wd * 1.25, '#5F9238', '#487A2C'); g.restore();
+    g.save(); g.rotate(-u * .62); leaf(L * 1.08, Wd * 1.05, '#7DB04C', '#5A8E36'); g.restore();
+    g.save(); g.rotate(u * .6); leaf(L * 1.08, Wd * 1.05, '#6FA244', '#4C7C2E'); g.restore();
+    g.restore();
+    g.save(); g.translate(-10, 0); dangoBody(L, Wd, bite, a); g.restore();
+    // 弹开的草绳
+    if (u < 1) { g.save(); g.globalAlpha = 1 - u; g.strokeStyle = '#EBD69C'; g.lineWidth = 6; g.lineCap = 'round'; g.translate(u * 160, -u * 190); g.rotate(u * 2); g.beginPath(); g.moveTo(-70, 0); g.bezierCurveTo(-30, -50, 30, 50, 70, 0); g.stroke(); g.restore(); }
+    if (!still) burst(L * .1, 0, 90, 170, 9, '#FFF6E0', prog(a, 2.0, .35), 7, .3);
+  });
+  steam(0, -40, a + 2, 3, 130, still ? .3 : .42 * prog(a, 1.3, .5), 300);
+}
+
+// ---- 05 日本酒 ----
+function masuSprite() {
+  const S = 500, h = S / 2, t = 40;
+  return sprite('masu', S + 40, S + 40, () => {
+    g.fillStyle = '#B98D4C'; g.fillRect(-h, -h, S, S); g.fillStyle = '#E3C080'; g.fillRect(-h + 4, -h + 4, S - 8, S - 8);
+    g.save(); g.beginPath(); g.rect(-h + 4, -h + 4, S - 8, S - 8); g.clip();
+    for (let i = 0; i < 30; i++) { const y = -h + i * 18 + rnd(i, 101) * 8; g.beginPath(); g.moveTo(-h, y); g.bezierCurveTo(-h / 3, y + (rnd(i, 102) - .5) * 16, h / 3, y + (rnd(i, 103) - .5) * 16, h, y); g.lineWidth = 1.5 + rnd(i, 104) * 2; g.strokeStyle = 'rgba(170,120,60,.4)'; g.stroke(); }
+    g.restore();
+    g.fillStyle = '#8F6935'; g.fillRect(-h + t, -h + t, S - 2 * t, S - 2 * t);
+    g.fillStyle = '#C59B58'; g.fillRect(-h + t + 10, -h + t + 14, S - 2 * t - 10, S - 2 * t - 14);
+    g.strokeStyle = 'rgba(120,82,36,.7)'; g.lineWidth = 2.5;
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) for (let k = 1; k <= 3; k++) { g.beginPath(); g.moveTo(sx * (h - 4), sy * (h - k * 10)); g.lineTo(sx * (h - t), sy * (h - k * 10)); g.stroke(); }
+  });
+}
+function tokkuri() {
+  return sprite('tokkuri', 520, 300, () => {
+    g.translate(-200, 0);
+    const shape = () => { g.beginPath(); g.moveTo(0, -30); g.bezierCurveTo(20, -20, 60, -22, 90, -30); g.bezierCurveTo(150, -120, 400, -130, 410, 0); g.bezierCurveTo(400, 130, 150, 120, 90, 30); g.bezierCurveTo(60, 22, 20, 20, 0, 30); g.closePath(); };
+    g.save(); g.translate(14, 22); shape(); g.fillStyle = 'rgba(0,0,0,.25)'; g.fill(); g.restore();
+    shape(); g.fillStyle = '#FBF8F0'; g.fill();
+    g.save(); shape(); g.clip();
+    g.fillStyle = '#DDD8C8'; g.beginPath(); g.ellipse(250, 120, 240, 80, 0, 0, TAU); g.fill();
+    g.strokeStyle = '#2A4596'; g.lineWidth = 12; g.beginPath(); g.ellipse(200, 0, 26, 150, 0, 0, TAU); g.stroke();
+    g.lineWidth = 5; g.beginPath(); g.ellipse(232, 0, 26, 150, 0, 0, TAU); g.stroke(); g.beginPath(); g.ellipse(100, 0, 8, 60, 0, 0, TAU); g.stroke();
+    g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = 10; g.lineCap = 'round'; g.beginPath(); g.moveTo(140, -62); g.quadraticCurveTo(260, -100, 350, -62); g.stroke();
+    g.restore();
+    g.beginPath(); g.ellipse(2, 0, 9, 30, 0, 0, TAU); g.fillStyle = '#C9C3B0'; g.fill();
+  });
+}
+function dishSake(a, still) {
+  g.save(); g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(-250 + 22, -250 + 32, 500, 500); g.restore();
+  stamp(masuSprite());
+  const fill = still ? 1 : eIO(prog(a, .75, 1.5)), over = still ? 1 : prog(a, 2.05, .5);
+  const pouring = !still && a > .7 && a < 2.5;
+  if (over > 0) {
+    g.save(); g.fillStyle = 'rgba(220,236,250,' + .42 * over + ')'; g.fillRect(-200, -196, 400, 396);
+    g.strokeStyle = 'rgba(255,255,255,' + .55 * over + ')'; g.lineWidth = 4; g.lineCap = 'round';
+    for (let i = 0; i < 4; i++) { const x = i < 2 ? -170 : 150, y = (i % 2 ? 150 : -165) + Math.sin(a * 2 + i) * 6; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + 12, y + 6 * Math.sin(a * 3 + i), x + 26, y); g.stroke(); }
+    g.restore();
+  }
+  const r = 186;
+  circ(10, 15, r, 'rgba(60,35,5,.3)');
+  circ(0, 0, r, '#FBF8F0'); circ(0, 0, r * .93, '#E4DFD0'); circ(2, 4, r * .9, '#F6F2E8');
+  // 蛇目：杯底两圈蓝
+  const wob = pouring ? Math.sin(a * 17) * 2.5 : Math.sin(a * 2) * .8;
+  g.save(); g.strokeStyle = '#2A4FA8'; g.lineWidth = r * .15; g.beginPath(); g.ellipse(wob, 0, r * .5, r * .5 + wob * .6, 0, 0, TAU); g.stroke();
+  circ(-wob * .5, 0, r * .18, '#2A4FA8'); g.restore();
+  if (fill > 0) {
+    const sr = r * lerp(.4, .87, fill);
+    circ(0, 0, sr, 'rgba(206,226,248,.34)');
+    g.save(); g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 4; g.beginPath(); g.arc(0, 0, sr, 0, TAU); g.stroke();
+    g.beginPath(); g.arc(0, 0, sr, 0, TAU); g.clip(); g.lineCap = 'round';
+    if (pouring) for (let i = 0; i < 3; i++) { const ph = frac(a * 1.5 + i / 3); g.globalAlpha = (1 - ph) * .8; g.lineWidth = 5; g.beginPath(); g.arc(20, -30, 12 + ph * sr * 1.1, 0, TAU); g.stroke(); }
+    g.globalAlpha = .75; g.lineWidth = 9; g.beginPath(); g.arc(0, 0, sr * .78, Math.PI * 1.08 + Math.sin(a * 1.6) * .08, Math.PI * 1.42 + Math.sin(a * 1.6) * .08); g.stroke();
+    g.restore();
+  }
+  if (still) return;
+  // 德利从右上探进来，倒完抬回去
+  const tilt = eIO(prog(a, .25, .45)) - eIO(prog(a, 2.35, .45));
+  const mx = lerp(330, 205, tilt), my = lerp(-470, -388, tilt);
+  const head = prog(a, .62, .14), tail = prog(a, 2.4, .16);
+  if (head > 0 && tail < 1) {
+    g.save(); g.lineCap = 'round';
+    const pt = f => { const u = 1 - f, cx = mx - 150, cy = my + 10; return [u * u * mx + 2 * u * f * cx + f * f * 20, u * u * my + 2 * u * f * cy + f * f * (-30)]; };
+    for (const [lw, col] of [[17, 'rgba(120,165,230,.55)'], [12, '#F4F9FF'], [3.5, '#FFFFFF']]) {
+      g.beginPath(); for (let i = 0; i <= 24; i++) { const f = lerp(tail, head, i / 24), [x, y] = pt(f); g.lineTo(x + (lw < 5 ? -3 : 0) + Math.sin(a * 30 + i) * .8, y); }
+      g.lineWidth = lw; g.strokeStyle = col; g.stroke();
+    }
+    g.restore();
+  }
+  g.save(); g.translate(mx, my); g.rotate(lerp(-.55, -.2, tilt) + Math.PI * 0); g.rotate(-.45); g.translate(200, 0); stamp(tokkuri()); g.restore();
+}
+
+// ======== 场景 ========
+function bg(col) { g.fillStyle = col; g.fillRect(0, 0, W, H); }
+function mat(x, y, w, h, rot, col) { g.save(); g.translate(x, y); g.rotate(rot); rrect(-w / 2, -h / 2, w, h, 26); g.fillStyle = col; g.fill(); g.restore(); }
+function popDish(x, y, a, f, rot = 0) { const s = lerp(.55, 1, eBack(prog(a, 0, .42))); g.save(); g.translate(x, y); g.rotate(rot); g.scale(s, s); f(); g.restore(); }
+
+function bigGrain(x, y, len, rot) {
+  g.save(); g.translate(x, y); g.rotate(rot);
+  const shape = () => { g.beginPath(); g.moveTo(-len * .5, 0); g.bezierCurveTo(-len * .5, -len * .3, len * .3, -len * .34, len * .47, -len * .1); g.bezierCurveTo(len * .44, -len * .02, len * .5, .02 * len, len * .5, len * .08); g.bezierCurveTo(len * .4, len * .33, -len * .5, len * .3, -len * .5, 0); g.closePath(); };
+  g.save(); g.translate(len * .05, len * .075); shape(); g.fillStyle = 'rgba(90,10,0,.3)'; g.fill(); g.restore();
+  shape(); const gr = g.createLinearGradient(0, -len * .3, 0, len * .3); gr.addColorStop(0, '#FFFFFF'); gr.addColorStop(1, '#EDE6D2'); g.fillStyle = gr; g.fill();
+  g.lineCap = 'round'; g.strokeStyle = '#FFFFFF'; g.lineWidth = len * .035; g.beginPath(); g.moveTo(-len * .3, -len * .12); g.quadraticCurveTo(-len * .05, -len * .22, len * .2, -len * .16); g.stroke();
+  g.strokeStyle = 'rgba(190,175,140,.6)'; g.lineWidth = len * .012; g.beginPath(); g.moveTo(-len * .28, len * .1); g.quadraticCurveTo(0, len * .19, len * .28, len * .1); g.stroke();
+  g.restore();
+}
+
+function sTitle(a) {
+  bg(C.red);
+  const gx = 540, gy = 640;
+  g.save(); g.translate(gx, gy); g.rotate(a * .22); g.globalAlpha = clamp(a * 3.5); g.fillStyle = '#D23A22';
+  for (let i = 0; i < 12; i++) { g.rotate(TAU / 12); g.beginPath(); g.moveTo(0, 0); g.lineTo(1500, -190); g.lineTo(1500, 190); g.closePath(); g.fill(); }
+  g.restore();
+  circ(gx, gy, 330 * eBack(prog(a, .36, .4)), C.must);
+  burst(gx, gy, 340, 520, 16, C.cream, prog(a, .38, .5), 12, .2);
+  const fall = prog(a, 0, .38), land = Math.max(0, a - .38);
+  const sc = lerp(3.4, 1, fall * fall) * (1 - .09 * Math.exp(-land * 9) * Math.cos(land * 26));
+  g.save(); g.globalAlpha = clamp(a * 12 + .25); bigGrain(gx, gy + Math.sin(a * 2.4) * 8, 400 * sc, -.5 + (1 - fall) * 1.2 + Math.sin(a * 1.7) * .05); g.restore();
+  txt('NIIGATA', 70, 150, 40, C.cream, {w: 800, ls: 10, alpha: clamp(a * 4)});
+  txt('新潟 · 吃什么', 70, 212, 40, C.must, {w: 700, alpha: clamp(a * 4)});
+  vtxt('新潟美食', 1000, 150, 46, C.cream, a - .5, {w: 700});
+  slam('一粒米，', 70, 1230, 236, C.cream, a - .45, {from: 1.35});
+  rise('变出一桌。', 70, 1490, 236, C.navy, a - .95, {max: 940});
+  band(1735, 120, -.045, C.navy, C.cream, 'NIIGATA GOHAN  ·  新潟的一桌饭  ·  ', a, 190);
+}
+
+function sRice(a) {
+  bg(C.pine);
+  mat(520, 1040, 900, 900, .12, '#236857');
+  slam('01', 1050, 250, 300, '#2B7765', a, {w: 800, align: 'right', from: 1.3});
+  rise('白饭', 70, 480, 270, C.cream, a - .12);
+  vtxt('鱼沼越光米', 1000, 640, 70, C.must, a - .55);
+  popDish(520, 1040, a, () => dishRice(a));
+  sticker(175, 735, 112, C.red, C.cream, [['刚出锅', 54], ['HOT', 34]], a - 1.9, {rot: -.22});
+  rise('先别夹菜，', 70, 1590, 104, C.cream, a - 1.0);
+  rise('空口来一碗。', 70, 1722, 104, C.must, a - 1.45);
+  band(1850, 96, 0, C.must, C.pine, 'KOSHIHIKARI  ·  越光米  ·  UONUMA  ·  鱼沼  ·  ', a, 170);
+}
+
+function sKatsu(a) {
+  bg(C.must);
+  mat(540, 1030, 880, 940, -.1, '#F2C55A');
+  slam('02', 1050, 250, 300, '#DDA22A', a, {w: 800, align: 'right', from: 1.3});
+  rise('酱汁炸猪排饭', 70, 430, 150, C.navy, a - .1, {max: 940});
+  pill('タレかつ丼  TARE-KATSU DON', 70, 480, 40, C.navy, C.cream, a - .45);
+  popDish(540, 1050, a, () => dishKatsu(a));
+  sticker(905, 680, 112, C.red, C.cream, [['新潟市', 50], ['名物', 50]], a - 1.7, {rot: .2});
+  rise('不裹蛋，只蘸酱。', 70, 1600, 106, C.navy, a - 1.15, {max: 940});
+  rise('薄猪排蘸满甜咸酱汁，直接盖饭。', 70, 1716, 60, C.navy, a - 1.6, {w: 700, stagger: .025, max: 940});
+  band(1850, 96, 0, C.red, C.cream, 'TARE-KATSU  ·  甜咸酱汁  ·  咔嚓一口  ·  ', a, 170);
+}
+
+function sSoba(a) {
+  bg(C.cream);
+  mat(500, 1045, 940, 800, .09, '#EADDBF');
+  slam('03', 1050, 250, 300, '#E6D8B6', a, {w: 800, align: 'right', from: 1.3});
+  rise('片木荞麦', 70, 450, 220, C.navy, a - .1, {max: 880});
+  pill('へぎそば  HEGI SOBA', 70, 500, 40, C.red, C.cream, a - .45);
+  const tx = 500, ty = 1035, rot = -.07;
+  popDish(tx, ty, a, () => dishSoba(a), rot);
+  const cupX = 905, cupY = 1378;
+  g.save(); g.translate(cupX, cupY); const cs = eBack(prog(a, .45, .35)); g.scale(cs, cs); if (cs > 0) sobaCup(a); g.restore();
+  // 筷子：夹起一束 → 提到蘸汁杯上 → 蘸一下 → 再提起
+  const c = sobaCell(SOBA_PICK), bx = tx + c.x * Math.cos(rot) - c.y * Math.sin(rot), by = ty + c.x * Math.sin(rot) + c.y * Math.cos(rot);
+  const arrive = eExpo(prog(a, .95, .4));
+  if (arrive > 0) {
+    const carry = eIO(prog(a, 1.5, .55)), dip = eIO(prog(a, 2.1, .3)) - eIO(prog(a, 2.6, .35));
+    let x = lerp(lerp(1150, bx, arrive), cupX - 8, carry), y = lerp(lerp(700, by, arrive), cupY - 250, carry) - Math.sin(Math.PI * carry) * 60 + dip * 150;
+    if (a > 1.5) {
+      g.save(); g.beginPath(); g.rect(0, 0, W, cupY - 6 + (1 - carry) * 600); g.clip();
+      sobaHang(x, y, lerp(150, 190, carry), a); g.restore();
+      if (dip > .25) { g.save(); g.strokeStyle = 'rgba(255,240,210,.6)'; g.lineWidth = 4; for (let i = 0; i < 2; i++) { const ph = frac(a * 2 + i / 2); g.globalAlpha = (1 - ph) * .8; g.beginPath(); g.ellipse(cupX - 4, cupY - 2, 30 + ph * 50, 12 + ph * 22, 0, 0, TAU); g.stroke(); } g.restore(); }
+      if (a > 2.75) for (let i = 0; i < 3; i++) { const ph = frac((a - 2.75) * 1.6 + i / 3); circ(x - 20 + i * 20, y + 190 + ph * 70, 5 * (1 - ph * .5), 'rgba(59,34,18,' + (1 - ph) + ')'); }
+    }
+    sticks(x, y + 6, -.72, .03, '#1C2B57', '#0E1733');
+  }
+  sticker(915, 690, 116, C.navy, C.cream, [['这盘', 52], ['不是米', 52]], a - 1.2, {rot: .18});
+  rise('一口一束，码进木盒。', 70, 1610, 94, C.navy, a - 1.0, {max: 940});
+  rise('面里揉了海藻“布海苔”，格外滑。', 70, 1722, 58, C.red, a - 1.55, {w: 700, stagger: .025, max: 940});
+  band(1850, 96, 0, C.navy, C.cream, 'HEGI SOBA  ·  布海苔  ·  吸溜  ·  ', a, 170);
+}
+
+function sDango(a) {
+  bg(C.red);
+  mat(540, 1060, 900, 920, -.12, '#D23A22');
+  slam('04', 1050, 250, 300, '#EC5C42', a, {w: 800, align: 'right', from: 1.3});
+  rise('笹团子', 70, 450, 240, C.cream, a - .1);
+  pill('ささだんご  SASA DANGO', 70, 500, 40, C.navy, C.cream, a - .45);
+  popDish(540, 1060, a, () => dishDango(a));
+  sticker(915, 715, 116, C.must, C.navy, [['也是', 52], ['米做的', 52]], a - 2.15, {rot: .2});
+  rise('解开草绳，剥开竹叶。', 70, 1610, 94, C.cream, a - .95, {max: 940});
+  rise('艾草米团，裹着红豆馅。', 70, 1722, 62, C.must, a - 1.75, {w: 700, stagger: .025});
+  band(1850, 96, 0, C.navy, C.cream, 'SASA DANGO  ·  艾草  ·  红豆馅  ·  ', a, 170);
+}
+
+function sSake(a) {
+  bg(C.navy);
+  mat(500, 1060, 860, 860, .1, '#22356A');
+  slam('05', 1050, 250, 300, '#28397A', a, {w: 800, align: 'right', from: 1.3});
+  rise('日本酒', 70, 450, 240, C.cream, a - .1);
+  pill('SAKE  ·  还是米酿的', 70, 500, 40, C.red, C.cream, a - .45);
+  popDish(480, 1070, a, () => dishSake(a), .1);
+  const n = Math.round(90 * eOut(prog(a, .65, .8)));
+  if (a > .65) {
+    txt('约', 74, 1500, 62, C.cream, {w: 700, alpha: clamp((a - .65) * 5)});
+    slam(String(n), 60, 1736, 270, C.must, a - .65, {w: 800, from: 1.25});
+  }
+  rise('家酒藏，', 492, 1590, 112, C.cream, a - 1.0);
+  rise('日本最多。', 492, 1730, 112, C.cream, a - 1.25);
+  rise('淡丽辛口：清爽，不留余味。', 70, 1846, 58, C.must, a - 1.8, {w: 700, stagger: .025, max: 940});
+}
+
+const RING = [[dishRice, .38], [dishKatsu, .37], [dishSoba, .38], [dishDango, .37], [dishSake, .42]];
+function sFinal(a) {
+  bg(C.cream);
+  band(128, 110, .03, C.red, C.cream, 'NIIGATA GOHAN  ·  新潟的一桌饭  ·  ', a + 5, 190);
+  const cx = 540, cy = 800;
+  circ(cx, cy, 500 * eBack(prog(a, 0, .5)), '#EADDBF');
+  RING.forEach(([f, s], i) => {
+    const p = eBack(prog(a, .1 + i * .09, .4)); if (p <= 0) return;
+    const an = -Math.PI / 2 + i * TAU / 5 + a * .22 + (1 - p) * .8;
+    g.save(); g.translate(cx + Math.cos(an) * 345, cy + Math.sin(an) * 345); g.scale(s * p, s * p); if (f === dishSake || f === dishSoba) g.rotate(.1 - i * .06); f(a + 4, true); g.restore();
+  });
+  const cp = eBack(prog(a, .5, .4));
+  if (cp > 0) { g.save(); g.translate(cx, cy); g.scale(cp * (1 + Math.sin(a * 5) * .025), cp * (1 + Math.sin(a * 5) * .025)); circ(6, 9, 128, 'rgba(0,0,0,.2)'); circ(0, 0, 128, C.red); txt('米', 0, 62, 170, C.cream, {align: 'center'}); g.restore(); }
+  slam('去新潟，', 70, 1520, 176, C.navy, a - .7, {from: 1.3});
+  rise('吃完这一桌。', 70, 1712, 176, C.red, a - 1.05, {max: 940});
+  sticker(900, 1330, 112, C.navy, C.cream, [['荞麦', 50], ['算加菜', 50]], a - 1.5, {rot: .2});
+  txt('NIIGATA, JAPAN', 74, 1830, 38, C.navy, {w: 800, ls: 12, alpha: clamp((a - 1.4) * 4)});
+  // 收尾：红色从正中铺满，接回片头
+  const out = prog(a, T - 19.75 - .42, .42);
+  if (out > 0) circ(cx, cy, 1300 * out * out, C.red);
+}
+
+// 分镜表（检查器会读 PLAN）：[名字, 开始, 结束]
+const PLAN = [['title', 0, 2.6], ['rice', 2.6, 6.1], ['katsu', 6.1, 9.6], ['soba', 9.6, 13.2], ['dango', 13.2, 16.5], ['sake', 16.5, 19.75], ['final', 19.75, T]];
+const SCENES = [sTitle, sRice, sKatsu, sSoba, sDango, sSake, sFinal];
+const ENTER = [null, 'circle', 'pushL', 'pushU', 'diag', 'circle', 'pushL'];
+const TR = .32;
+function shotAt(t) { t = ((t % T) + T) % T; for (let i = PLAN.length - 1; i >= 0; i--) if (t >= PLAN[i][1]) return i; return 0; }
+function drawScene(i, a) { g.save(); g.beginPath(); g.rect(0, 0, W, H); g.clip(); SCENES[i](a); g.restore(); }
+function render(t) {
+  t = ((t % T) + T) % T;
+  g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.clearRect(0, 0, W, H);
+  const i = shotAt(t), a = t - PLAN[i][1];
+  if (!ENTER[i] || a >= TR) { drawScene(i, a); return; }
+  const p = eIO(a / TR), prevA = t - PLAN[i - 1][1];
+  g.save();
+  if (ENTER[i] === 'pushL') { g.translate(-W * p, 0); drawScene(i - 1, prevA); g.translate(W, 0); drawScene(i, a); }
+  else if (ENTER[i] === 'pushU') { g.translate(0, -H * p); drawScene(i - 1, prevA); g.translate(0, H); drawScene(i, a); }
+  else {
+    drawScene(i - 1, prevA);
+    g.beginPath();
+    if (ENTER[i] === 'circle') g.arc(540, 1010, 1320 * p, 0, TAU);
+    else { const x = (W + 700) * p; g.moveTo(0, 0); g.lineTo(x, 0); g.lineTo(x - 700, H); g.lineTo(0, H); g.closePath(); }
+    g.save(); g.lineWidth = 44; g.strokeStyle = C.must; g.stroke(); g.restore();
+    g.clip(); drawScene(i, a);
+  }
+  g.restore();
+}
+
+// ======== 播放和导出 ========
+const params = new URLSearchParams(location.search), REC = params.has('record');
+async function loadFonts() {
+  if (!document.fonts || !document.fonts.load) return;
+  const cjk = [...new Set(SRC.replace(/[\x00-\x7f]/g, ''))].join('');
+  const jobs = [];
+  for (const w of [500, 700, 900]) jobs.push(document.fonts.load(`${w} 64px "Noto Sans SC"`, cjk));
+  for (const w of [600, 800]) jobs.push(document.fonts.load(`${w} 64px "Sora"`, 'NIIGATA 0123456789'));
+  const wait = new Promise(r => setTimeout(r, REC ? 20000 : 3000));   // 断网时不等：直接用系统字体
+  await Promise.race([Promise.allSettled(jobs), wait]);
+}
+window.render = render; window.LOOP_SECONDS = T; window.START_SECONDS = 0;
+window.duration = () => T;
+const ready = loadFonts().catch(() => {});
+if (REC) ready.then(() => { render(0); window.READY = true; });
+else ready.then(() => {
+  let base = performance.now(), paused = false, held = 0;
+  canvas.addEventListener('click', () => { paused = !paused; if (paused) held = (performance.now() - base) / 1000; else base = performance.now() - held * 1000; });
+  const tick = () => { if (!paused) render((performance.now() - base) / 1000); requestAnimationFrame(tick); };
+  window.READY = true; tick();
+});
+</script>
+</body>
+</html>
