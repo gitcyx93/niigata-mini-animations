@@ -43,6 +43,8 @@ npm run inspect -- viz/autumn/yahiko-v38.html --compare /tmp/previous-yahiko.htm
 
 `?record=1` 模式不启动正常声音控制器。修改播放或混音时，在 `npm run dev` 提供的正常页面检查对应操作与时段；播放检查与像素采样各自回答不同问题。
 
+`npm run dev` 会监听 V38 源码，在内存中重建三种语言，并刷新正常预览、恢复播放位置和状态。构建失败时保留上一份可用预览。`--no-watch` 可关闭监听；录制模式始终读取磁盘上的生成 HTML，导出前通过 `npm run build` 同步源码。
+
 导出使用 `npm run record -- <作品ID或HTML> --out output/film.mp4`。逐帧渲染后用 FFprobe 验证完整解码帧数、时长、尺寸、帧率及音视频编码。新文件先在临时路径完成，成功后再发布；已有成品必须显式传 `--force`。
 
 兼容入口 `viz/tools/check.js` 支持旧的 `--strip output/frames.png`、`--at`、`--compare`；它调用同一个详细检查器，不再维护另一套就绪/错误判断。旧的按 V11/V25/V31 复制的检查脚本已退役。

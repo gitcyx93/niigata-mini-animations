@@ -1223,8 +1223,6 @@ function overlookHill(b,p,seed,pal){
   b.fillStyle=pal[2];b.globalAlpha=.3;b.beginPath();b.ellipse(x,y,r*1.4,r,0,0,TAU);b.fill();
  }b.globalAlpha=1;
 }
-const overlookMid=layer(b=>overlookHill(b,[[-80,1290],[120,1230],[270,1250],[470,1350],[640,1380],[800,1320],[990,1245],[1160,1190]],2401,['#253643','#3c4852','#6a6067']));
-const overlookNear=layer(b=>overlookHill(b,[[-80,1510],[110,1430],[280,1475],[490,1550],[680,1510],[900,1390],[1160,1340]],2501,['#172e32','#2b4141','#50594c']));
 function headland(b,hy,u){
  b.save();b.translate(0,hy-950+u*48);
  b.beginPath();b.moveTo(1160,1015);b.bezierCurveTo(1080,1018,1028,1050,990,1080);b.bezierCurveTo(954,1102,960,1120,916,1134);b.bezierCurveTo(892,1154,852,1163,828,1174);b.bezierCurveTo(910,1195,1007,1198,1160,1222);b.closePath();
@@ -1309,30 +1307,6 @@ function lookoutDeck(b,u,hy){
  for(const [x,z]of posts){const dir=x<-3?1:-1;beam([x,2.6,z],[x+dir*.65,3.2,z],.075,'#8a8b74');beam([x,2.7,z],[x,3.2,z+(z<8?.7:-.7)],.07,'#8a8b74');}
  b.restore();
 }
-const lookoutAutumn=layer(b=>{
- const p=[[530,2050],[670,1870],[820,1700],[980,1540],[1160,1490]];
- overlookHill(b,p,2701,['#203b38','#3f5245','#6c694b']);
- const trees=[];for(let i=0;i<220;i++){const x=650+rnd(i,2702)*530,y=1540+rnd(i,2703)*470;if(y<contourY(p,x)+24)continue;trees.push({x,y,i});}
- trees.sort((a,c)=>a.y-c.y).forEach(({x,y,i})=>{const h=28+rnd(i,2704)*65;treeCrown(b,x,y,h,h*(.45+rnd(i,2705)*.25),2800+i*7,i%4===0?['#314b3c','#526042','#7a7950']:i%3===0?['#71513c','#987044','#b4965e']:['#5d4a38','#82623d','#a58247'],i%11===0);});
-});
-const sunsetScenicRidge=layer(b=>{
- const p=[[-100,1540],[55,1480],[165,1495],[290,1550],[420,1660],[555,1700],[690,1665],[825,1585],[960,1515],[1160,1550]];
- overlookHill(b,p,6101,['#24323a','#39464b','#635e60']);
- // Just a small suggestion of the summit lookout, embedded in the ridge rather than a foreground plaza.
- poly(b,[[105,1531],[250,1531],[268,1543],[92,1543]],'#7e8070');
- poly(b,[[92,1543],[268,1543],[265,1550],[99,1550]],'#4f5e55');
- for(const [x,y]of [[124,1526],[228,1526],[112,1540],[243,1540]]){b.fillStyle='#53615a';b.fillRect(x,y-61,3.5,62);b.fillStyle='#c3b18a';b.fillRect(x+2,y-61,1,61);}
- poly(b,[[105,1478],[246,1478],[231,1455],[119,1455]],'#707a6a');
- for(let x=119;x<232;x+=12){lineRidge(x,1456,105+(x-119)*141/112,1478,'#b5a686',2);}
- lineRidge(105,1478,246,1478,'#a89b7c',3);
- lineRidge(119,1455,231,1455,'#c6af83',2);
- poly(b,[[140,1521],[213,1521],[207,1517],[144,1517]],'#a19372');
- for(const x of [148,201])lineRidge(x,1521,x,1531,'#4e5b50',2);
- function lineRidge(x,y,xx,yy,c,w){b.strokeStyle=c;b.lineWidth=w;b.beginPath();b.moveTo(x,y);b.lineTo(xx,yy);b.stroke();}
- // An irregular foreground rim frames the wide sea without competing with it.
- const trees=[];for(let i=0;i<180;i++){const x=rnd(i,6201)*W,y=1550+rnd(i,6202)*430;if(y<contourY(p,x)+36)continue;trees.push({x,y,i});}
- trees.sort((a,c)=>a.y-c.y).forEach(({x,y,i})=>{const h=18+rnd(i,6203)*42;treeCrown(b,x,y,h,h*.65,6301+i,['#28383b','#3c4943','#5b584b'],i%7===0);});
-});
 const sunsetHorizonClouds=layer(b=>{
  b.save();b.filter='blur(9px)';
  for(let i=0;i<16;i++){const xx=-70+i*84,yy=80-7-rnd(i,6701)*18;b.fillStyle=`rgba(109,105,129,${.08+rnd(i,6702)*.10})`;b.beginPath();b.ellipse(xx,yy,74+rnd(i,6703)*70,9+rnd(i,6704)*12,0,0,TAU);b.fill();}b.restore();
@@ -1965,18 +1939,6 @@ const picMap=layer(b=>{
 },W,H,2);
 // ======== v8 地图上的动作：路线、标记、圆形的窗 ========
 // v11 keeps Claude's hand-drawn overview, enlarges its landmarks, and exits once.
-const overviewDetails=layer(b=>{
- b.drawImage(picMap,0,0,W,H);
- // Bridge, temple and cable are large enough to identify on a phone.
- b.fillStyle='#547b7a';b.beginPath();b.ellipse(722,1252,68,29,-.08,0,TAU);b.fill();
- b.strokeStyle='#89332c';b.lineWidth=12;b.beginPath();b.moveTo(660,1255);b.quadraticCurveTo(722,1219,784,1255);b.stroke();
- b.strokeStyle='#e57e51';b.lineWidth=4;b.beginPath();b.moveTo(660,1242);b.quadraticCurveTo(722,1206,784,1242);b.stroke();
- for(let i=0;i<9;i++){const x=662+i*15,y=1242-18*Math.sin(i/8*Math.PI);b.beginPath();b.moveTo(x,y);b.lineTo(x,y+13);b.stroke();}
- b.fillStyle='#e6d6b4';b.fillRect(646,1045,77,32);b.fillStyle='#3d3a2d';b.fillRect(673,1054,21,23);
- poly(b,[[634,1048],[682,1012],[736,1048],[718,1054],[682,1032],[652,1054]],'#35594c','#a7a583',2);
- b.fillStyle='#b95033';b.fillRect(730,1120,7,43);b.fillRect(762,1120,7,43);b.fillRect(722,1116,55,7);b.fillRect(726,1130,47,5);
- refinedCabin(b,563,897,.19);
-},W,H,1.5);
 // Two opening studies share the same film from 2.2s onwards. These are
 // stylised compositions, not surveyed viewpoints or navigation maps.
 let openingVariant=params.get('opening')==='C'?'C':'A';
@@ -2312,7 +2274,7 @@ const alphaC=layer(()=>{},W,H,1);
 function gradeSet(c,rgb){const m=alphaC.getContext('2d');m.setTransform(1,0,0,1,0,0);m.globalCompositeOperation='copy';m.drawImage(c.canvas,0,0);
   c.save();c.setTransform(1,0,0,1,0,0);c.globalCompositeOperation='multiply';c.fillStyle=`rgb(${rgb.join(',')})`;c.fillRect(0,0,W,H);c.globalCompositeOperation='destination-in';c.drawImage(alphaC,0,0);c.restore();}
 function drawMoonAt(b,x,y,z){b.save();b.translate(x,y);b.scale(z,z);b.drawImage(moonLayer,-785,-570,W,H);b.restore();}
-const NIGHT_OUT=[0,.3],NIGHT_IN=[.12,.48];const skyC=layer(()=>{},W,H,1);   // 秒（从 17.0 起）：旧景沉下去；新景升上来
+const NIGHT_OUT=[0,.3],NIGHT_IN=[.12,.48];   // 秒（从 17.0 起）：旧景沉下去；新景升上来
 function nightV18(b,src){
   // v23：太阳一下去天就黑了（不渐变）。山顶画面的上半部分——夜空、海——留着，月亮从左边的海里斜着升上来；
   // 然后入夜的红叶谷（还没亮灯）从下面升上来，盖住海和海岸，17.95 秒落定，再三波点灯。
