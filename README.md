@@ -17,6 +17,10 @@ GitHub 文件页显示源码，不会直接播放 HTML。克隆或下载本仓�
 | 秋 | [弥彦 V38](viz/autumn/yahiko-v38.html) · [English](viz/autumn/yahiko-v38-en.html) · [繁體](viz/autumn/yahiko-v38-tw.html) | 27.8 秒首尾循环，红叶谷与温泉街风叶互动；环境音、海浪、风铃、鸟鸣、猫叫与窗框声，**无配乐** |
 | 冬 | [越后汤泽](viz/winter/yuzawa-yukiguni.html) · [台湾繁体](viz/winter/yuzawa-yukiguni-tw.html) | 三维滑雪、SNS 运镜与新稿；保留原 20 秒循环 |
 
+### 弥彦 V39：评审修改版（画面与字）
+
+- [V39 动画](viz/autumn/yahiko-v39.html) · [修改记录](stories/yahiko-v39.md)。夜景观月桥封面、新叶形与透光主叶、字的节奏与可读性、日落蓝调过渡。声音沿用 V38，未重新对齐。
+
 ### 弥彦 V38：当前版本
 
 - [完整动画](viz/autumn/yahiko-v38.html) · [本轮记录](stories/yahiko-v38.md) · [音效来源与授权](viz/autumn/audio/yahiko-v38/LICENSES.md)。
