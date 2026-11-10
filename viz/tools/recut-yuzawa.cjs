@@ -43,7 +43,7 @@ const HEADLINE = `function headline(s, segs, sub, subColor, P) {
     rich(segs, LINE1, HL.size, wt, HL.sp, P); if (P.shade) rich(segs, LINE1, HL.size, wt, HL.sp, P);   // 浅色水面上叠两次，字影更实
     if (sub.startsWith('——')) {
       const w = segs.reduce((p, [q]) => p + measure(q, HL.size, wt, HL.sp) + HL.sp, -HL.sp);
-      g.globalAlpha *= .72; text(sub, (W + w) / 2, LINE2 - 4, 24, subColor, SUBT.weight, 'right', 1);
+      g.globalAlpha *= .88; text(sub, (W + w) / 2, LINE2 + 2, 28, subColor, 400, 'right', 1);
     } else for (let k = 0; k < (P.shade ? 2 : 1); k++) text(sub, W / 2, LINE2 + 6, SUBT.size, subColor, sw, 'center', SUBT.sp);
     g.shadowColor = 'transparent'; g.shadowBlur = 0;
   });
