@@ -312,11 +312,6 @@ function boot(render) {
 <script>
 // 越后汤泽（新潟县汤泽町）—— 冬季：滑雪 + 温泉，川端康成《雪国》的舞台。
 // 一张雪国全景（雪山和夜间雪道、温泉街、新干线高架、有路灯的雪墙小路、露天温泉），镜头在里面上下平移、推近拉远，每段只看一样东西：
-//   0–4 秒   推近隧道口：新干线冲出隧道（第 0 秒当封面）
-//   4–9 秒   往上移到雪道：一个人滑下来，最后急停扬起粉雪
-//   9–14 秒  往下移到露天温泉：白汽、雪落进热水、灯笼
-//   14–18 秒 拉远看整张全景
-//   18–20 秒 慢慢推回隧道口，地面开始震动、洞里亮起来 —— 第 0 秒列车正好冲出来（首尾无缝）
 // render(t) 是确定性的：同一个 t 永远画出同一帧。
 // 坐标：「世界」就是镜头拉到最远（不放大）时的画面坐标，1080 × 1920；温泉的水面往下多画了一截，推近温泉时用得到。
 
@@ -974,14 +969,15 @@ const FIXED_P = {head: '#fff4e6', key: '#ffb46e', sub: 'rgba(255,228,198,.92)', 
 // 滑雪那段背景是白雪：颜色不变，只把字影换成一圈更浓的深色光晕，让字从雪地上浮出来（不垫深色带子）
 const onSnow = t => t >= 3.3 && t < 8.7;
 function palette(t) {
-  return onSnow(t) ? {...FIXED_P, glow: 'rgba(16,22,40,.92)'} : FIXED_P;
+  return onSnow(t) ? {...FIXED_P, head: '#16233f', key: '#d2481f', sub: 'rgba(22,35,63,.88)', ink: 1}
+    : t >= 12.3 && t < 17 ? {...FIXED_P, key: '#ffa24f', shade: 'rgba(6,40,46,.8)'} : FIXED_P;   // 温泉的水面是浅绿色：字影换成深的青绿，托住暖白的字
 }
 const STORY = [
   [0.2, 3.2, '『雪国』の舞台は、ここ。'],
-  [3.8, 6.2, '新幹線で、ゲレンデへ直行。'],
-  [6.4, 8.6, 'この駅は、主に冬のあいだ開く。'],
-  [9.1, 13.0, '「駒子の湯」の名は『雪国』から。'],
-  [14.5, 18.6, 'ひと冬に降る雪は、約 10 メートル。'],
+  [3.6, 5.9, '新幹線で、ゲレンデへ直行。'],
+  [6.1, 8.5, 'この駅は、主に冬のあいだ開く。'],
+  [12.7, 16.6, '「駒子の湯」の名は『雪国』から。'],
+  [18.1, 22.2, 'ひと冬に降る雪は、約 10 メートル。'],
 ]
 // 标题上有落雪，就不再加字面的反射和高光（太花）
 const HEADER = {title: '越後湯沢', place: '新潟県湯沢町', story: STORY, storyShadow: 'rgba(4,8,22,.9)', sheen: [60, 520, W - 120, 560], reflect: false,
@@ -1040,16 +1036,18 @@ function rich(segs, y, size, weight, sp, P) {
 const HL = {size: 68, weight: 300, sp: 8}, SUBT = {size: 30, weight: 300, sp: 2};
 function headline(s, segs, sub, subColor, P) {
   rise(s, () => {
-    g.shadowColor = P.glow || 'rgba(4,8,22,.55)'; g.shadowBlur = P.glow ? 22 : 12; g.shadowOffsetY = 0;
-    rich(segs, LINE1, HL.size, HL.weight, HL.sp, P); if (P.glow) rich(segs, LINE1, HL.size, HL.weight, HL.sp, P);
-    if (sub.startsWith('——')) {                              // 引用的出处：破折号开头，小字、淡，靠在大字右下角，不抢眼
-      const w = segs.reduce((p, [q]) => p + measure(q, HL.size, HL.weight, HL.sp) + HL.sp, -HL.sp);
+    const wt = P.ink ? 400 : HL.weight;                      // 深色字压在白雪上会显得更细，加一档字重
+    const sw = P.ink || P.shade ? 400 : SUBT.weight;
+    g.shadowColor = P.ink ? 'rgba(255,255,255,.85)' : P.shade || 'rgba(4,8,22,.55)'; g.shadowBlur = P.shade ? 20 : 12; g.shadowOffsetY = 0;
+    rich(segs, LINE1, HL.size, wt, HL.sp, P); if (P.shade) rich(segs, LINE1, HL.size, wt, HL.sp, P);   // 浅色水面上叠两次，字影更实
+    if (sub.startsWith('——')) {
+      const w = segs.reduce((p, [q]) => p + measure(q, HL.size, wt, HL.sp) + HL.sp, -HL.sp);
       g.globalAlpha *= .72; text(sub, (W + w) / 2, LINE2 - 4, 24, subColor, SUBT.weight, 'right', 1);
-    } else for (let k = 0; k < (P.glow ? 3 : 1); k++) text(sub, W / 2, LINE2 + 6, SUBT.size, subColor, SUBT.weight, 'center', SUBT.sp);   // 白雪上细的小字叠几次，深色光晕更实
+    } else for (let k = 0; k < (P.shade ? 2 : 1); k++) text(sub, W / 2, LINE2 + 6, SUBT.size, subColor, sw, 'center', SUBT.sp);
     g.shadowColor = 'transparent'; g.shadowBlur = 0;
   });
 }
-const TEXT_WINDOWS = [[19.3, 3.2], [3.8, 6.2], [6.4, 8.6], [9.2, 13.0], [14.8, 18.7]]; // 两个短段的大字与旁白同时出现
+const TEXT_WINDOWS = [[22.9, 3.2], [3.7, 8.5], [9.1, 12.1], [12.8, 16.6], [18.4, 22.3]];   // 成片时间；每个镜头只有一句大字
 const HEADLINES = [
   P => [[['トンネルを抜けると', 0], ['雪国', 1]], '——川端康成『雪国』', P.sub, P],   // 第 0 秒列车冲出隧道（封面），正是小说开头那一幕
   P => [[['駅を出たら', 0], ['ゲレンデ', 1]], '乗り換えなし バスも要らない', P.sub, P],
@@ -1057,10 +1055,10 @@ const HEADLINES = [
   P => [[['滑ったあとは', 0], ['温泉', 1]], '湯につかって 冷えたビールを一杯', P.sub, P],
   P => [[['約1時間で', 0], ['雪国', 1]], '東京から上越新幹線で 最速 66 分', P.sub, P],   // 拉到全景：整个雪国离东京只有一小时
 ];
-const textVis = t => Math.max(...TEXT_WINDOWS.map(([a, b]) => { const s = scene(t, a, b); return s ? s.p * s.out : 0; }));
+const textVis = t => Math.max(...TEXT_WINDOWS.map(([a, b]) => { const s = sceneF(t, a, b); return s ? s.p * s.out : 0; }));
 function typoFront(t) {
   const P = palette(t);
-  TEXT_WINDOWS.forEach(([a, b], i) => headline(scene(t, a, b), ...HEADLINES[i](P)));
+  TEXT_WINDOWS.forEach(([a, b], i) => headline(sceneF(t, a, b), ...HEADLINES[i](P)));
 }
 
 // ======== 雪道特写：镜头站到雪坡上往上看（有透视），滑雪的人朝镜头一路刻滑下来 ========
@@ -5145,9 +5143,37 @@ function camAt(t) {
 }
 
 // ======== 渲染 ========
-function render(t) {
-  t = fract(t / T) * T;
-  const a = trainA(t), C = camAt(t);
+// ======== 剪辑 ========
+// 场景本身仍是 20 秒一圈的首尾无缝循环（下面的 T）；成片 FILM 秒，由 PLAN 把成片时间映射到场景时间，速度始终 1:1，只在切点跳。
+// [镜头, 成片起, 成片止, 对应的场景起点]
+//   0–3.3      隧道口：新干线冲出来（第 0 秒当封面）
+//   3.3–8.7    雪道跟拍：一趟刻滑到急停。整段只放一句大字，两句旁白先后出现
+//   8.7–12.3   夜里的雪山：沿着缆车慢慢升上去，几条亮着灯的雪道一起入画（「约 11 座雪场」配这个画面）
+//   12.3–16.6  露天温泉：推近、干杯
+//   16.6–23.6  拉远到全景，再推回隧道口，接回第 0 秒
+const FILM = 23.6;
+const PLAN = [['tunnel', 0, 3.3, 0], ['ski', 3.3, 8.7, 3.3], ['mountain', 8.7, 12.3, 4.4], ['onsen', 12.3, 16.6, 8.7], ['panorama', 16.6, 23.6, 13]];
+const wrapFilm = f => fract(f / FILM) * FILM;
+const planAt = f => { f = wrapFilm(f); return PLAN.find(p => f >= p[1] && f < p[2]) || PLAN[0]; };
+const shotAt = f => planAt(f)[0];
+const sourceTime = f => { const p = planAt(f); return p[3] + wrapFilm(f) - p[1]; };
+// 雪山镜头：从温泉街的屋顶往山顶升，同时很慢地推近（升降镜头，不是平移）
+const MOUNTAIN_CAM = [[640, 712, 1.5], [662, 640, 1.7]];   // 楼顶始终压在大字下面，大字落在暗的杉树林上
+function mountainCam(k) {
+  const [a, b] = MOUNTAIN_CAM, e = lerp(.08, .92, k);                       // 整个镜头都在匀速运动，切进切出时不停顿
+  return {x: lerp(a[0], b[0], e), y: lerp(a[1], b[1], e), z: Math.exp(lerp(Math.log(a[2]), Math.log(b[2]), e))};
+}
+// 大字的出场/退场，按成片时间算（跨成片首尾）
+function sceneF(f, from, to) {
+  const age = wrapFilm(f - from), dur = wrapFilm(to - from);
+  if (age > dur) return 0;
+  return {p: from > to && f < to ? 1 : easeOut(age / .55), out: clamp((dur - age) / .35), age};
+}
+
+function render(f) {
+  f = wrapFilm(f);
+  const plan = planAt(f), mountain = plan[0] === 'mountain', t = sourceTime(f);
+  const a = trainA(t), C = mountain ? mountainCam((f - plan[1]) / (plan[2] - plan[1])) : camAt(t);
   // 列车快出来时，地面开始轻轻震动，越来越强，冲出来后很快平息
   const rum = a > -1.4 && a < .8 ? (a < 0 ? ease((a + 1.4) / 1.4) : 1 - easeOut(a / .8)) * 4 : 0;
   const sx = Math.sin(t * 91) * rum, sy = Math.cos(t * 73) * rum * .8;
@@ -5194,7 +5220,7 @@ function render(t) {
   const hot = (t >= 8.7 ? 1 : 0) * clamp((14.0 - t) / .8);
   if (hot > 0) { g.globalCompositeOperation = 'soft-light'; g.fillStyle = `rgba(255,178,110,${.3 * hot})`; g.fillRect(0, 0, W, H); g.globalCompositeOperation = 'source-over'; }
   // 雪道特写：交叉淡入站在雪坡上往上看的镜头
-  const ski = t >= 3.3 && t < 8.7 ? 1 : 0;   // 直切进跟拍滑雪的镜头，滑完再直切到温泉
+  const ski = plan[0] === 'ski' ? 1 : 0;   // 直切进跟拍滑雪的镜头，滑完再直切到温泉
   if (ski > 0) { const c3 = SKI3D.render(t); g.globalAlpha = ski; g.drawImage(c3, 0, 0); g.globalAlpha = 1; }
   drawSnow(t, false, C);
   drawSnow(t, true, C);
@@ -5220,15 +5246,16 @@ function render(t) {
   // 文字层（不跟镜头动，保证清晰）
   // 上面的压暗托住标题，一直在；中下方的大字底下不压暗，只靠字本身的柔和字影
   g.drawImage(verticalSprite('topscrim204', [[0, [1, 3, 12, 204]], [1, [1, 3, 12, 0]]]), 0, 0, W, 600);
-  if (ski) g.drawImage(verticalSprite('skitop-soft', [[0, [12, 26, 46, 54]], [.45, [12, 26, 46, 36]], [1, [12, 26, 46, 0]]]), 0, 0, W, 560);   // 滑雪时背后是发亮的雪树：上方的渐暗加深一点，托住标题和旁白（只是从顶上往下的渐变，不是一条带子）
-  drawHeader(t, {light: 0, lc: [255, 236, 210], x: W / 2}, HEADER);
+  if (ski) g.drawImage(verticalSprite('skitop-soft2', [[0, [10, 22, 40, 120]], [.5, [10, 22, 40, 96]], [1, [10, 22, 40, 0]]]), 0, 0, W, 560);   // 滑雪时背后是发亮的雪树：上方的渐暗加深一点，托住标题和旁白（只是从顶上往下的渐变，不是一条带子）
+  drawHeader(f, {light: 0, lc: [255, 236, 210], x: W / 2}, HEADER);
   drawTitleSnow();
-  typoFront(t);
+  typoFront(f);
 }
 // Compile the offscreen 3D scene before the film clock starts, rather than
 // pausing the first ski frame at 3.3s. This never opens a window or starts RAF.
 SKI3D.render(3.3);
 boot(render);
+window.LOOP_SECONDS = FILM;   // 导出和检查按成片时长，不是场景循环的 T
 </script>
 </body>
 </html>
