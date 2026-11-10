@@ -1,0 +1,31 @@
+{
+  "name": "niigata-mini-animations",
+  "version": "1.0.0",
+  "private": true,
+  "description": "新潟旅行小动画的源码、预览与制作工具",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node viz/tools/serve.cjs",
+    "build": "node viz/tools/build-yahiko-v38.cjs",
+    "build:check": "node viz/tools/build-yahiko-v38.cjs --check",
+    "build:audio": "node viz/tools/build-yahiko-v38-audio.cjs",
+    "build:locales": "node viz/tools/build-yahiko-v38-locales.cjs",
+    "build:ski": "node viz/tools/build-yuzawa-ski3d.cjs",
+    "check": "node viz/tools/check-project.cjs",
+    "inspect": "node viz/tools/inspect-animation.cjs",
+    "record": "node viz/tools/record-animation.cjs",
+    "record:yahiko": "node viz/tools/record-yahiko-v38-social.cjs",
+    "test": "node --test tests/*.test.cjs",
+    "check:motion": "node viz/tools/check-leaf-motion.cjs"
+  },
+  "devDependencies": {
+    "@fontsource-variable/noto-sans-sc": "5.3.1",
+    "@fontsource-variable/noto-sans-tc": "5.3.1",
+    "esbuild": "0.25.10",
+    "opencc-js": "1.4.2",
+    "playwright": "1.65.0",
+    "three": "0.180.0"
+  }
+}

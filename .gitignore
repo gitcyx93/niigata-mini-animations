@@ -6,3 +6,13 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+# Generated recordings, previews and inspection reports stay local.
+output/**
+!output/**/
+!output/**/*.md
+!output/README.txt
+.cache/
+test-results/
+playwright-report/
+*.tmp

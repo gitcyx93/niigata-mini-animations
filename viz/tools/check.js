@@ -1,80 +1,55 @@
-// 改完页面后的检查：一条命令跑完，只输出几行结果。
-// 用法：NODE_PATH=/opt/node22/lib/node_modules node viz/tools/check.js <页面.html> [选项]
-//   --strip <输出.png>   全片缩略图（每 0.5 秒一格），用来看节奏、构图和文字
-//   --at <秒,秒,...>     另外输出这几个时刻的全尺寸截图（<输出>-<秒>.png，和 --strip 一起用）
-//   --compare <旧.html>  逐像素对比两个页面（改了 series.js 后，确认其他集没被改到）
-// 检查内容：报错；字体是否加载；单独打开（复制到空目录）能否运行；首尾接缝是否和普通相邻两帧一样平滑；每帧耗时。
-const { chromium } = require('playwright');
-const path = require('path'), fs = require('fs'), os = require('os');
-
-const args = process.argv.slice(2), page = path.resolve(args[0]);
-const opt = k => { const i = args.indexOf(k); return i > 0 ? args[i + 1] : null; };
-
-async function open(browser, file) {
-  const p = await browser.newPage({viewport: {width: 1080, height: 1920}});
-  const errs = [];
-  p.on('pageerror', e => errs.push(e.message));
-  p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
-  await p.goto('file://' + file + '?record');
-  await p.waitForFunction('window.READY === true', null, {timeout: 30000}).catch(() => errs.push('页面没有就绪（READY 没有变成 true）'));
-  return {p, errs};
-}
+#!/usr/bin/env node
+'use strict';
+// Compatibility entry point; inspection and browser startup share the current tools.
+const fs = require('node:fs'), path = require('node:path');
+const {spawnSync} = require('node:child_process');
+const {ROOT} = require('./lib/catalog.cjs');
+const {launchBrowser, openAnimation, assertNoPageErrors} = require('./lib/browser.cjs');
 
 (async () => {
-  const browser = await chromium.launch();
-  // 1) 单独打开：复制到一个空目录，确认不依赖其他文件（series.js 和字体都已嵌入）
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'chk-')), alone = path.join(dir, path.basename(page));
-  fs.copyFileSync(page, alone);
-  const {p, errs} = await open(browser, alone);
-  const r = await p.evaluate(() => {
-    const T = window.LOOP_SECONDS, c = document.getElementById('c'), x = c.getContext('2d');
-    const grab = t => { render(t); return x.getImageData(0, 0, c.width, c.height).data; };
-    const diff = (a, b) => { let s = 0; for (let i = 0; i < a.length; i += 16) s += Math.abs(a[i] - b[i]); return s / (a.length / 16); };
-    const d = 1 / 30, f0 = grab(T - d), f1 = grab(0), f2 = grab(d);
-    const cost = [];
-    for (let k = 0; k < 10; k++) { const t = T * k / 10, s = performance.now(); render(t); x.getImageData(0, 0, 1, 1); cost.push(performance.now() - s); }
-    const fonts = [...document.fonts].map(f => f.family + ':' + f.status).filter((v, i, a) => a.indexOf(v) === i);
-    return {T, seam: diff(f0, f1), step: diff(f1, f2), avg: cost.reduce((a, b) => a + b) / cost.length, max: Math.max(...cost), fonts};
-  });
-  const bad = r.fonts.filter(f => !f.endsWith(':loaded'));
-  console.log(`报错：${errs.length ? errs.join(' | ') : '无'}（单独打开测试）`);
-  console.log(`字体：${bad.length ? '未加载 ' + bad.join(', ') : '全部加载'}`);
-  console.log(`首尾接缝：${r.seam.toFixed(2)}，普通相邻两帧 ${r.step.toFixed(2)}（${r.seam < r.step * 2.5 ? '无缝' : '有跳变'}）`);
-  console.log(`每帧耗时：平均 ${r.avg.toFixed(0)} ms，最慢 ${r.max.toFixed(0)} ms`);
-
-  // 2) 全片缩略图 + 指定时刻的截图
-  const strip = opt('--strip');
-  if (strip) {
-    const png = await p.evaluate(T => {
-      const c = document.getElementById('c'), n = Math.round(T / .5), cols = 10, w = 216, h = 384;
-      const s = document.createElement('canvas'); s.width = cols * w; s.height = Math.ceil(n / cols) * (h + 24);
-      const x = s.getContext('2d'); x.fillStyle = '#08090f'; x.fillRect(0, 0, s.width, s.height); x.font = '16px sans-serif';
-      for (let i = 0; i < n; i++) {
-        render(i * .5); const X = (i % cols) * w, Y = Math.floor(i / cols) * (h + 24);
-        x.drawImage(c, X, Y + 24, w, h); x.fillStyle = '#dde4f0'; x.fillText((i * .5) + 's', X + 6, Y + 17);
-      }
-      return s.toDataURL('image/png');
-    }, r.T);
-    fs.writeFileSync(strip, Buffer.from(png.split(',')[1], 'base64'));
-    console.log(`缩略图：${strip}`);
-    for (const t of (opt('--at') || '').split(',').filter(Boolean)) {
-      await p.evaluate(t => render(t), +t);
-      const f = strip.replace(/\.png$/, '') + `-${t}.png`;
-      await p.locator('#c').screenshot({path: f});
-      console.log(`截图：${f}`);
+  const args=process.argv.slice(2), options={};
+  if (!args.length || args.includes('--help')) {
+    console.log('Usage: node viz/tools/check.js <page.html> [--strip output/frames.png] [--at 0,4,12] [--compare old.html]');
+    if (!args.length) process.exitCode=1;
+    return;
+  }
+  const file=path.resolve(args.shift());
+  for(let i=0;i<args.length;i++) {
+    if (!['--strip','--at','--compare'].includes(args[i]) || !args[i+1] || args[i+1].startsWith('--')) throw Error('Invalid option: '+args[i]);
+    options[args[i].slice(2)]=args[++i];
+  }
+  const report=path.join(ROOT,'output/checks',path.basename(file,'.html')+'-inspection.json');
+  const forwarded=[path.join(__dirname,'inspect-animation.cjs'),file,'--out',report];
+  if(options.at) forwarded.push('--times',options.at);
+  if(options.compare) forwarded.push('--compare',options.compare);
+  const result=spawnSync(process.execPath,forwarded,{stdio:'inherit'});
+  if(result.error) throw result.error;
+  if(result.status!==0) {process.exitCode=result.status||1;return;}
+  if(!options.strip) return;
+  const output=path.resolve(options.strip);
+  if(path.extname(output)!=='.png') throw Error('--strip must end in .png');
+  if(output.startsWith(ROOT+path.sep)&&!output.startsWith(path.join(ROOT,'output')+path.sep)) throw Error('Save generated images under output/');
+  const browser=await launchBrowser({pixelStable:true});
+  let opened;
+  try {
+    opened=await openAnimation(browser,file);
+    const {page,metadata,errors}=opened;
+    const png=await page.evaluate(duration=>{
+      const source=document.getElementById('c'),count=Math.ceil(duration/.5),columns=10,w=216,h=Math.round(w*source.height/source.width);
+      const canvas=document.createElement('canvas');canvas.width=columns*w;canvas.height=Math.ceil(count/columns)*(h+24);
+      const context=canvas.getContext('2d');context.fillStyle='#08090f';context.fillRect(0,0,canvas.width,canvas.height);context.font='16px sans-serif';
+      for(let i=0;i<count;i++) {window.render(i*.5);const x=i%columns*w,y=Math.floor(i/columns)*(h+24);context.drawImage(source,x,y+24,w,h);context.fillStyle='#dde4f0';context.fillText(i*.5+'s',x+6,y+17);}
+      return canvas.toDataURL('image/png').split(',')[1];
+    },metadata.duration);
+    assertNoPageErrors(errors);
+    fs.mkdirSync(path.dirname(output),{recursive:true});fs.writeFileSync(output,Buffer.from(png,'base64'));
+    for(const text of (options.at||'').split(',').filter(Boolean)) {
+      const time=Number(text);
+      if(!Number.isFinite(time)||time<0||time>=metadata.duration) throw Error('Invalid sample time: '+text);
+      await page.evaluate(t=>window.render(t),time);
+      await page.locator('#c').screenshot({path:output.slice(0,-4)+'-'+time+'.png'});
     }
-  }
-
-  // 3) 和另一个页面逐像素对比
-  const other = opt('--compare');
-  if (other) {
-    const q = await open(browser, path.resolve(other));
-    const ts = [0, 1, 5, 9.4, 12.1, 16, 19.7].filter(t => t < r.T);
-    const a = await p.evaluate(ts => ts.map(t => { render(t); return document.getElementById('c').toDataURL(); }), ts);
-    const b = await q.p.evaluate(ts => ts.map(t => { render(t); return document.getElementById('c').toDataURL(); }), ts);
-    const diffAt = ts.filter((t, i) => a[i] !== b[i]);
-    console.log(`对比 ${path.basename(other)}：${diffAt.length ? '这些时刻不同 ' + diffAt.join(', ') : '完全一致'}`);
-  }
-  await browser.close();
-  fs.rmSync(dir, {recursive: true, force: true});
-})();
+    assertNoPageErrors(errors);
+    console.log(output);
+  } finally {if(opened)await opened.context.close();await browser.close();}
+})().catch(error=>{console.error(error.message);process.exitCode=1;});

@@ -4,6 +4,8 @@
 const fs = require('node:fs'), path = require('node:path');
 const crypto = require('node:crypto'), {spawnSync} = require('node:child_process');
 const {pathToFileURL} = require('node:url');
+const {launchBrowser, browserOptions} = require('./lib/browser.cjs');
+const {reportPath, writeReport} = require('./lib/reports.cjs');
 const MAX_SAMPLES = 60, VIEWPORT = {width: 1080, height: 1920};
 const HELP = `Usage: node viz/tools/inspect-animation.cjs <page.html> [options]
   --times 0,3.2,10       Explicit sample times in seconds (0 <= t < duration)
@@ -38,7 +40,7 @@ function options(argv) {
     o[key] = path.resolve(o[key]);
     if (!fs.statSync(o[key]).isFile()) throw Error('Not a file: ' + o[key]);
   }
-  if (o.out) o.out = path.resolve(o.out);
+  if (o.out) o.out = reportPath(o.out, 'niigata-animation-inspection');
   if (o.out === o.file || o.out === o.compare) throw Error('--out must not overwrite an input');
   return o;
 }
@@ -184,7 +186,7 @@ function compare(current, baseline) {
 
 (async () => {
   let opt, browser;
-  const report = {schemaVersion: 2, createdAt: new Date().toISOString(), status: 'failed',
+  const report = {type: 'niigata-animation-inspection', schemaVersion: 2, createdAt: new Date().toISOString(), status: 'failed',
     scope: {sampled_only: true, audio_not_tested: true, visual_quality_not_judged: true,
       continuous_playback_not_tested: true, standalone_offline_not_tested: true,
       missing_capability_is_not_a_pass: true, pixel_hash: 'SHA-256 of all RGBA bytes'},
@@ -195,10 +197,8 @@ function compare(current, baseline) {
     if (opt.help) {console.log(HELP); return;}
     // Repeated pixel readbacks can change the accelerated Canvas raster path.
     // Keep 2D pixel comparisons on one backend without disabling WebGL scenes.
-    const args = JSON.parse(process.env.BROWSER_ARGS || '["--disable-accelerated-2d-canvas"]');
-    if (!Array.isArray(args) || args.some(a => typeof a !== 'string')) throw Error('BROWSER_ARGS must be a JSON string array');
-    const {chromium} = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
-    browser = await chromium.launch({headless: true, executablePath: process.env.BROWSER_EXE || undefined, args});
+    const args = browserOptions({pixelStable: true}).args;
+    browser = await launchBrowser({pixelStable: true});
     report.environment.browser = browser.version(); report.environment.browserArgs = args;
     report.environment.canvas2DPolicy = args.includes('--disable-accelerated-2d-canvas') ? 'software-requested' : 'browser-default';
     report.current = await inspect(browser, opt.file, opt.times);
@@ -211,7 +211,7 @@ function compare(current, baseline) {
   finally {if (browser) await browser.close();}
   const json = JSON.stringify(report, null, 2) + '\n';
   if (opt?.out) {
-    fs.mkdirSync(path.dirname(opt.out), {recursive: true}); fs.writeFileSync(opt.out, json);
+    writeReport(opt.out, report);
     console.log(JSON.stringify({status: report.status, sampleCount: report.current?.samples.length || 0,
       matches_at_samples: report.comparison?.matches_at_samples ?? null, report: opt.out}));
   } else process.stdout.write(json);

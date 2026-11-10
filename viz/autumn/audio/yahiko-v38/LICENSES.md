@@ -4,7 +4,7 @@ This is sound design, not a field recording made in Yahiko. No background music.
 
 ## Reused V25 B mix and stems
 
-The existing `output/autumn/yahiko-v25-sound-review/02-B-water.m4a` is retained through 24.6 seconds. The extra town duration uses the original quiet ambience and the existing small-water stem, without repeating the wind-chime strike.
+The approved V25 B mix is stored in `sources/v25-b-water.m4a` and retained through 24.6 seconds. The extra town duration uses the original quiet ambience and the existing small-water stem, without repeating the wind-chime strike.
 
 | Sound | Author | Source | License |
 |---|---|---|---|
@@ -57,12 +57,6 @@ The English and Traditional Chinese social exports use the ambience-only `master
 
 The already approved `bird-01.flac` and `bird-02.flac` phrases (rawhiteman7, CC0, listed above) are reused quietly at 21.6s, 22.7s, 25.1s and 26.25s in the town scene, avoiding the 23.45s cat cue. Bird species has not been identified; “cuckoo-like” is a listening description, not a claim about the source species. Background bird calls embedded in the original forest bed are not separately isolated stems and should be listed as part of that bed.
 
-## Historical temporary reference music (not used in the release)
-
-`music.wav` is an original programmatically synthesized felt-piano-like / warm-pad sketch, approximately 69 BPM, with no drums, vocals or third-party song samples. It is a style and mix-level reference, not a recording of an acoustic piano or a licensed commercial track.
-
-`effects.wav` retains the music-free sound design. `master.wav` combines it with the reference sketch. The previously approved music gain is frozen (music RMS about -45.66dBFS), including gentle ducking around bells, cat and gusts. After replacing the louder summit wind, whole-clip effects RMS is about -40.39dBFS, so their average difference is now about 5.28dB; the music itself was not turned up. These are measured RMS levels, not a claim of LUFS normalization or platform loudness compliance.
-
 ## New cat sound
 
 **Kitten Meow — Mike Koenig**, SoundBible, **Creative Commons Attribution 3.0**.
@@ -75,6 +69,6 @@ The already approved `bird-01.flac` and `bird-02.flac` phrases (rawhiteman7, CC0
 
 The two additional wind-leaf accents reuse the existing edited leaves recording. The final accent wraps across the 27.8s/0s cut. No new synthesized animal vocalization is used.
 
-Existing source license records: `viz/autumn/audio/yahiko-v24/LICENSES.md` and `reference/yahiko-v25/sound-candidates-v1/manifest.json`. CC0: https://creativecommons.org/publicdomain/zero/1.0/
+Original source records are retained in [legacy-v24-LICENSES.md](sources/legacy-v24-LICENSES.md), [legacy-v25-candidates.json](sources/legacy-v25-candidates.json) and [legacy-v25-edits.json](sources/legacy-v25-edits.json). Those records describe their original candidate stage. The current input paths and SHA-256 hashes are in [sources/manifest.json](sources/manifest.json). CC0: https://creativecommons.org/publicdomain/zero/1.0/
 
 Audio attribution must accompany publication (for example in the video description). This notice does not relicense the animation, fonts or other repository material.

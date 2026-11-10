@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "masterGainDb": 0,
+  "sources": {
+    "base": "sources/v25-b-water.m4a",
+    "quiet": "sources/v25-quiet.m4a",
+    "leaves": "sources/leaves-soft.wav",
+    "water": "sources/water.m4a",
+    "ropeway": "sources/ropeway.m4a",
+    "cat": "cat-source.mp3",
+    "windchime": "windchimes-source.ogg",
+    "window": "window-source.mp3",
+    "sea": "sea-source.ogg",
+    "bird1": "sources/bird-01.flac",
+    "bird2": "sources/bird-02.flac"
+  },
+  "levels": {
+    "base": {
+      "enabled": true,
+      "gainDb": 0
+    },
+    "quiet": {
+      "enabled": true,
+      "gainDb": 0
+    },
+    "leaves": {
+      "enabled": true,
+      "gainDb": 0
+    },
+    "water": {
+      "enabled": true,
+      "gainDb": 0
+    },
+    "ropeway": {
+      "enabled": true,
+      "gainDb": 0
+    },
+    "cat": {
+      "enabled": true,
+      "gainDb": 0
+    },
+    "windchime": {
+      "enabled": true,
+      "gainDb": 0
+    },
+    "window": {
+      "enabled": true,
+      "gainDb": 0
+    },
+    "sea": {
+      "enabled": true,
+      "gainDb": 0
+    },
+    "bird1": {
+      "enabled": true,
+      "gainDb": 0
+    },
+    "bird2": {
+      "enabled": true,
+      "gainDb": 0
+    },
+    "forest": {
+      "enabled": true,
+      "gainDb": 0
+    }
+  }
+}
