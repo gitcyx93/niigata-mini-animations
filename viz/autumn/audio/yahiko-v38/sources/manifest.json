@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "migrationCommit": "28cc9f540ea0481c4dd721d12da19121eb152048",
+  "files": {
+    "base": {
+      "file": "sources/v25-b-water.m4a",
+      "sha256": "37cc4579aba45093718d0904c6ab5df7b6921c2e43069f0de7800f36edf3d9d5",
+      "bytes": 597679,
+      "previousPath": "output/autumn/yahiko-v25-sound-review/02-B-water.m4a"
+    },
+    "leaves": {
+      "file": "sources/leaves-soft.wav",
+      "sha256": "fb45bd7dab1e469ef28ab4ca03057fe11c26ef7baca55026e9a556be83ab3e7d",
+      "bytes": 691244,
+      "previousPath": "reference/yahiko-v25/sound-candidates-v1/edited-v1/02-leaves-soft.wav"
+    },
+    "water": {
+      "file": "sources/water.m4a",
+      "sha256": "df00c28b582b8ee05eafaa7dbb0849a6fdd0489dedf70c11eca45d18cd83a5fe",
+      "bytes": 100423,
+      "previousPath": "output/autumn/yahiko-v25-sound-review/stems/water.m4a"
+    },
+    "ropeway": {
+      "file": "sources/ropeway.m4a",
+      "sha256": "73466c025e053e1114e581636d80603eacd04200d3f519a95308202e7bb02d92",
+      "bytes": 77707,
+      "previousPath": "output/autumn/yahiko-v25-sound-review/stems/ropeway.m4a"
+    },
+    "bird1": {
+      "file": "sources/bird-01.flac",
+      "sha256": "53225819ef5cfa0dd88f7342f387da85e96570b08c90c09e29f4f927f2087b80",
+      "bytes": 31250,
+      "previousPath": "viz/autumn/audio/yahiko-v18/stems/bird-01.flac"
+    },
+    "bird2": {
+      "file": "sources/bird-02.flac",
+      "sha256": "fe966a0b985a69253b705974f24eafe6cff454f6b493459824059bd1a086d1d1",
+      "bytes": 26086,
+      "previousPath": "viz/autumn/audio/yahiko-v18/stems/bird-02.flac"
+    },
+    "quiet": {
+      "file": "sources/v25-quiet.m4a",
+      "sha256": "f4f0ae65c07b95147ef338eb9230248183ce8eb66aebc4f11555f149fb313e18",
+      "bytes": 729580,
+      "previousPath": "viz/autumn/yahiko-v25-sound.html#yahiko-audio-data",
+      "extraction": "Decoded the existing base64 payload without audio transcoding."
+    },
+    "cat": {
+      "file": "cat-source.mp3",
+      "sha256": "a46b66da00861483e030cd89ce9870f6b8e22b4f618889c81900db89457f2b62",
+      "bytes": 15060
+    },
+    "windchime": {
+      "file": "windchimes-source.ogg",
+      "sha256": "5d93b31e9a40d0de54daeb97ffbaa1f12b56ab97710bf9bc196b8efe16a7da09",
+      "bytes": 48798
+    },
+    "window": {
+      "file": "window-source.mp3",
+      "sha256": "a069c0c4b2f61bcd0ea38d2cf0be032bad08372af52d341c9149d78b037caad0",
+      "bytes": 47912
+    },
+    "sea": {
+      "file": "sea-source.ogg",
+      "sha256": "2a56648817264b6caa30426baa2245a03041b1febe9faa7b9235d7cc539aa9ca",
+      "bytes": 2849514
+    }
+  }
+}

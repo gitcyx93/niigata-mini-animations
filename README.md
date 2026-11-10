@@ -1,112 +1,88 @@
 # Niigata Mini Animations
 
-新潟小动画：用网页绘制的新潟旅行短片。高田夜樱、长冈花火、弥彦红叶与山海、越后汤泽滑雪和温泉。
+用网页绘制的新潟旅行短片，以及可重复使用的制作工具。当前维护弥彦、高田、长冈和越后汤泽；作品与语言入口统一记录在 [`animations.json`](animations.json)。
 
-这是**动画作品与制作工程**，不是统计看板。2026-11-02 从旧数据仓库（现名 [`gitcyx93/niigata-data-archive`](https://github.com/gitcyx93/niigata-data-archive)）的动画工作分支迁出。
+## 当前作品
 
-2026-11-07 用户已撤销迁移时的全量历史留存要求：旧稿、视频、比较材料与旧分支不再因迁移文档而必须保留。下列历史入口仅说明现有文件，不代表保留要求；后续清理按用户当前指示进行。
-
-## 从这里打开
-
-GitHub 文件页显示源码，不会直接播放 HTML。克隆或下载本仓库后，双击下面的 HTML；也可以在仓库根目录运行 `python3 -m http.server 8000`，通过 `http://localhost:8000/viz/` 打开。
-
-| 季节 | 作品入口 | 说明 |
+| 作品 | 页面 | 时长 |
 |---|---|---|
-| 春 | [高田夜樱 v2](viz/spring/takada-yozakura-v2.html) · [台湾繁体](viz/spring/takada-yozakura-v2-tw.html) | 当前 v2 页面与新稿 |
-| 夏 | [长冈花火 A](viz/summer/nagaoka-hanabi-a.html) · [台湾繁体](viz/summer/nagaoka-hanabi-a-tw.html) | 保留原已发布版本，不改画面或文案 |
-| 秋 | [弥彦 V38](viz/autumn/yahiko-v38.html) · [English](viz/autumn/yahiko-v38-en.html) · [繁體](viz/autumn/yahiko-v38-tw.html) | 27.8 秒首尾循环，红叶谷与温泉街风叶互动；环境音、海浪、风铃、鸟鸣、猫叫与窗框声，**无配乐** |
-| 冬 | [越后汤泽](viz/winter/yuzawa-yukiguni.html) · [台湾繁体](viz/winter/yuzawa-yukiguni-tw.html) | 三维滑雪、SNS 运镜与新稿；保留原 20 秒循环 |
+| 弥彦 V38 | [简体](viz/autumn/yahiko-v38.html) · [English](viz/autumn/yahiko-v38-en.html) · [繁體](viz/autumn/yahiko-v38-tw.html) | 27.8 秒，环境音，无配乐 |
+| 高田夜樱 v2 | [简体](viz/spring/takada-yozakura-v2.html) · [繁體](viz/spring/takada-yozakura-v2-tw.html) | 20 秒 |
+| 长冈花火 A | [简体](viz/summer/nagaoka-hanabi-a.html) · [繁體](viz/summer/nagaoka-hanabi-a-tw.html) | 20 秒，已发布版本 |
+| 越后汤泽 | [简体](viz/winter/yuzawa-yukiguni.html) · [繁體](viz/winter/yuzawa-yukiguni-tw.html) | 20 秒，含三维滑雪 |
 
-### 弥彦 V38：当前版本
+页面内嵌绘制代码和字体。弥彦播放声音还需同目录下的 `audio/yahiko-v38/`；保留整个目录或使用本地预览服务。
 
-- [完整动画](viz/autumn/yahiko-v38.html) · [本轮记录](stories/yahiko-v38.md) · [音效来源与授权](viz/autumn/audio/yahiko-v38/LICENSES.md)。
-- 保留 `viz/autumn/audio/yahiko-v38/` 目录；运行 `node viz/tools/preview-yahiko-v38.cjs` 后打开 **http://127.0.0.1:8941/yahiko**。点击“有声播放”，可按时间表单听音效。英文预览 `/en`，繁体预览 `/tw`。
-- 英文与繁体发布 MP4 正在本地录制，按用户要求稍后单独上传；当前先发布双语网页、无配乐母带及制作源码。目标规格：1080×1920、30fps、H.264＋AAC、27.8 秒。
-- [发布说明与音效署名](output/autumn/yahiko-v38-social/PUBLISHING.md)。下方 v16/v25 视频是历史版本，不要误用。
-- [纯音效／发布母带](viz/autumn/audio/yahiko-v38/master.wav) · [混音参数](viz/autumn/audio/yahiko-v38/mix.json)。
-- [快改流程与已确认经验](docs/YAHIKO_ITERATION.md)。
+## 开始制作
 
-### 弥彦 v16：历史视频与声音源码
+Node.js 22+；`.nvmrc` 指定 Node 24。依赖版本由 `package-lock.json` 锁定。
 
-画面修订与字幕来源见 [v16 修订记录](stories/yahiko-v16-travel.md)；声音及导出范围见 [环境音版记录](stories/yahiko-v16-travel-sound.md)。
+```sh
+npm ci
+npx playwright install chromium
+npm run dev
+```
 
-- [v16 MP4（无声）](output/autumn/yahiko-v16-travel/yahiko-v16-travel-silent.mp4)
-- [v16 画面＋环境音 MP4](output/autumn/yahiko-v16-travel/yahiko-v16-travel-ambience.mp4)：22.8 秒，1080×1920，30fps。
-- [声音配置 `mix.json`](viz/autumn/audio/yahiko-v16-travel/mix.json)：能直接看到音轨、素材来源、音量和鸟鸣时间点。
-- [声音播放／同步代码](viz/autumn/yahiko-v16-travel-sound.js) · [分轨、重建说明与授权](viz/autumn/audio/yahiko-v16-travel/README.md)
+打开 **http://127.0.0.1:8941/** 选择作品和语言。旧的 `/yahiko`、`/en`、`/tw` 入口仍可用；`npm run dev -- --port 8000` 可改端口。只看页面无需安装制作依赖。
 
-环境音 HTML 已内嵌音频，下载后可以独立打开，点击“有声播放”才出声。浏览器使用同一音频时钟驱动画面，支持暂停、拖动、章节跳转、音量、静音及循环。
+| 命令 | 用途 |
+|---|---|
+| `npm run build` | 从 V38 源码生成三种语言的独立 HTML |
+| `npm run build:check` | 检查生成页面是否与源码一致，不写文件 |
+| `npm run check` | 检查当前 9 个页面的脚本、字体、画布尺寸、时长与采样渲染 |
+| `npm run check -- --id yuzawa` | 只检查一部作品，包含三维滑雪时段 |
+| `npm run check -- --static` | 不启动浏览器，检查入口、素材和脚本语法 |
+| `npm run inspect -- <页面.html> --times 0,5,13,25` | 输出指定时间的状态、像素哈希与渲染耗时 |
+| `npm run record -- yahiko --locale en --out output/yahiko-en.mp4` | 确定性逐帧导出；弥彦自动使用已认可音轨 |
+| `npm run build:audio` | 按当前声音配置重建试听，写入 `output/audio/yahiko-v38/` |
+| `npm test` | 运行预览、输出保护与录制参数的工具测试 |
 
-其他版本：
+导出 MP4 需要 `ffmpeg` 和 `ffprobe`；声音重建在浏览器不支持源编码时也会调用 FFmpeg。`FFMPEG`、`FFPROBE` 可指定可执行文件。已有浏览器或 Playwright 可通过 `BROWSER_EXE`、`BROWSER_CHANNEL`、`PLAYWRIGHT_MODULE` 使用；`BROWSER_ARGS` 接受 JSON 字符串数组。
 
-- **弥彦 v25 完整动画：[环境音 MP4](output/autumn/yahiko-v25/yahiko-v25-ambience.mp4) · [无声 MP4](output/autumn/yahiko-v25/yahiko-v25-silent.mp4)**，24.6 秒、1080×1920、30fps。基于 v24，以原片 Canvas 插画画风重画最后 4 秒，第三张参考图仅用于布局，不作背景贴图；[可编辑无声页面](viz/autumn/yahiko-v25.html) · [环境音页面](viz/autumn/yahiko-v25-sound.html) · [说明](stories/yahiko-v25.md)。仅小镇旁白改为泛称弥彦温泉，前段场景及原环境音保留；新风铃等候选另行下载，尚未混入。
+原有 Python 字体、繁体转换及汤泽环境音工具继续保留，分别需要 `fonttools` / `brotli`、`opencc-python-reimplemented`、`numpy`；它们是可选工具，V38 的普通构建不依赖 Python、OpenCC 或在线字体下载。
 
-- [原始弥彦 v16](viz/autumn/yahiko-v16.html)：历史对照入口。
+## V38 的可编辑源码
 
-- [弥彦 v11 精修](viz/autumn/yahiko-v11-refined.html) · [对应台湾繁体](viz/autumn/yahiko-v11-refined-tw.html)：繁体版不是 v16 的翻译。
-- [弥彦 v12](viz/autumn/yahiko-v12.html) · [对应台湾繁体](viz/autumn/yahiko-v12-tw.html)、[v13](viz/autumn/yahiko-v13.html) · [对应台湾繁体](viz/autumn/yahiko-v13-tw.html)、[v14](viz/autumn/yahiko-v14.html)、[v15](viz/autumn/yahiko-v15.html)：历史比较入口，不代表当前最终版本。
-- [佐渡木盆船](viz/summer/sado-taraibune.html)：早期试作。
-- [汤泽日文试作](viz/winter/yuzawa-yukiguni-ja.html)：已有历史版本，不代表系列改为维护日文。
-- 各季目录中还存在其他旧版；不同分支的试作不一定已经合入当前版本。
+入口在 [`src/yahiko-v38/`](src/yahiko-v38/README.md)：
 
-## 文件放在哪里
+- `animation.js`：场景、时间轴、叶片和对象运动。
+- `player.js`：播放、音频时钟与控制。
+- `page.html`、`styles.css`：页面壳与界面。
+- `series.js`：当前作品认可的系列绘制快照。
+- `locales/*.json`：已批准的语言差异与字体清单。
+- `fonts/`：按内容去重的内嵌字体原件。
+
+编辑源码后运行 `npm run build`。生成的 `viz/autumn/yahiko-v38*.html` 保留原有独立页面格式。语言差异采用精确匹配，源段落改变却未更新对应语言时会停止构建，避免静默改错。通用 `viz/common/series.js` 与此作品快照各有用途，不要直接互相覆盖。
+
+落叶轨迹按原来的固定时间步计算并缓存。拖动、倒放检查和随机时间采样仍返回同一状态；缓存有固定上限。
+
+其他三部作品继续使用其既有源文件。`npm run build:ski` 重建汤泽嵌入的 Three.js 场景；此命令沿用该画面所用的 Three.js / esbuild 版本。
+
+## 声音与发布
+
+V38 的 [声音目录](viz/autumn/audio/yahiko-v38/README.md) 收齐了实际使用的原料、[来源与授权](viz/autumn/audio/yahiko-v38/LICENSES.md) 和 [可执行混音配置](viz/autumn/audio/yahiko-v38/build-config.json)。构建不再从旧提交、旧 HTML 或旧视频目录提取原料。
+
+- `build-config.json` 控制每层开关、增益和总增益；`mix.json` 是已认可母带的生成记录。
+- 默认重建产生独立试听文件。明确更新成品时才使用 `npm run build:audio -- --update-release`。
+- `npm run record:yahiko` 导出英文、繁体；`-- --locales zh,en,tw` 导出三种语言。
+- 导出采用固定帧时刻、H.264/AAC、yuv420p、BT.709 和 fast-start；FFprobe 检查后才发布目标文件。
+- 已有视频需 `--force` 才替换。失败时保留原成品；每个新视频附带来源哈希、版本和媒体验证 JSON。
+- 发布署名见 [`output/autumn/yahiko-v38-social/PUBLISHING.md`](output/autumn/yahiko-v38-social/PUBLISHING.md)。
+
+## 目录与维护
 
 | 路径 | 内容 |
 |---|---|
-| `viz/spring/`、`summer/`、`autumn/`、`winter/` | 动画 HTML 及独立场景源文件 |
-| `viz/common/series.js` | 系列共用绘制代码 |
-| `viz/tools/` | 字体内嵌、繁体转换、构建、检查与录制工具 |
-| `stories/` | 每集调研、分镜、文案和试作记录 |
-| `data/` | 事实来源与研究用数据快照；保留原出处与核验提醒 |
-| `reference/` | 动画比较图、播放采样与旧检查结果，不是作品入口 |
-| `output/` | 已有 MP4、发布文案与评审预览 |
-| `docs/` | 迁移记录与本次检查结果 |
+| `src/` | 可编辑的 V38 源码与共享字体资源 |
+| `viz/` | 当前独立页面、其他作品源文件、有效音频与工具 |
+| `stories/` | 调研、分镜、用户意见与制作记录 |
+| `data/` | 事实来源与系列资料 |
+| `reference/` | 实际照片参考及第三方许可证 |
+| `output/` | 保留的已发布成品、发布文案；新导出与检查结果默认不进 Git |
+| `docs/` | 制作约定、检查说明及迁移事实 |
 
-原统计看板 `dashboard/`、它的 `scripts/` 和 `reference/niigata-cinema-zh.html` **不属于本项目的当前工作树**；迁移时它们位于原数据仓库及历史提交中。
+修改作品前读 [`CLAUDE.md`](CLAUDE.md) 与 [`docs/YAHIKO_ITERATION.md`](docs/YAHIKO_ITERATION.md)。本次技术整理保留这些既有规则。长冈已发布版本、汤泽时长、V38 字幕和已认可音轨继续按原约定处理。
 
-清理文件或调整 `viz/` 路径时，需同步实际使用的生成脚本与文档引用。
+2026-11-10 清理移除了已被替代的弥彦版本、旧视频与音频副本、一次性比较图、历史专用检查/构建器及未使用的统计看板数据。原始资料、用户意见和已发布长冈/汤泽 MP4 保留。历史文件可从清理前提交 `28cc9f540ea0481c4dd721d12da19121eb152048` 找回；旧记录中的路径按当时提交解读。
 
-## 使用与制作
-
-- **看动画无需安装依赖**。本次入口页面的字体和运行代码均已内嵌；验证范围见 [检查结果](docs/migration-check.json)。
-- 修改作品前读 [`CLAUDE.md`](CLAUDE.md) 与该集的 `stories/` 记录。迁移没有重新确认旧文档中的待办、最终版本选择或发布状态。
-- 原系列共用代码更新后，按对应版本说明重新内嵌；不要用旧的公共生成流程覆盖独立版本。
-- 工具要求 Node.js 22+、Python 3；录制还需要 FFmpeg、Playwright 与 Chromium。字体处理需要 `fonttools` / `brotli`。三维构建及繁体生成的精确依赖见相应脚本和制作记录，**仅观看时不需要安装**。
-- 某些历史检查工具通过 `git show <旧提交>:<文件>` 做回归比较；本仓库保留原提交，因此这些基线仍可访问。旧检查结果是当时的证据，不代表本次全部重跑。
-
-```sh
-# 无 npm 依赖的原三集脚本/字体检查；需要本机 Chrome/Chromium
-node viz/tools/check-copy-pages.cjs
-
-# 使用其他 Chrome/Chromium 路径
-BROWSER_EXE=/path/to/chrome node viz/tools/check-copy-pages.cjs
-```
-
-### 重建弥彦声音与视频
-
-V38 语言版：`NODE_PATH=/path/to/font-and-opencc/node_modules node viz/tools/build-yahiko-v38-locales.cjs`。发布录制：`PLAYWRIGHT_MODULE=/path/to/playwright FFMPEG=/path/to/ffmpeg node viz/tools/record-yahiko-v38-social.cjs`（已有输出须显式加 `--force`）。
-
-V38 声音：已有 Playwright 安装时运行 `PLAYWRIGHT_MODULE=/path/to/playwright node viz/tools/build-yahiko-v38-audio.cjs`；快速检查为 `node viz/tools/check-yahiko-v38-loop.cjs`。其音频构建使用浏览器解码与 WAV 输出，不需要 FFmpeg。
-
-以下命令针对历史 v16，不能用于覆盖 V38。需要 Python 3、FFmpeg；浏览器检查和录制另需可解析的 `playwright` 包及浏览器（可用 `BROWSER_EXE` 指定本机 Chrome）。
-
-```sh
-# 从已剪辑的无损分轨重建混音和独立有声 HTML
-python3 viz/tools/build-yahiko-travel-sound.py
-# 画面一致性、声音媒体时钟、完整播放和控制检查
-node viz/tools/check-yahiko-sound.cjs
-# 同时导出无声与环境音 MP4；--force 仅替换这两个生成的视频
-node viz/tools/record-yahiko-sound.cjs --force
-```
-
-`mix.json` 的 `start_seconds`、`gain_db`、`enabled` 和 `master_gain_db` 会实际影响重建；`baked_processing` 是已经应用到分轨的处理说明，不会被重复执行。
-
-## 版本与来源
-
-- 主分支以源仓库 `519ec9a3a5e9a2208cd65f8c6b6d48e6cbe5cd8a` 为迁移基线；没有用落后的源仓库 `main` 覆盖动画。
-- 迁移时的 8 个源分支 tip 记录在 `archive/source/*` 标签中；这是迁移快照，不是当前工作分支清单，也不是继续保留旧分支的要求。当前分支以 GitHub 实际列表为准。
-- 恢复示例：`git fetch --tags origin`，再执行 `git switch --detach refs/tags/archive/source/gpt/yahiko-v11-refine`。
-- [迁移说明与完整分支映射](docs/MIGRATION.md)
-- [迁移前的项目 README](https://github.com/gitcyx93/niigata-mini-animations/blob/519ec9a3a5e9a2208cd65f8c6b6d48e6cbe5cd8a/README.md)
-
-本仓库未新增许可证；作品、字体和第三方库的权利及许可声明保持原状。
+持续检查仅针对当前作品与制作工具，不重新生成视频或音轨。仓库未新增作品许可证，字体、第三方库和声音的许可声明继续保留。[迁移事实](docs/MIGRATION.md) · [检查工具说明](docs/AI_INSPECTION.md)

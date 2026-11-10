@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "animations": [
+    {
+      "id": "yahiko",
+      "title": "弥彦 V38",
+      "duration": 27.8,
+      "width": 1080,
+      "height": 1920,
+      "source": "src/yahiko-v38",
+      "locales": {
+        "zh": { "page": "viz/autumn/yahiko-v38.html", "audio": "viz/autumn/audio/yahiko-v38/master.wav" },
+        "en": { "page": "viz/autumn/yahiko-v38-en.html", "audio": "viz/autumn/audio/yahiko-v38/master.wav" },
+        "tw": { "page": "viz/autumn/yahiko-v38-tw.html", "audio": "viz/autumn/audio/yahiko-v38/master.wav" }
+      }
+    },
+    {
+      "id": "takada",
+      "title": "高田夜樱 v2",
+      "duration": 20,
+      "width": 1080,
+      "height": 1920,
+      "locales": {
+        "zh": { "page": "viz/spring/takada-yozakura-v2.html" },
+        "tw": { "page": "viz/spring/takada-yozakura-v2-tw.html" }
+      }
+    },
+    {
+      "id": "nagaoka",
+      "title": "长冈花火 A",
+      "duration": 20,
+      "width": 1080,
+      "height": 1920,
+      "locales": {
+        "zh": { "page": "viz/summer/nagaoka-hanabi-a.html" },
+        "tw": { "page": "viz/summer/nagaoka-hanabi-a-tw.html" }
+      }
+    },
+    {
+      "id": "yuzawa",
+      "title": "越后汤泽",
+      "duration": 20,
+      "width": 1080,
+      "height": 1920,
+      "locales": {
+        "zh": { "page": "viz/winter/yuzawa-yukiguni.html" },
+        "tw": { "page": "viz/winter/yuzawa-yukiguni-tw.html" }
+      }
+    }
+  ]
+}
