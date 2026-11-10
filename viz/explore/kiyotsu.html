@@ -22,8 +22,8 @@ const PLAN = [            // [镜头, 起, 止]（秒）
   ['arrive',  7.0,  9.8],  // 尽头的光变成半个圆
   ['half',    9.8, 11.8],  // 半圆里的峡谷
   ['reveal', 11.8, 13.2],  // 水面把圆补全
-  ['wade',   13.2, 19.6],  // 人走进水里，涟漪；四季换色
-  ['card',   19.6, 23.5],  // 片尾信息
+  ['wade',   13.2, 19.3],  // 人走进水里，涟漪；四季换色
+  ['card',   19.3, 23.5],  // 片尾信息
   ['return', 23.5, 25.0],  // 圆缩回一点光，接回开头
 ];
 const TEXT_WINDOWS = [
@@ -31,14 +31,14 @@ const TEXT_WINDOWS = [
   [4.6, 8.0, '半路，几个洞口漏进一点峡谷'],
   [9.9, 11.7, '走到头，是半个圆'],
   [12.1, 14.4, '脚下一层水，补上另外半个'],
-  [14.9, 17.3, '踩进去，圆会晃'],
-  [17.7, 19.5, '同一个圆，一年换三次颜色'],
+  [14.9, 17.0, '踩进去，圆会晃'],
+  [17.3, 19.2, '同一个圆，一年换三次颜色'],
 ];
 const ARC_WINDOWS = [
   [10.2, 12.9, '柱状节理的岩壁 · 日本三大峡谷之一'],
   [13.5, 14.9, '新绿　5月'],
-  [16.0, 17.5, '红叶　10月中旬—11月上旬'],
-  [18.8, 23.3, '雪　12月下旬—4月上旬'],
+  [16.0, 17.3, '红叶　10月中旬—11月上旬'],
+  [18.6, 23.3, '雪　12月下旬—4月上旬'],
 ];
 const CARD = {
   title: '清津峡 · 光之隧道',
@@ -79,16 +79,19 @@ const PAL = {
   skyTop: ['#9fc8dc', '#c3d3dd', '#b4bec8'], skyBot: ['#eaf4ee', '#f7ebd2', '#eef1f3'],
   far:    ['#8db5a2', '#c39a72', '#c9d1d8'], far2:   ['#a9c9b8', '#d9b98f', '#dde3e8'],
   rock:   ['#86837a', '#8c7c6e', '#7b8188'], rockD:  ['#4c4b47', '#4e423b', '#3c4147'],
-  v0:     ['#4c9a4a', '#d4522a', '#f3f5f7'], v1:     ['#86c45c', '#eda62f', '#dfe6eb'],
-  v2:     ['#2c7741', '#a52f20', '#ffffff'], v3:     ['#5fae52', '#e27a2a', '#e9eef2'],
+  v0:     ['#4c9a4a', '#cf5527', '#6f6359', '#eef1f4'], v1:     ['#8fca62', '#f0ac34', '#8a7b6c', '#ffffff'],
+  v2:     ['#2a6f3d', '#8f2a1c', '#4a423c', '#cfd7de'], v3:     ['#5fae52', '#e27a2a', '#7a6d60', '#e9eef2'],
   river:  ['#58b3a4', '#4b9aa2', '#3d6c7e'],
 };
 for (const k in PAL) PAL[k] = PAL[k].map(hex);
-const pal = (k, s) => s <= 1 ? mix3(PAL[k][0], PAL[k][1], clamp(s)) : mix3(PAL[k][1], PAL[k][2], clamp(s - 1));
+const pal = (k, s) => { const a = PAL[k];
+  if (s <= 1) return mix3(a[0], a[1], clamp(s));
+  if (a.length === 3) return mix3(a[1], a[2], clamp(s - 1));
+  return s <= 1.5 ? mix3(a[1], a[2], clamp((s - 1) * 2)) : mix3(a[2], a[3], clamp((s - 1.5) * 2)); };
 
 // ---------- 峡谷（缓冲坐标：780×390，底边 = 水面线） ----------
-const CLIFF_L = [[0, 390], [0, 0], [150, 0], [214, 52], [258, 118], [296, 204], [318, 286], [326, 340], [322, 390]];
-const CLIFF_R = [[780, 390], [780, 0], [636, 0], [586, 40], [548, 102], [512, 188], [486, 276], [476, 338], [482, 390]];
+const CLIFF_L = [[0, 390], [0, 0], [176, 0], [204, 44], [236, 62], [252, 132], [284, 190], [296, 252], [320, 296], [330, 346], [320, 390]];
+const CLIFF_R = [[780, 390], [780, 0], [604, 0], [596, 70], [556, 92], [546, 164], [508, 206], [498, 282], [470, 312], [468, 350], [484, 390]];
 const FAR_A = [[236, 390], [286, 214], [326, 150], [352, 128], [380, 156], [404, 226], [420, 390]];
 const FAR_B = [[372, 390], [398, 236], [436, 168], [486, 120], [528, 104], [560, 150], [580, 390]];
 function poly(c, pts) { c.beginPath(); pts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.closePath(); }
@@ -101,11 +104,11 @@ const BLOBS = [];
   };
   for (let side = 0; side < 2; side++) {
     const pts = side ? CLIFF_R : CLIFF_L, dir = side ? 1 : -1;
-    for (let i = 0; i < 56; i++) {
+    for (let i = 0; i < 96; i++) {
       const u = Math.pow(hash(i * 3.1 + side * 77), 1.1) * .7, e = edge(pts, u);
-      const inset = Math.pow(hash(i * 5.7 + side * 31 + 9), 2.2) * 58;
+      const inset = Math.pow(hash(i * 5.7 + side * 31 + 9), 2.6) * 44;
       BLOBS.push({x: e[0] + dir * (inset + 4), y: e[1] + 4 + hash(i * 9.3 + side) * 14 + inset * .5,
-        r: 5 + hash(i * 1.7 + side * 3) * 8 - u * 2, k: Math.floor(hash(i * 7.7 + side * 13) * 4), ph: hash(i + side * 50) * 6.28, front: 1});
+        r: 6 + hash(i * 1.7 + side * 3) * 6 - u * 2, k: Math.floor(hash(i * 7.7 + side * 13) * 4), ph: hash(i + side * 50) * 6.28, front: 1});
     }
     for (let i = 0; i < 12; i++) { // 河边的灌木
       const u = .8 + hash(i * 4.4 + side * 19) * .2, e = edge(pts, u);
@@ -118,29 +121,40 @@ const BLOBS = [];
 
 const CLIFFS = new Path2D();
 for (const pts of [CLIFF_L, CLIFF_R]) { pts.forEach((p, i) => i ? CLIFFS.lineTo(p[0], p[1]) : CLIFFS.moveTo(p[0], p[1])); CLIFFS.closePath(); }
+function columnField(c, seed, rock, rockD, lean, fan, bend) {
+  let x0 = -220, i = 0;
+  while (x0 < BW + 220) {
+    const w = 9 + hash(seed + i * 1.9) * 12, sh = hash(seed + i * 4.3);
+    // 柱子的中线：整体倾斜 + 扇形展开 + 一点弯
+    const fx = (xx, y) => { const v = (390 - y) / 390; return xx + (lean + (xx - 390) * fan) * (390 - y) + bend * v * v * 60; };
+    const strip = (xa, xb, y0, y1) => { c.beginPath(); for (let k = 0; k <= 8; k++) { const y = lerp(y0, y1, k / 8); c.lineTo(fx(xa, y), y); } for (let k = 8; k >= 0; k--) { const y = lerp(y0, y1, k / 8); c.lineTo(fx(xb, y), y); } c.closePath(); c.fill(); };
+    c.fillStyle = rgb(mix3(rockD, rock, .12 + sh * 1.15)); strip(x0, x0 + w + .7, -20, 400);
+    c.fillStyle = 'rgba(255,255,255,.17)'; strip(x0 + 1, x0 + 1 + Math.max(1.4, w * .24), -20, 400);   // 受光的棱
+    c.fillStyle = 'rgba(8,9,10,.55)'; strip(x0 + w - 1.7, x0 + w + .3, -20, 400);                      // 柱缝
+    for (let j = 0; j < 7; j++) {                                                                      // 横向断口
+      const y = hash(seed + i * 7.1 + j * 13.7) * 400;
+      c.fillStyle = `rgba(8,9,10,${.22 + hash(seed + i + j * 3.3) * .3})`; strip(x0, x0 + w, y, y + 1.6);
+      c.fillStyle = 'rgba(255,255,255,.10)'; strip(x0, x0 + w, y + 1.6, y + 3.4);
+    }
+    x0 += w; i++;
+  }
+}
 function columns(c, pts, lean, seed, rock, rockD) {
-  // 柱状节理：一根根斜立的棱柱，明暗交替，带横向断口
+  // 柱状节理：成组斜立的棱柱，上下两层朝向不同，中间一道岩棚
+  const L = pts === CLIFF_L;
   c.save(); poly(c, pts); c.clip();
   c.fillStyle = rgb(rockD); c.fillRect(0, 0, BW, BH);
-  c.save(); c.translate(390, 390); c.rotate(lean); c.translate(-390, -390);
-  let x = -140, i = 0;
-  while (x < BW + 140) {
-    const w = 10 + hash(seed + i * 1.9) * 12, sh = hash(seed + i * 4.3);
-    c.fillStyle = rgb(mix3(rockD, rock, .15 + sh * 1.1));
-    c.fillRect(x, -200, w + .6, 900);
-    c.fillStyle = 'rgba(255,255,255,.16)'; c.fillRect(x + 1, -200, Math.max(1.4, w * .24), 900);   // 受光的棱
-    c.fillStyle = 'rgba(8,9,10,.55)'; c.fillRect(x + w - 1.6, -200, 1.9, 900);                     // 柱缝
-    for (let j = 0; j < 9; j++) {                                                                  // 横向断口
-      const y = -40 + hash(seed + i * 7.1 + j * 13.7) * 520;
-      c.fillStyle = `rgba(8,9,10,${.22 + hash(seed + i + j * 3.3) * .28})`;
-      c.fillRect(x, y, w, 1.5);
-      c.fillStyle = 'rgba(255,255,255,.09)'; c.fillRect(x, y + 1.5, w, 1.8);
-    }
-    x += w; i++;
-  }
+  columnField(c, seed, rock, rockD, lean, L ? .00035 : -.0003, L ? .5 : -.4);
+  // 上层：岩棚以上换一组朝向
+  const ledge = L ? [[0, 250], [90, 232], [170, 196], [236, 150], [262, 120]] : [[780, 214], [700, 196], [630, 150], [575, 118], [548, 96]];
+  c.save(); c.beginPath(); c.moveTo(L ? 0 : 780, -10); ledge.forEach(p => c.lineTo(p[0], p[1])); c.lineTo(L ? 300 : 500, -10); c.closePath(); c.clip();
+  c.fillStyle = rgb(rockD); c.fillRect(0, 0, BW, BH);
+  columnField(c, seed + 300, rock, rockD, -lean * 1.6, L ? -.0005 : .0006, L ? -.8 : .7);
   c.restore();
-  const inner = pts === CLIFF_L;   // 谷里的天光：靠中间亮、靠外暗
-  let gr = c.createLinearGradient(inner ? 60 : 720, 0, inner ? 340 : 440, 0);
+  c.lineCap = 'round'; c.lineJoin = 'round';
+  c.strokeStyle = 'rgba(6,7,8,.6)'; c.lineWidth = 5; c.beginPath(); ledge.forEach((p, i) => i ? c.lineTo(p[0], p[1] + 3) : c.moveTo(p[0], p[1] + 3)); c.stroke();
+  c.strokeStyle = 'rgba(255,255,255,.22)'; c.lineWidth = 1.6; c.beginPath(); ledge.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.stroke();
+  let gr = c.createLinearGradient(L ? 60 : 720, 0, L ? 340 : 440, 0);   // 谷里的天光：靠中间亮、靠外暗
   gr.addColorStop(0, 'rgba(0,0,0,.30)'); gr.addColorStop(.6, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(255,255,255,.14)');
   c.fillStyle = gr; c.fillRect(0, 0, BW, BH);
   gr = c.createLinearGradient(0, 250, 0, 390); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,.30)');
@@ -165,7 +179,7 @@ const BAKED = [0, 1, 2].map(s => {
   columns(c, CLIFF_L, .13, 11, pal('rock', s), pal('rockD', s));
   columns(c, CLIFF_R, -.10, 57, pal('rock', s), pal('rockD', s));
   for (let i = 0; i < 9; i++) {   // 崖脚的石头
-    const L = i % 2, y = 318 + hash(i * 2.7) * 70, x = (L ? 326 - (y - 300) * .16 : 478 + (y - 300) * .10) + (hash(i * 5.1) - .5) * 16;
+    const L = i % 2, y = 318 + hash(i * 2.7) * 70, x = (L ? 328 - (y - 300) * .1 : 474 + (y - 300) * .1) + (hash(i * 5.1) - .5) * 16;
     c.fillStyle = rgb(mix3(pal('rockD', s), pal('rock', s), hash(i) * .6)); c.beginPath(); c.ellipse(x, y, 9 + hash(i * 9) * 9, 5 + hash(i * 4) * 4, 0, 0, 7); c.fill();
     if (s === 2) { c.fillStyle = 'rgba(245,247,250,1)'; c.beginPath(); c.ellipse(x, y - 3, 8 + hash(i * 9) * 8, 3, 0, 0, 7); c.fill(); }
   }
@@ -217,11 +231,11 @@ function drawGorge(t, s) {
   gr.addColorStop(0, 'rgba(255,248,225,0)'); gr.addColorStop(.5, 'rgba(255,248,225,.24)'); gr.addColorStop(1, 'rgba(255,248,225,0)');
   c.fillStyle = gr; c.fillRect(0, 0, BW, BH); c.restore();
   // 树丛：随季节换色，轻轻摇
-  for (const o of BLOBS) {
-    const sway = Math.sin(t * 1.1 + o.ph) * 1.2, x = o.x + sway, r = Math.max(3.5, o.r);
-    c.fillStyle = rgb(pal('rockD', s), .5); c.beginPath(); c.arc(x + 1, o.y + r * .34, r, 0, 7); c.fill();
-    c.fillStyle = rgb(pal('v' + o.k, s)); c.beginPath(); c.arc(x, o.y - wS * r * .18, r * (1 - wS * .12), 0, 7); c.fill();
-  }
+  const sx = o => o.x + Math.sin(t * 1.1 + o.ph) * 1.2;
+  c.fillStyle = rgb(pal('rockD', s), .45); for (const o of BLOBS) { c.beginPath(); c.arc(sx(o) + 1, o.y + o.r * .45, o.r + 1, 0, 7); c.fill(); }
+  c.fillStyle = rgb(pal('v2', s)); for (const o of BLOBS) { c.beginPath(); c.arc(sx(o), o.y, o.r + 1, 0, 7); c.fill(); }
+  c.fillStyle = rgb(pal('v0', s)); for (const o of BLOBS) if (o.k !== 3) { c.beginPath(); c.arc(sx(o) - o.r * .12, o.y - o.r * .22, o.r * .72, 0, 7); c.fill(); }
+  c.fillStyle = rgb(pal('v1', s)); for (const o of BLOBS) if (o.k === 0) { c.beginPath(); c.arc(sx(o) - o.r * .3, o.y - o.r * .45, o.r * .3, 0, 7); c.fill(); }
   // 秋天几片落叶，冬天下雪
   if (wA > .01) for (let i = 0; i < 18; i++) {
     const p = (hash(i * 6.7) + t * (.07 + hash(i * 2.3) * .05)) % 1, x = 120 + hash(i * 3.1) * 540 + Math.sin(t * 1.3 + i * 2) * 18, y = p * 390;
@@ -248,7 +262,10 @@ function drawPerson(c, x, t) {
   for (const d of [1, -1]) { c.beginPath(); c.moveTo(d * 2.5, hipY); c.lineTo(d * 3 + Math.sin(sw * d) * 46, hipY + Math.cos(sw * d) * 50 + 2); c.stroke(); }
   c.beginPath(); c.moveTo(-10.5, shY + 3); c.quadraticCurveTo(0, shY - 5, 10.5, shY + 3); c.lineTo(11.5, hipY + 4); c.lineTo(-11.5, hipY + 4); c.closePath(); c.fill();   // 外套
   c.lineWidth = 5.5;                                        // 手臂
-  for (const d of [1, -1]) { c.beginPath(); c.moveTo(d * 10, shY + 6); c.lineTo(d * 12 - Math.sin(sw * d) * 20, shY + 42 - Math.abs(sw) * 4); c.stroke(); }
+  const lift = sm(18.1, 18.9, t);
+  for (const d of [1, -1]) { const u = d === 1 ? lift : 0; c.beginPath(); c.moveTo(d * 10, shY + 6);
+    if (u > 0) c.lineTo(lerp(d * 13, 17, u), lerp(shY + 24, shY + 12, u));
+    c.lineTo(lerp(d * 12 - Math.sin(sw * d) * 20, 12, u), lerp(shY + 42 - Math.abs(sw) * 4, shY - 12, u)); c.stroke(); }
   c.beginPath(); c.arc(0, shY - 13, 8.6, 0, 7); c.fill();   // 头
   c.restore();
 }
@@ -270,7 +287,7 @@ function reflect(t, rip) {
   for (let y = 0; y < BH; y++) { rowA[y] = Math.sin(y * .31 - t * 2.3); rowB[y] = Math.sin(y * .083 + t * 1.1); }
   for (let x = 0; x < BW; x++) colA[x] = Math.sin(x * .019 + t * .8);
   const n = rip.length, rx = new Float32Array(n), rr = new Float32Array(n), ra = new Float32Array(n);
-  for (let i = 0; i < n; i++) { rx[i] = rip[i].x; rr[i] = 10 + rip[i].age * 78; ra[i] = rip[i].amp * 13 * Math.exp(-rip[i].age * .75) * Math.min(1, rip[i].age * 5); }
+  for (let i = 0; i < n; i++) { rx[i] = rip[i].x; rr[i] = 10 + rip[i].age * 78; ra[i] = rip[i].amp * 17 * Math.exp(-rip[i].age * .75) * Math.min(1, rip[i].age * 5); }
   const BAND = 44, R2 = R * R;
   for (let y = 0; y < BH; y++) {
     const depth = y / BH, amb = .5 + depth * 2.6, ey = (y + 3) / .34, ey2 = ey * ey;
@@ -284,10 +301,14 @@ function reflect(t, rip) {
           dx += w * ex / (d + 1); dy += w * 1.25; lum += w;
         }
       }
-      let sx = (x + dx + .5) | 0, sy = (BH - 1 - y - dy + .5) | 0;
-      sx = sx < 0 ? 0 : sx >= BW ? BW - 1 : sx; sy = sy < 0 ? 0 : sy >= BH ? BH - 1 : sy;
-      const si = (sy * BW + sx) * 4, oi = (y * BW + x) * 4, m = .9 - depth * .16 + lum * .012;
-      out[oi] = src[si] * m; out[oi + 1] = src[si + 1] * m; out[oi + 2] = src[si + 2] * m; out[oi + 3] = 255;
+      let fx = x + dx, fy = BH - 1 - y - dy;
+      fx = fx < 0 ? 0 : fx > BW - 1.001 ? BW - 1.001 : fx; fy = fy < 0 ? 0 : fy > BH - 1.001 ? BH - 1.001 : fy;
+      const ix = fx | 0, iy = fy | 0, ux = fx - ix, uy = fy - iy, si = (iy * BW + ix) * 4, sj = si + BW * 4, oi = (y * BW + x) * 4;
+      const w00 = (1 - ux) * (1 - uy), w10 = ux * (1 - uy), w01 = (1 - ux) * uy, w11 = ux * uy, m = .9 - depth * .16 + lum * .028;
+      out[oi] = (src[si] * w00 + src[si + 4] * w10 + src[sj] * w01 + src[sj + 4] * w11) * m;
+      out[oi + 1] = (src[si + 1] * w00 + src[si + 5] * w10 + src[sj + 1] * w01 + src[sj + 5] * w11) * m;
+      out[oi + 2] = (src[si + 2] * w00 + src[si + 6] * w10 + src[sj + 2] * w01 + src[sj + 6] * w11) * m;
+      out[oi + 3] = 255;
     }
   }
   rb.putImageData(rimg, 0, 0);
@@ -324,7 +345,7 @@ function tunnel(t, alpha, camT) {
   for (const X of [27, 36, 45]) {
     const zn = Math.max(.95, X - cam), zf = X + 2.6 - cam;
     if (zf <= 1.05 || zn > 17) continue;
-    const a = alpha * (1 - sm(11, 17, zn)) * sm(1.4, 5.5, X - cam) * alpha;
+    const a = alpha * (1 - sm(11, 17, zn)) * sm(2.4, 7, X - cam) * alpha;
     if (a <= .003) continue;
     const rn = FOC / zn, rf = FOC / zf, yn = VPY + ER * rn, yf = VPY + ER * rf;
     const A0 = 171 * Math.PI / 180, A1 = 139 * Math.PI / 180;
@@ -336,6 +357,8 @@ function tunnel(t, alpha, camT) {
     const gr = g.createLinearGradient(0, top, 0, bot);
     gr.addColorStop(0, `rgba(226,240,236,${a})`); gr.addColorStop(.45, `rgba(150,200,150,${a})`); gr.addColorStop(1, `rgba(70,140,90,${a})`);
     g.fillStyle = gr; g.fill();
+    g.strokeStyle = `rgba(30,48,40,${a * .4})`; g.lineWidth = Math.max(1, rn / 160);
+    for (let j = 1; j < 6; j++) { const rj = FOC / lerp(zn, zf, j / 6), yj = VPY + ER * rj, tj = lerp(A0, A1, .25 + .5 * hash(X + j)); g.beginPath(); g.moveTo(CX + rj * Math.cos(A0), yj - rj * Math.sin(A0)); g.lineTo(CX + rj * Math.cos(tj), yj - rj * Math.sin(tj)); g.stroke(); }
   }
   for (let m = Math.ceil((cam + .7) / 4.5); m * 4.5 - cam < 60; m++) {
     const z = m * 4.5 - cam, rad = FOC / z, y = VPY + ER * rad;
@@ -366,7 +389,7 @@ function render(time) {
   const reveal = t < 11.8 ? 0 : eio((t - 11.8) / 1.4);
   const water = reveal * (1 - sm(23.5, 24.5, t));                       // 结尾倒影淡出，不再擦除
   const settled = sm(9.2, 10.2, t) * (1 - sm(23.5, 24.3, t));
-  const season = t < 12 ? 0 : sm(14.9, 16.1, t) + sm(17.5, 18.8, t);
+  const season = t < 12 ? 0 : sm(14.9, 16.1, t) + sm(17.2, 18.7, t);
   const white = 1 - sm(30, 250, r);
 
   // 隧道
@@ -449,14 +472,14 @@ function render(time) {
     spaced(String(Math.round(750 * p)).padStart(3, '0') + ' m', CX + 3, 1640, font(200, 26), 6, ink, ca * .8);
   }
   // 片尾
-  const ka = win(t, 19.9, 23.7, .7, .6);
+  const ka = win(t, 19.5, 23.7, .7, .6);
   if (ka > .003) {
     spaced(CARD.title, CX + 7, 1440, font(200, 60), 14, ink, ka);
     spaced(CARD.en, CX + 7, 1516, font(300, 21), 14, ink, ka * .6);
     g.fillStyle = `rgba(233,237,240,${.3 * ka})`; g.fillRect(CX - 24, 1565, 48, 1.2);
-    spaced(CARD.credit, CX + 2, 1620, font(300, 28), 4, ink, ka * .85);
-    spaced(CARD.tips[0], CX + 2, 1712, font(300, 28), 5, ink, win(t, 20.5, 23.7, .7, .6) * .74);
-    spaced(CARD.tips[1], CX + 2, 1764, font(300, 28), 5, ink, win(t, 20.8, 23.7, .7, .6) * .74);
+    spaced(CARD.credit, CX + 2, 1622, font(300, 30), 4, ink, ka * .88);
+    spaced(CARD.tips[0], CX + 2, 1716, font(300, 32), 4, ink, win(t, 19.9, 23.7, .7, .6) * .82);
+    spaced(CARD.tips[1], CX + 2, 1774, font(300, 32), 4, ink, win(t, 20.2, 23.7, .7, .6) * .82);
   }
 }
 
