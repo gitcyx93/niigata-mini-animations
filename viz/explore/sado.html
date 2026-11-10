@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>佐渡四景 · 版画册页</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&family=Sora:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;height:100%;background:#26221f;overflow:hidden}
+  body{display:flex;align-items:center;justify-content:center}
+  canvas{display:block;width:min(100vw,calc(100vh*9/16));height:min(100vh,calc(100vw*16/9));cursor:pointer}
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+'use strict';
+/* 佐渡四景：新版画 / 孔版印刷风格的四张册页。
+   render(t) 是确定性的：同一 t 同一画面；随机全部来自种子哈希。 */
+const W = 1080, H = 1920, T = 20, SCENE = 5, TURN = 0.7;
+const PLAN = [['ferry', 0, 5], ['goldmine', 5, 10], ['taraibune', 10, 15], ['toki', 15, 20]];
+const PX = 60, PY = 350, PW = 960, PH = 1440;           // 版心（画面）位置
+const C = {paper: '#f1e8d4', white: '#f6efdf', sumi: '#211e23', indigo: '#1f3d63',
+  celadon: '#7fb0a8', verm: '#d4502c', ochre: '#dba646', pink: '#eeb0a0'};
+const SERIF = '"Noto Serif SC","Source Han Serif SC","Noto Serif CJK SC","Songti SC","STSong","SimSun",serif';
+const LATIN = 'Sora,"Helvetica Neue",Arial,sans-serif';
+const NUM = ['一', '二', '三', '四'];
+const COPY = [
+  {name: '渡海', l1: '从新潟港上船，', l2: '两个半小时，海上浮出一座岛。', note: '新潟港 → 两津港 · 汽车渡轮约 2 小时 30 分'},
+  {name: '金山', l1: '这座山，是挖金子挖开的。', l2: '道游之割户——江户时代，人一凿一凿劈出来。', note: '佐渡岛的金山 · 2024 年列入世界文化遗产'},
+  {name: '木盆舟', l1: '到了海边，换一只木盆。', l2: '宿根木，船板盖的老屋就在岸上。', note: 'たらい舟 · 原本是采海螺、鲍鱼的小渔船'},
+  {name: '朱鹮', l1: '傍晚，朱鹮飞过水田。', l2: '它曾从日本的野外消失，如今又回到这座岛。', note: '朱鹮（トキ）· 2008 年起在佐渡放归野外'}
+];
+
+const cv = document.getElementById('c');
+const g = cv.getContext('2d');
+const TAU = Math.PI * 2;
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const ss = (v, a, b) => { const x = clamp((v - a) / (b - a)); return x * x * (3 - 2 * x); };
+const lerp = (a, b, k) => a + (b - a) * k;
+const fr = x => x - Math.floor(x), pm = (x, m) => x - Math.floor(x / m) * m;
+const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const hash = n => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+function rgba(hex, a) {
+  const n = parseInt(hex.slice(1), 16);
+  return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+}
+
+/* ---------- 印刷手法 ---------- */
+const REG = [4, 3];                                        // 色版相对墨线版的套色错位
+function blk(color, path, alpha = 1) {                     // 色版：平涂，带错位
+  g.save(); g.translate(REG[0], REG[1]); g.globalAlpha *= alpha;
+  g.beginPath(); path(); g.fillStyle = color; g.fill(); g.restore();
+}
+function key(path, lw = 3, color = C.sumi) {               // 墨线版
+  g.beginPath(); path(); g.lineWidth = lw; g.strokeStyle = color;
+  g.lineJoin = 'round'; g.lineCap = 'round'; g.stroke();
+}
+function shape(color, path, lw = 3, alpha = 1) { blk(color, path, alpha); if (lw) key(path, lw); }
+function bokashi(x, y, w, h, color, a0, a1, horizontal) {  // 渐变拓印
+  const gr = horizontal ? g.createLinearGradient(x, 0, x + w, 0) : g.createLinearGradient(0, y, 0, y + h);
+  gr.addColorStop(0, rgba(color, a0)); gr.addColorStop(1, rgba(color, a1));
+  g.fillStyle = gr; g.fillRect(x, y, w, h);
+}
+function poly(pts) { g.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]); g.closePath(); }
+function open(pts) { g.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]); }
+function waveRow(y, w, h, off) {                           // 浮世绘式的浪头
+  let x = -w * 2 + (((off % w) + w) % w); g.moveTo(x, y);
+  for (; x < PW + w; x += w) {
+    g.bezierCurveTo(x + w * .35, y + h * .15, x + w * .55, y - h * 1.15, x + w * .78, y - h);
+    g.quadraticCurveTo(x + w * .88, y - h * .25, x + w, y);
+  }
+}
+function humpRow(y, w, h, off) {                           // 圆弧排：树冠、远山
+  let x = -w * 2 + (((off % w) + w) % w); g.moveTo(x, y);
+  for (; x < PW + w; x += w) g.quadraticCurveTo(x + w / 2, y - h * 2, x + w, y);
+}
+function band(x, y, w, h, color, alpha) {                  // 霞（すやり霞）：圆头横条
+  blk(color, () => { g.moveTo(x + h / 2, y); g.arc(x + w - h / 2, y + h / 2, h / 2, -Math.PI / 2, Math.PI / 2);
+    g.arc(x + h / 2, y + h / 2, h / 2, Math.PI / 2, Math.PI * 1.5); g.closePath(); }, alpha);
+}
+function sea(u, y0, y1, rows, drawAt) {                    // 层层浪排；drawAt(i,y) 可在浪排之间插入主体
+  for (let i = 0; i < rows; i++) {
+    const k = i / (rows - 1), y = lerp(y0, y1, Math.pow(k, 1.55)) + Math.sin(u * 1.5 + i * 1.3) * (3 + 7 * k);
+    const w = lerp(64, 300, k), h = lerp(7, 50, k), off = u * lerp(10, 70, k) * (i % 2 ? 1 : -.7) + hash(i) * w;
+    if (drawAt) drawAt(i, y);
+    blk(i % 2 ? C.indigo : '#2c5479', () => { waveRow(y, w, h, off); g.lineTo(PW + w * 2, PH + 80); g.lineTo(-w * 2, PH + 80); }, lerp(.5, 1, k));
+    key(() => waveRow(y, w, h, off), lerp(2, 5, k), C.white);
+  }
+}
+function vtext(str, x, y, size, color, weight = 900, step = 1.1) {
+  g.font = weight + ' ' + size + 'px ' + SERIF; g.fillStyle = color; g.textAlign = 'center'; g.textBaseline = 'middle';
+  for (let i = 0; i < str.length; i++) g.fillText(str[i], x, y + i * size * step);
+}
+function htext(str, x, y, size, color, weight = 700, family = SERIF, align = 'left', maxW = 0, spacing = 0) {
+  g.font = weight + ' ' + size + 'px ' + family; g.textAlign = align; g.textBaseline = 'alphabetic';
+  if ('letterSpacing' in g) g.letterSpacing = spacing + 'px';
+  if (maxW) { const m = g.measureText(str).width; if (m > maxW) g.font = weight + ' ' + Math.floor(size * maxW / m) + 'px ' + family; }
+  g.fillStyle = color; g.fillText(str, x, y);
+  if ('letterSpacing' in g) g.letterSpacing = '0px';
+}
+
+/* ---------- 第一景：渡海 ---------- */
+function gull(x, y, s, f) {
+  g.save(); g.translate(x, y); g.scale(s, s);
+  const wing = () => { g.moveTo(-64, -34 * f - 4); g.quadraticCurveTo(-34, -30 * f - 20, 0, 0); g.quadraticCurveTo(34, -30 * f - 20, 64, -34 * f - 4); };
+  key(wing, 15); key(wing, 9, C.white);
+  key(() => { g.moveTo(-64, -34 * f - 4); g.lineTo(-52, -33 * f - 9); g.moveTo(64, -34 * f - 4); g.lineTo(52, -33 * f - 9); }, 9);
+  shape(C.white, () => g.ellipse(0, 4, 17, 8, 0, 0, TAU), 3);
+  key(() => { g.moveTo(-15, 3); g.lineTo(-25, 5); }, 4, C.ochre);
+  g.restore();
+}
+function ferry(u) {                                        // 原点在水线中点，船头朝左
+  for (let i = 0; i < 6; i++) {                            // 烟
+    const a = fr(u * .5 + i / 6), r = 16 + 46 * a;
+    blk(C.white, () => g.arc(98 + a * 300, -238 - a * 110 + Math.sin(i * 2.1) * 12, r, 0, TAU), .9 * (1 - a));
+  }
+  shape(C.white, () => poly([[-246, -84], [-196, 0], [206, 0], [224, -76]]), 4);                // 船身
+  blk(C.indigo, () => poly([[-196, 0], [206, 0], [210, -20], [-208, -20]]));
+  key(() => { g.moveTo(-232, -58); g.lineTo(218, -58); }, 5, C.verm);
+  shape(C.white, () => g.rect(-158, -122, 356, 44), 3);                                         // 一层甲板
+  shape(C.white, () => g.rect(-128, -160, 296, 38), 3);                                         // 二层
+  shape(C.white, () => poly([[-128, -160], [-112, -198], [-26, -198], [-26, -160]]), 3);        // 驾驶台
+  for (let i = 0; i < 12; i++) blk(C.indigo, () => g.rect(-142 + i * 28, -110, 15, 17));
+  for (let i = 0; i < 8; i++) blk(C.indigo, () => g.rect(-6 + i * 21, -150, 12, 14));
+  blk(C.indigo, () => poly([[-118, -168], [-108, -190], [-36, -190], [-36, -168]]));
+  shape(C.verm, () => poly([[52, -160], [62, -236], [112, -236], [118, -160]]), 3);             // 烟囱
+  blk(C.sumi, () => poly([[61, -224], [62, -236], [112, -236], [113, -224]]));
+  key(() => { g.moveTo(-70, -198); g.lineTo(-70, -262); g.moveTo(-92, -236); g.lineTo(-48, -236); }, 4);
+  blk(C.verm, () => poly([[-70, -262], [-36, -253], [-70, -244]]));
+  shape(C.ochre, () => g.rect(128, -176, 44, 14), 2);                                           // 救生艇
+  key(() => { g.moveTo(-246, -84); g.lineTo(224, -76); }, 4);
+  for (let i = 0; i < 5; i++) {                                                                 // 船头浪、尾迹
+    const a = fr(u * .9 + i / 5);
+    blk(C.white, () => g.ellipse(-206 - a * 60, 2 - Math.sin(a * Math.PI) * 26, 20 * (1 - a) + 6, 12 * (1 - a) + 4, 0, 0, TAU), 1 - a);
+    blk(C.white, () => g.ellipse(214 + a * 260, 4, 30 - 16 * a, 9 - 5 * a, 0, 0, TAU), .9 * (1 - a));
+  }
+}
+function sceneFerry(u) {
+  const hz = 640, rise = ss(u, -.4, 3.6);
+  g.fillStyle = C.paper; g.fillRect(0, 0, PW, PH);
+  bokashi(0, 0, PW, 300, C.indigo, .92, 0);                // 天顶一文字拓印
+  bokashi(0, 330, PW, hz - 330, C.pink, 0, .95);
+  bokashi(0, hz - 90, PW, 90, C.ochre, 0, .55);
+  for (let i = 0; i < 4; i++) {                            // 流云
+    const x = pm(hash(i + 3) * 1300 + u * (9 + i * 5), 1500) - 320;
+    band(x, 200 + i * 78, 300 + hash(i + 9) * 220, 26 + (i % 2) * 12, i % 2 ? C.white : C.pink, .85);
+  }
+  // 佐渡：北边的大佐渡高、南边的小佐渡低，从新潟一侧望去像并排的两座岛
+  g.save(); g.translate(PW / 2, hz); g.scale(1 + .1 * rise, 1 + .32 * rise); g.translate(-PW / 2, 0);
+  const isle = () => poly([[70, 0], [130, -22], [200, -52], [262, -66], [322, -50], [382, -30], [432, -14], [470, -10],
+    [520, -30], [570, -74], [622, -112], [668, -134], [712, -118], [760, -90], [812, -54], [862, -24], [910, 0]]);
+  blk(C.indigo, isle, .3 + .6 * rise);
+  blk(C.celadon, () => poly([[230, 0], [300, -30], [360, -14], [420, 0]]), .5 * rise);
+  blk(C.celadon, () => poly([[560, 0], [640, -62], [700, -78], [770, -40], [830, 0]]), .5 * rise);
+  g.restore();
+  bokashi(0, hz - 46 + 30 * rise, PW, 50, C.paper, .9 * (1 - rise), 0);
+  band(-80 - 260 * rise, hz - 58, 560, 34, C.white, .95 * (1 - .7 * rise));    // 海雾散开
+  band(520 + 300 * rise, hz - 30, 600, 26, C.white, .9 * (1 - .8 * rise));
+  bokashi(0, hz, PW, PH - hz, C.celadon, 1, 1);
+  bokashi(0, hz, PW, 420, C.indigo, 0, .75);
+  const fx = lerp(720, 430, clamp((u + .7) / 5.7)), bob = Math.sin(u * 1.7) * 7;
+  sea(u, hz + 18, PH + 10, 10, i => {
+    if (i !== 6) return;
+    g.save(); g.translate(fx, 1010 + bob); g.rotate(Math.sin(u * 1.7 + .8) * .012); g.scale(1.42, 1.42); ferry(u); g.restore();
+  });
+  for (let i = 0; i < 5; i++) {
+    const ph = u * (5.2 + i * .4) + i * 1.9;
+    gull(fx + 250 - i * 150 + Math.sin(u * .7 + i * 2) * 46 + u * 12, 470 - (i % 3) * 86 + i * 30 + Math.cos(u * .9 + i) * 24, .62 + hash(i + 20) * .5, Math.sin(ph));
+  }
+}
+
+/* ---------- 第二景：金山 · 道游之割户 ---------- */
+function pine(x, y, s, sway) {
+  g.save(); g.translate(x, y); g.rotate(sway); g.scale(s, s);
+  key(() => { g.moveTo(0, 0); g.bezierCurveTo(90, 20, 170, 90, 300, 96); g.moveTo(120, 48); g.quadraticCurveTo(170, 20, 236, 4);
+    g.moveTo(210, 88); g.quadraticCurveTo(260, 130, 330, 150); }, 13);
+  const tufts = [[300, 96, 78], [236, 4, 66], [330, 150, 62], [150, 62, 60], [70, 14, 54], [392, 104, 50]];
+  tufts.forEach(([tx, ty, r], i) => {
+    shape(i % 2 ? '#2b5a5c' : C.indigo, () => { g.moveTo(tx - r, ty + 8); g.arc(tx, ty + 8, r, Math.PI, 0); g.closePath(); }, 3);
+    key(() => { for (let k = 1; k < 7; k++) { const a = Math.PI + k * Math.PI / 7; g.moveTo(tx, ty + 8); g.lineTo(tx + Math.cos(a) * r * .86, ty + 8 + Math.sin(a) * r * .86); } }, 2, rgba(C.celadon, .8));
+  });
+  g.restore();
+}
+function sceneGold(u) {
+  const z = 1 + .07 * clamp((u + .7) / 5.7);
+  g.fillStyle = C.paper; g.fillRect(0, 0, PW, PH);
+  g.save(); g.translate(490, 700); g.scale(z, z); g.translate(-490, -700);
+  bokashi(-60, -60, PW + 120, 330, C.indigo, .9, 0);
+  bokashi(-60, 300, PW + 120, 640, C.ochre, 0, .95);
+  const sunY = lerp(650, 548, ss(u, -.7, 5));
+  blk(C.verm, () => g.arc(494, sunY, 104, 0, TAU));                           // 朝日从割口里升起
+  for (let i = 0; i < 9; i++) {                                               // 光芒
+    const a = -Math.PI / 2 + (i - 4) * .26 + Math.sin(u * .5) * .02, r0 = 150, r1 = 520 + 70 * Math.sin(u * 1.4 + i * 1.7);
+    blk(C.ochre, () => poly([[494 + Math.cos(a - .035) * r0, sunY + Math.sin(a - .035) * r0], [494 + Math.cos(a - .05) * r1, sunY + Math.sin(a - .05) * r1],
+      [494 + Math.cos(a + .05) * r1, sunY + Math.sin(a + .05) * r1], [494 + Math.cos(a + .035) * r0, sunY + Math.sin(a + .035) * r0]]), .55);
+  }
+  blk(C.celadon, () => { humpRow(1000, 420, 120, 130); g.lineTo(PW + 500, PH); g.lineTo(-500, PH); }, .8);   // 远山
+  const mount = () => poly([[-80, 1300], [-20, 1080], [70, 960], [150, 900], [206, 880], [262, 770], [330, 640], [352, 566], [392, 500], [414, 426], [440, 436],
+    [452, 540], [472, 700], [488, 810], [504, 700], [528, 548], [544, 424], [574, 398], [606, 470], [650, 566], [700, 668],
+    [756, 776], [820, 830], [884, 846], [950, 960], [1040, 1160], [1040, 1500], [-80, 1500]]);
+  shape(C.indigo, mount, 4);
+  g.save(); g.beginPath(); mount(); g.clip();                                 // 山上的树冠
+  for (let i = 0; i < 9; i++) {
+    const y = 700 + i * 78, w = 96 + i * 13;
+    blk(i % 2 ? '#2b5a5c' : '#24486c', () => { humpRow(y, w, 22 + i * 2, hash(i + 40) * w + Math.sin(u * .9 + i) * 5); g.lineTo(PW + 300, PH + 100); g.lineTo(-300, PH + 100); });
+    key(() => humpRow(y, w, 22 + i * 2, hash(i + 40) * w + Math.sin(u * .9 + i) * 5), 2, rgba(C.celadon, .7));
+  }
+  g.restore();
+  const rockL = [[330, 640], [352, 566], [392, 500], [414, 426], [440, 436], [452, 540], [472, 700], [488, 810], [462, 792], [430, 716], [388, 672]];
+  const rockR = [[488, 810], [504, 700], [528, 548], [544, 424], [574, 398], [606, 470], [650, 566], [700, 668], [640, 690], [578, 716], [526, 780]];
+  shape(C.ochre, () => poly(rockL), 4); shape(C.white, () => poly(rockR), 4);  // 两片裸岩：一明一暗
+  blk(C.ochre, () => poly([[574, 398], [606, 470], [650, 566], [700, 668], [640, 690], [600, 560]]), .9);
+  blk(C.sumi, () => poly([[414, 426], [440, 436], [452, 540], [472, 700], [488, 810], [470, 720], [446, 600], [428, 500]]), .55);
+  key(() => { open([[400, 520], [432, 560]]); open([[372, 590], [440, 640]]); open([[396, 650], [452, 700]]); open([[430, 730], [470, 760]]);
+    open([[540, 500], [590, 470]]); open([[530, 590], [628, 560]]); open([[516, 670], [640, 640]]); open([[510, 740], [570, 716]]);
+    open([[560, 430], [566, 520]]); open([[600, 560], [612, 650]]); }, 3);
+  for (let i = 0; i < 14; i++) {                                              // 岩壁上的金光
+    const tw = Math.max(0, Math.sin(u * 3.2 + i * 2.4)), px = 350 + hash(i + 60) * 330, py = 450 + hash(i + 80) * 300, r = 5 + 13 * tw;
+    if (px > 446 && px < 524) continue;
+    blk(i % 3 ? C.white : C.verm, () => poly([[px, py - r], [px + r * .34, py], [px, py + r], [px - r * .34, py]]), tw);
+  }
+  for (let i = 0; i < 3; i++) {                                               // 盘旋的鸢
+    const a = u * .55 + i * 2.2, bx = 700 + Math.cos(a) * (120 + i * 30) - i * 150, by = 330 + Math.sin(a) * 46 + i * 34;
+    key(() => { g.moveTo(bx - 28, by - 9 - 5 * Math.sin(u * 3 + i)); g.quadraticCurveTo(bx - 10, by - 6, bx, by); g.quadraticCurveTo(bx + 10, by - 6, bx + 28, by - 9 - 5 * Math.sin(u * 3 + i)); }, 5);
+  }
+  g.restore();
+  for (let i = 0; i < 4; i++) {                                               // 山腰的霞
+    const x = pm(hash(i + 11) * 1500 + u * (26 + i * 9), 1700) - 520;
+    band(x, 930 + i * 62, 420 + hash(i + 14) * 260, 34 + (i % 2) * 14, i === 2 ? C.pink : C.white, .93);
+  }
+  const fore = () => { g.moveTo(-40, 1300); g.bezierCurveTo(200, 1210, 420, 1290, 620, 1236); g.bezierCurveTo(780, 1196, 900, 1250, 1000, 1220); g.lineTo(1000, 1500); g.lineTo(-40, 1500); };
+  shape('#16293f', fore, 0);                                                   // 近处的山脊和小路
+  key(() => { g.moveTo(-40, 1300); g.bezierCurveTo(200, 1210, 420, 1290, 620, 1236); g.bezierCurveTo(780, 1196, 900, 1250, 1000, 1220); }, 7, C.ochre);
+  g.save(); g.beginPath(); fore(); g.clip();
+  for (let i = 0; i < 3; i++) {
+    blk(i % 2 ? C.indigo : '#2b5a5c', () => { humpRow(1330 + i * 50, 120 + i * 30, 26, 40 * i + Math.sin(u * 1.1 + i) * 6); g.lineTo(PW + 300, PH + 100); g.lineTo(-300, PH + 100); });
+    key(() => humpRow(1330 + i * 50, 120 + i * 30, 26, 40 * i + Math.sin(u * 1.1 + i) * 6), 2, rgba(C.celadon, .7));
+  }
+  g.restore();
+  for (let i = 0; i < 3; i++) {                                               // 抬头看山的旅人
+    const x = 520 + i * 58 + u * 13, y = 1250 - (x - 520) * .13 + Math.abs(Math.sin(u * 5 + i * 1.3)) * -5;
+    shape([C.verm, C.white, C.ochre][i], () => poly([[x - 13, y], [x - 9, y - 44], [x + 9, y - 44], [x + 13, y]]), 2);
+    shape(C.white, () => g.arc(x, y - 53, 9, 0, TAU), 2);
+    shape(C.ochre, () => poly([[x - 24, y - 56], [x, y - 76], [x + 24, y - 56]]), 2);
+  }
+  pine(-70, 96, .98, Math.sin(u * 1.1) * .014);
+}
+
+/* ---------- 第三景：宿根木 · 木盆舟 ---------- */
+function house(x, y, w, h, roof, i) {
+  shape('#3a302c', () => g.rect(x, y - h, w, h), 3);                          // 船板外墙
+  key(() => { for (let k = 1; k < w / 13; k++) { g.moveTo(x + k * 13, y - h + 4); g.lineTo(x + k * 13, y - 3); } }, 2, rgba(C.ochre, .55));
+  shape(i % 2 ? '#4c6e7c' : C.indigo, () => poly([[x - 12, y - h + 6], [x + w * .5, y - h - roof], [x + w + 12, y - h + 6]]), 3);
+  shape(i % 3 ? C.ochre : C.white, () => g.rect(x + w * .5 - 15, y - h * .62, 30, 26), 2);
+  key(() => { g.moveTo(x + w * .5, y - h * .62); g.lineTo(x + w * .5, y - h * .62 + 26); }, 2);
+}
+function tub(u) {                                          // 原点在盆口中心
+  const sw = Math.sin(u * 3.3);
+  for (let i = 0; i < 3; i++) {                            // 水纹
+    const a = fr(u * .45 + i / 3);
+    key(() => g.ellipse(0, 96, 236 + a * 190, 96 + a * 78, 0, .05 * Math.PI, .95 * Math.PI), 4, rgba(C.white, .9 * (1 - a)));
+  }
+  blk(C.indigo, () => g.ellipse(14, 118, 226, 98, 0, 0, TAU), .5);
+  const wall = () => { g.moveTo(-204, 0); g.lineTo(-190, 100); g.ellipse(0, 100, 190, 84, 0, Math.PI, 0, true); g.lineTo(204, 0); g.ellipse(0, 0, 204, 94, 0, 0, Math.PI); };
+  shape(C.ochre, wall, 4);
+  key(() => { for (let k = -8; k <= 8; k++) { const x = k * 23, d = Math.sqrt(1 - (x / 204) * (x / 204)); g.moveTo(x, 94 * d); g.lineTo(x * .93, 100 + 84 * Math.sqrt(1 - (x * .93 / 190) * (x * .93 / 190))); } }, 2, rgba(C.sumi, .5));
+  key(() => g.ellipse(0, 28, 200, 92, 0, .04 * Math.PI, .96 * Math.PI), 9, C.indigo);      // 竹箍
+  key(() => g.ellipse(0, 74, 194, 87, 0, .04 * Math.PI, .96 * Math.PI), 9, C.indigo);
+  shape('#b98a3c', () => g.ellipse(0, 0, 204, 94, 0, 0, TAU), 4);                          // 盆内
+  blk(C.sumi, () => { g.ellipse(0, 0, 190, 82, 0, Math.PI, TAU); g.ellipse(0, 22, 172, 66, 0, 0, Math.PI, true); }, .3);
+  key(() => g.ellipse(0, 6, 186, 80, 0, 0, TAU), 2, rgba(C.sumi, .6));
+  // 乘客：坐在盆尾，抓着盆沿
+  shape(C.pink, () => poly([[-128, 34], [-120, -42], [-98, -62], [-58, -62], [-38, -40], [-30, 34]]), 3);
+  key(() => { g.moveTo(-118, -30); g.quadraticCurveTo(-150, 10, -158, 40); g.moveTo(-40, -30); g.quadraticCurveTo(-22, 16, -28, 58); }, 13);
+  key(() => { g.moveTo(-118, -30); g.quadraticCurveTo(-150, 10, -158, 40); g.moveTo(-40, -30); g.quadraticCurveTo(-22, 16, -28, 58); }, 8, C.pink);
+  shape(C.white, () => g.arc(-78, -92, 27, 0, TAU), 3);
+  blk(C.sumi, () => { g.arc(-78, -96, 29, Math.PI * .95, Math.PI * 2.05); g.quadraticCurveTo(-78, -104, -106, -90); });
+  // 船娘：站在盆前，单桨左右拧
+  g.save(); g.translate(92, 16); g.rotate(sw * .05);
+  const hx = 76 + sw * 8, hy = -128;
+  shape(C.indigo, () => poly([[-36, 0], [-30, -150], [-20, -178], [22, -178], [34, -150], [42, 0]]), 3);
+  for (let k = 0; k < 14; k++) blk(C.white, () => g.rect(-24 + (k % 4) * 16 + ((k >> 2) % 2) * 7, -150 + (k >> 2) * 36, 6, 6));   // 絣纹
+  shape(C.verm, () => g.rect(-34, -108, 74, 20), 2);
+  key(() => { g.moveTo(22, -164); g.quadraticCurveTo(54, -160, hx, hy); g.moveTo(-10, -160); g.quadraticCurveTo(30, -130, hx - 6, hy + 14); }, 15);
+  key(() => { g.moveTo(22, -164); g.quadraticCurveTo(54, -160, hx, hy); g.moveTo(-10, -160); g.quadraticCurveTo(30, -130, hx - 6, hy + 14); }, 9, C.indigo);
+  shape(C.white, () => g.arc(4, -200, 23, 0, TAU), 3);
+  shape(C.ochre, () => poly([[-68, -200], [4, -256], [76, -200], [4, -190]]), 3);                                                // 斗笠
+  key(() => { g.moveTo(4, -256); g.lineTo(-34, -196); g.moveTo(4, -256); g.lineTo(4, -190); g.moveTo(4, -256); g.lineTo(42, -196); }, 2);
+  g.restore();
+  const tipX = 318 + sw * 46, tipY = 150;                                     // 桨
+  key(() => { g.moveTo(92 + 60 + sw * 6, -150); g.lineTo(tipX, tipY); }, 12);
+  key(() => { g.moveTo(92 + 60 + sw * 6, -150); g.lineTo(tipX, tipY); }, 6, C.ochre);
+  for (let i = 0; i < 2; i++) { const a = fr(u * 1.1 + i / 2); key(() => g.ellipse(tipX - 6, tipY + 6, 20 + a * 70, 8 + a * 26, 0, 0, TAU), 3, rgba(C.white, 1 - a)); }
+  key(() => g.ellipse(0, 0, 204, 94, 0, .02 * Math.PI, .98 * Math.PI), 5);
+}
+function sceneTub(u) {
+  const pan = lerp(30, -30, clamp((u + .7) / 5.7));
+  g.fillStyle = C.paper; g.fillRect(0, 0, PW, PH);
+  bokashi(0, 0, PW, 250, C.pink, .9, .1);
+  g.save(); g.translate(pan * .5, 0);
+  blk(C.celadon, () => { humpRow(250, 380, 80, 90); g.lineTo(PW + 400, 420); g.lineTo(-400, 420); });
+  blk(C.indigo, () => { humpRow(292, 250, 62, 20); g.lineTo(PW + 400, 420); g.lineTo(-400, 420); }, .92);
+  g.restore();
+  g.save(); g.translate(pan, 0);
+  const hs = [[-60, 150, 150, 60], [84, 124, 118, 46], [196, 168, 172, 70], [362, 132, 130, 52], [486, 176, 140, 64], [620, 140, 168, 58], [782, 160, 120, 62], [896, 128, 150, 50]];
+  hs.forEach(([x, w, h, r], i) => house(x, 452, w, h, r, i));
+  shape(C.white, () => poly([[-80, 452], [1060, 452], [1060, 500], [-80, 500]]), 3);     // 石垣
+  key(() => { for (let k = 0; k < 24; k++) { const x = -70 + k * 48 + (k % 2) * 10; g.moveTo(x, 452); g.lineTo(x + 8, 476); g.lineTo(x - 6, 500); } g.moveTo(-80, 476); g.lineTo(1060, 476); }, 2);
+  g.restore();
+  bokashi(0, 500, PW, PH - 500, C.celadon, 1, 1);
+  bokashi(0, 500, PW, 130, C.white, .7, 0);
+  bokashi(0, 900, PW, PH - 900, C.indigo, 0, .82);
+  g.save(); g.translate(pan * 1.6, 0);
+  for (let i = 0; i < 7; i++)                               // 透明海水下的礁石
+    blk(C.indigo, () => g.ellipse(hash(i + 100) * 1000, 620 + hash(i + 110) * 700, 60 + hash(i + 120) * 90, 22 + hash(i + 130) * 30, 0, 0, TAU), .22);
+  for (let i = 0; i < 5; i++) {                             // 小鱼
+    const x = pm(hash(i + 140) * 1200 + u * (50 + i * 14), 1200) - 100, y = 640 + hash(i + 150) * 240 + Math.sin(u * 2 + i) * 8;
+    blk(C.sumi, () => { g.ellipse(x, y, 20, 6, 0, 0, TAU); g.moveTo(x - 18, y); g.lineTo(x - 32, y - 8 + Math.sin(u * 9 + i) * 4); g.lineTo(x - 32, y + 8 + Math.sin(u * 9 + i) * 4); g.closePath(); }, .5);
+  }
+  g.restore();
+  for (let i = 0; i < 26; i++) {                            // 水面波纹
+    const k = hash(i + 200), y = 540 + k * 880, x = pm(hash(i + 230) * 1400 + u * (16 + k * 44), 1300) - 170, w = 50 + k * 110;
+    key(() => { g.moveTo(x, y); g.quadraticCurveTo(x + w * .25, y - 9, x + w * .5, y); g.quadraticCurveTo(x + w * .75, y + 9, x + w, y); }, 2 + k * 3, rgba(C.white, .55 + .3 * Math.sin(u * 2 + i)));
+  }
+  g.save(); g.translate(pan * 1.4, 0);                      // 岸边的礁岩
+  shape('#3a302c', () => poly([[-60, 760], [10, 680], [80, 650], [150, 690], [196, 760], [120, 792], [0, 792]]), 4);
+  blk(C.ochre, () => poly([[10, 680], [80, 650], [104, 690], [50, 716]]), .7);
+  key(() => g.ellipse(70, 786, 150 + Math.sin(u * 2) * 8, 22, 0, 0, Math.PI), 5, C.white);
+  shape('#3a302c', () => poly([[800, 610], [860, 560], [930, 574], [990, 622], [920, 646], [830, 644]]), 4);
+  key(() => g.ellipse(896, 642, 112 + Math.sin(u * 2 + 1) * 6, 16, 0, 0, Math.PI), 4, C.white);
+  g.restore();
+  const tx = lerp(390, 560, clamp((u + .7) / 5.7)), ty = 1030 + Math.sin(u * 1.6) * 9;
+  g.save(); g.translate(tx, ty); g.rotate(Math.sin(u * 1.6 + 1) * .035 + Math.sin(u * 3.3) * .012); g.scale(1.3, 1.3); tub(u); g.restore();
+  sea(u * .7, 1330, PH + 30, 3);
+}
+
+/* ---------- 第四景：朱鹮 ---------- */
+function wingPath(a, L, dx) {                              // a: -1 下拍 … +1 上扬
+  const e = a * .76 + .24 * Math.tanh(a * 6);            // 翅膀不会薄成一条线
+  const m = (x, v) => [dx + x + v * 78, -12 - v * e * L];
+  const pts = [m(-52, 0), m(-78, .42), m(-70, .78), m(-46, 1), m(-30, .9), m(-20, .97), m(-6, .85), m(4, .91), m(18, .77), m(28, .82),
+    m(40, .66), m(50, .69), m(58, .5), m(66, .5), m(66, .28), m(58, 0)];
+  return () => poly(pts);
+}
+function tokiFly(x, y, s, ph) {                            // 朝左飞
+  const a = Math.sin(ph), a2 = Math.sin(ph - .5);
+  g.save(); g.translate(x, y + a * -10 * s); g.scale(s, s); g.rotate(-.04);
+  shape(C.pink, wingPath(a2 * .92 + .04, 228, -22), 3);                       // 远侧翅
+  key(() => { g.moveTo(74, 14); g.lineTo(196, 30); g.moveTo(70, 22); g.lineTo(186, 42); }, 6, C.verm);          // 腿
+  shape(C.white, () => poly([[84, -14], [176, -22], [182, 0], [172, 18], [86, 16]]), 3);                         // 尾
+  shape(C.white, () => { g.moveTo(-196, -28); g.bezierCurveTo(-120, -44, -60, -46, 20, -36); g.bezierCurveTo(70, -30, 100, -18, 104, 0);
+    g.bezierCurveTo(70, 26, 0, 34, -60, 22); g.bezierCurveTo(-110, 8, -150, -4, -198, -4); g.closePath(); }, 3);
+  key(() => { g.moveTo(-178, -34); g.lineTo(-140, -52); g.moveTo(-172, -36); g.lineTo(-130, -44); }, 4, C.white);  // 冠羽
+  key(() => { g.moveTo(-178, -34); g.lineTo(-140, -52); }, 2);
+  shape(C.verm, () => { g.moveTo(-212, -30); g.quadraticCurveTo(-196, -40, -180, -30); g.quadraticCurveTo(-182, -6, -210, -4); g.closePath(); }, 2);   // 红脸
+  shape(C.sumi, () => { g.moveTo(-208, -26); g.quadraticCurveTo(-280, -22, -310, 34); g.quadraticCurveTo(-270, -4, -208, -8); g.closePath(); }, 2);   // 长而下弯的喙
+  blk(C.sumi, () => g.arc(-196, -22, 3.4, 0, TAU));
+  const near = wingPath(a, 258, 0), e = a * .76 + .24 * Math.tanh(a * 6), tipY = -12 - e * 258;
+  shape(C.white, near, 3);
+  g.save(); g.beginPath(); near(); g.clip();                                  // 飞羽的朱鹮色
+  bokashi(-160, Math.min(tipY, -12), 420, Math.abs(tipY + 12) + 1, C.pink, e > 0 ? 1 : 0, e > 0 ? 0 : 1);
+  key(() => { for (let k = 0; k < 7; k++) { const x = -44 + k * 15; g.moveTo(x + 36, -12 - e * 258 * .46); g.lineTo(x + 72 + k * 2, -12 - e * 258 * (.96 - k * .065)); } }, 2, rgba(C.sumi, .6));
+  g.restore();
+  g.restore();
+}
+function tokiStand(x, y, s, peck) {                        // 朝右站在水田里
+  g.save(); g.translate(x, y); g.scale(s, s);
+  key(() => { g.moveTo(-6, -70); g.lineTo(-12, 0); g.moveTo(22, -70); g.lineTo(30, 0); }, 7, C.verm);
+  key(() => { g.ellipse(-12, 2, 30, 6, 0, 0, TAU); g.ellipse(30, 2, 30, 6, 0, 0, TAU); }, 3, rgba(C.white, .9));
+  const hx = lerp(92, 132, peck), hy = lerp(-222, -22, peck);
+  const neck = () => { g.moveTo(44, -132); g.quadraticCurveTo(lerp(96, 124, peck), lerp(-150, -120, peck), hx, hy); };
+  shape(C.white, () => { g.moveTo(-104, -112); g.bezierCurveTo(-60, -168, 30, -176, 66, -136); g.bezierCurveTo(78, -108, 40, -66, -10, -64); g.bezierCurveTo(-56, -64, -84, -86, -124, -80); g.closePath(); }, 3);
+  blk(C.pink, () => { g.moveTo(-104, -112); g.bezierCurveTo(-64, -124, -30, -110, 10, -84); g.bezierCurveTo(-30, -70, -76, -84, -124, -80); g.closePath(); }, .9);
+  key(() => { g.moveTo(-40, -112); g.quadraticCurveTo(-10, -100, 14, -84); g.moveTo(-70, -108); g.quadraticCurveTo(-40, -92, -16, -78); }, 2);
+  key(neck, 34); key(neck, 28, C.white);
+  const ang = lerp(.5, 1.25, peck);
+  g.save(); g.translate(hx, hy); g.rotate(ang);
+  key(() => { g.moveTo(-22, -10); g.lineTo(-60, -24); g.moveTo(-22, -4); g.lineTo(-64, -8); }, 5, C.white); key(() => { g.moveTo(-22, -10); g.lineTo(-60, -24); }, 2);
+  shape(C.white, () => g.arc(0, 0, 21, 0, TAU), 3);
+  shape(C.verm, () => { g.moveTo(2, -18); g.quadraticCurveTo(26, -14, 24, 6); g.quadraticCurveTo(10, 16, 2, 10); g.closePath(); }, 2);
+  shape(C.sumi, () => { g.moveTo(20, -8); g.quadraticCurveTo(90, -8, 124, 44); g.quadraticCurveTo(78, 12, 20, 8); g.closePath(); }, 2);
+  blk(C.sumi, () => g.arc(8, -4, 3.6, 0, TAU));
+  g.restore(); g.restore();
+}
+function sceneToki(u) {
+  const hz = 560;
+  g.fillStyle = C.paper; g.fillRect(0, 0, PW, PH);
+  bokashi(0, 0, PW, 330, C.indigo, .95, 0);
+  bokashi(0, 150, PW, hz - 150, C.pink, 0, 1);
+  bokashi(0, 340, PW, hz - 340, C.verm, 0, .78);
+  const sunY = lerp(516, 566, clamp((u + .7) / 5.7));
+  blk(C.ochre, () => g.arc(610, sunY, 150, 0, TAU), .5);
+  blk(C.verm, () => g.arc(610, sunY, 112, 0, TAU));
+  blk(C.white, () => g.arc(610, sunY, 112, 0, TAU), .16);
+  for (let i = 0; i < 4; i++) {
+    const x = pm(hash(i + 300) * 1400 + u * (8 + i * 4), 1600) - 420;
+    band(x, 180 + i * 84, 300 + hash(i + 310) * 300, 24 + (i % 2) * 14, i % 2 ? C.indigo : C.pink, i % 2 ? .6 : .9);
+  }
+  g.fillStyle = C.indigo; g.fillRect(0, hz, PW, 190);                         // 海
+  bokashi(0, hz, PW, 190, C.verm, .5, 0);
+  for (let i = 0; i < 16; i++) {                                              // 落日在海上的光路
+    const y = hz + 8 + i * 10, w = (30 + i * 9) * (.7 + .3 * Math.sin(u * 3.4 + i * 1.9));
+    blk(i % 2 ? C.ochre : C.pink, () => g.rect(610 - w / 2 + Math.sin(u * 2 + i) * 6, y, w, 4), .95);
+  }
+  shape(C.sumi, () => poly([[-40, hz + 4], [-40, hz - 84], [70, hz - 106], [170, hz - 70], [262, hz - 30], [330, hz + 4]]), 0);   // 远岬
+  // 梯田：一层层往海边落下去
+  const edge = (i, x) => 700 + i * 128 + Math.pow(i, 1.25) * 12 + Math.sin(x / 960 * Math.PI * (1.1 + i * .13) + i * 1.9) * (26 + i * 9) + (x - 480) * (i % 2 ? .05 : -.06);
+  const edgePath = (i, close) => { g.moveTo(-40, edge(i, -40)); for (let x = 0; x <= 1000; x += 40) g.lineTo(x, edge(i, x)); if (close) { g.lineTo(1000, PH + 60); g.lineTo(-40, PH + 60); } };
+  for (let i = 0; i < 6; i++) {
+    g.save(); g.beginPath(); edgePath(i, true); g.clip();
+    const y0 = 660 + i * 128;
+    bokashi(0, y0, PW, 260, i % 2 ? C.pink : C.ochre, .95, .95);
+    bokashi(0, y0, PW, 240, C.celadon, 0, .92);
+    bokashi(0, y0 + 20, PW, 120, C.white, .55 * (.7 + .3 * Math.sin(u * 1.2 + i)), 0);
+    for (let r = 0; r < 5; r++) {                                              // 秧苗
+      const yy = r * (24 + i * 5) + 44 + i * 5;
+      key(() => { for (let k = 0; k < 30; k++) { const x = k * (34 + i * 4) - 20 + (r % 2) * 14, y = edge(i, x) + yy, sw = Math.sin(u * 2.2 + k * .7 + r + i) * (2 + i);
+        g.moveTo(x, y); g.lineTo(x + sw, y - 9 - i * 3); g.moveTo(x + 5, y); g.lineTo(x + 7 + sw, y - 7 - i * 2); } }, 2 + i * .45, i > 2 ? '#2b5a5c' : rgba(C.indigo, .75));
+    }
+    g.restore();
+    key(() => edgePath(i, false), 9 + i * 2.5, '#2b3a3c');                     // 田埂
+    key(() => edgePath(i, false), 3, rgba(C.celadon, .7));
+  }
+  const peck = Math.pow(Math.max(0, Math.sin(u * 2.1 - .6)), 3);
+  for (let i = 0; i < 2; i++) { const a = fr(u * .5 + i / 2); key(() => g.ellipse(300, 1232, 60 + a * 150, 12 + a * 30, 0, 0, TAU), 3, rgba(C.white, .9 * (1 - a))); }
+  tokiStand(300, 1230, 1.3, peck);
+  const k = clamp((u + .7) / 5.7);
+  tokiFly(lerp(800, 250, k), lerp(600, 470, k), .56, u * 6.4 + 1.6);
+  tokiFly(lerp(1040, 330, k), lerp(900, 770, k) + Math.sin(u * 1.3) * 12, 1.0, u * 5.8);
+}
+
+/* ---------- 册页：纸、版心、题签、文案 ---------- */
+const DRAW = [sceneFerry, sceneGold, sceneTub, sceneToki];
+let grain = null, wear = null;
+function buildTextures() {
+  let s = 20240727; const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  grain = document.createElement('canvas'); grain.width = W / 2; grain.height = H / 2;      // 纸纹：正片叠底
+  const gg = grain.getContext('2d'), im = gg.createImageData(W / 2, H / 2), d = im.data;
+  for (let y = 0, p = 0; y < H / 2; y++) { const row = rnd() * 10; for (let x = 0; x < W / 2; x++, p += 4) {
+    const v = 255 - rnd() * 30 - row - (rnd() < .012 ? 34 : 0); d[p] = v; d[p + 1] = v - 2; d[p + 2] = v - 7; d[p + 3] = 255; } }
+  gg.putImageData(im, 0, 0);
+  wear = document.createElement('canvas'); wear.width = PW; wear.height = PH;                // 版面：漏白颗粒 + 马连刷痕
+  const wg = wear.getContext('2d'); wg.fillStyle = C.paper;
+  for (let i = 0; i < 26000; i++) { wg.globalAlpha = .25 + rnd() * .5; const r = rnd() < .92 ? 1.6 : 3.4; wg.fillRect(rnd() * PW, rnd() * PH, r, r); }
+  wg.strokeStyle = C.paper; wg.lineCap = 'round';
+  for (let i = 0; i < 150; i++) { const y = rnd() * PH, x = rnd() * PW - 200, len = 200 + rnd() * 700;
+    wg.globalAlpha = .05 + rnd() * .09; wg.lineWidth = 1 + rnd() * 3; wg.beginPath(); wg.moveTo(x, y);
+    wg.bezierCurveTo(x + len * .3, y + rnd() * 16 - 8, x + len * .7, y + rnd() * 16 - 8, x + len, y + rnd() * 10 - 5); wg.stroke(); }
+}
+function seal(x, y, size, a) {                             // 朱印
+  if (a <= 0) return;
+  const k = 1 + (1 - ss(a, 0, 1)) * .5;
+  g.save(); g.translate(x, y); g.rotate(-.05); g.scale(k, k); g.globalAlpha = clamp(a * 1.6);
+  g.fillStyle = C.verm; g.beginPath(); g.roundRect(-size / 2, -size / 2, size, size, 10); g.fill();
+  g.strokeStyle = C.white; g.lineWidth = 3; g.strokeRect(-size / 2 + 9, -size / 2 + 9, size - 18, size - 18);
+  vtext('佐渡', 0, -size * .2, size * .36, C.white, 900, 1.12);
+  g.restore();
+}
+function sheet(i, u, dx, dim) {
+  const c = COPY[i];
+  g.save(); g.translate(dx, 0);
+  if (dx > 0) { const sh = g.createLinearGradient(-70, 0, 0, 0); sh.addColorStop(0, 'rgba(20,14,10,0)'); sh.addColorStop(1, 'rgba(20,14,10,.38)'); g.fillStyle = sh; g.fillRect(-70, 0, 70, H); }
+  g.fillStyle = C.paper; g.fillRect(0, 0, W, H);
+  // 上边：文案
+  htext('SADO ISLAND · NIIGATA', PX + 2, 122, 22, rgba(C.sumi, .62), 600, LATIN, 'left', 0, 5);
+  htext('佐渡四景 · 其' + NUM[i], W - PX, 124, 28, rgba(C.sumi, .72), 700, SERIF, 'right', 0, 4);
+  g.fillStyle = C.sumi; g.fillRect(PX, 144, W - PX * 2, 3);
+  g.fillStyle = C.verm; g.fillRect(PX, 144, 120, 3);
+  const a1 = ss(u, .15, .75), a2 = ss(u, 1.5, 2.2), a3 = ss(u, 2.5, 3.1);
+  g.globalAlpha = a1; htext(c.l1, PX - 4 + (1 - a1) * 18, 232, 64, C.sumi, 900, SERIF, 'left', W - PX * 2);
+  g.globalAlpha = a2; htext(c.l2, PX + (1 - a2) * 18, 304, 39, C.sumi, 700, SERIF, 'left', W - PX * 2);
+  g.globalAlpha = 1;
+  // 版心
+  g.save(); g.beginPath(); g.rect(PX, PY, PW, PH); g.clip(); g.translate(PX, PY);
+  DRAW[i](u);
+  g.drawImage(wear, 0, 0);
+  // 题签：朱底白字，旁边一条小签
+  const n = c.name.length, ch = n * 82 + 44, cx = PW - 122, cy = 44;
+  g.fillStyle = rgba(C.sumi, .35); g.fillRect(cx + 5, cy + 6, 96, ch);
+  g.fillStyle = C.verm; g.fillRect(cx, cy, 96, ch);
+  g.strokeStyle = C.white; g.lineWidth = 2; g.strokeRect(cx + 7, cy + 7, 82, ch - 14);
+  vtext(c.name, cx + 48, cy + 22 + 41, 66, C.white, 900, 82 / 66);
+  g.fillStyle = C.paper; g.fillRect(cx - 58, cy, 48, 228); g.strokeStyle = C.sumi; g.lineWidth = 2; g.strokeRect(cx - 58, cy, 48, 228);
+  vtext('佐渡四景之' + NUM[i], cx - 34, cy + 30, 26, C.sumi, 700, 1.3);
+  if (i === 3) seal(PW - 150, PH - 160, 176, clamp((u - 3.15) / .35));
+  g.restore();
+  g.strokeStyle = C.sumi; g.lineWidth = 4; g.strokeRect(PX, PY, PW, PH);
+  // 下边：小注
+  g.globalAlpha = a3; htext(c.note, PX, 1856, 28, rgba(C.sumi, .82), 500, SERIF, 'left', W - PX * 2 - 150, 1);
+  g.globalAlpha = 1;
+  for (let k = 0; k < 4; k++) { g.fillStyle = k === i ? C.verm : rgba(C.sumi, .25); g.fillRect(W - PX - 124 + k * 33, 1838, 24, 12); }
+  if (dim > 0) { g.fillStyle = 'rgba(30,22,16,' + (.3 * dim) + ')'; g.fillRect(0, 0, W, H); }
+  g.restore();
+}
+function shotAt(t) { t = ((t % T) + T) % T; return PLAN[Math.min(3, Math.floor(t / SCENE))][0]; }
+function render(t) {
+  t = ((t % T) + T) % T;
+  const i = Math.min(3, Math.floor(t / SCENE)), u = t - i * SCENE;
+  g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+  if (u > SCENE - TURN) {                                   // 翻页：下一张从右边叠上来
+    const e = ease((u - (SCENE - TURN)) / TURN);
+    sheet(i, u, -150 * e, e);
+    sheet((i + 1) % 4, u - SCENE, W * (1 - e), 0);
+  } else sheet(i, u, 0, 0);
+  g.globalCompositeOperation = 'multiply'; g.imageSmoothingEnabled = true; g.drawImage(grain, 0, 0, W, H);
+  g.globalCompositeOperation = 'source-over';
+}
+window.render = render; window.LOOP_SECONDS = T; window.START_SECONDS = 0; window.PLAN = PLAN;
+
+/* ---------- 启动 ---------- */
+buildTextures();
+const RECORD = new URLSearchParams(location.search).has('record');
+const allText = COPY.map(c => c.name + c.l1 + c.l2 + c.note).join('') + '佐渡四景其之一二三四';
+const fontsReady = (document.fonts && document.fonts.load ? Promise.race([
+  Promise.all([document.fonts.load('900 64px "Noto Serif SC"', allText), document.fonts.load('700 39px "Noto Serif SC"', allText),
+    document.fonts.load('500 28px "Noto Serif SC"', allText), document.fonts.load('600 22px Sora', 'SADO ISLAND NIIGATA')]).catch(() => 0),
+  new Promise(r => setTimeout(r, 4000))]) : Promise.resolve()).then(() => document.fonts ? document.fonts.ready : 0, () => 0);
+render(0);                                                  // 字体到位前先用回退字体出画面
+fontsReady.then(() => {
+  render(0); window.READY = true;
+  if (RECORD) return;
+  let playing = true, base = performance.now(), held = 0;
+  const tick = now => { if (playing) render((now - base) / 1000); requestAnimationFrame(tick); };
+  const toggle = () => { const now = performance.now(); if (playing) held = now - base; else base = now - held; playing = !playing; };
+  cv.addEventListener('click', toggle);
+  addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); toggle(); } });
+  requestAnimationFrame(tick);
+});
+</script>
+</body>
+</html>
