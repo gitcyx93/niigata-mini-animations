@@ -309,13 +309,14 @@ function boot(render) {
 }
 /*SERIES-END*/
 </script>
-<script>// 高田夜樱（春）：上越市高田城址公园。三个场景，段落之间直切（构图按观光协会的照片选）：
-//   0–5      三重橹近景：樱花框住建筑，缓慢推近；不在开头先展示完整护城河全景
-//   5–9      极乐桥：朱红的长桥横过护城河，桥灯在水里拉出金光，天上一轮满月
-//   9–13     站在樱花底下抬头看：发光的粉色花铺满头顶，下面是人群和纸灯笼
-//   13–20    保留原全景高潮：花吹雪落进护城河，拉远展开花筏；不再用水面裁切替代
+<script>// 高田夜樱（春）：上越市高田城址公园。四个镜头，段落之间直切（构图按观光协会的照片选）：
+//   0–4.2      三重橹近景：樱花框住建筑，先快后慢地推近，镜头前有花瓣飘过
+//   4.2–8.8    极乐桥：朱红的长桥横过护城河，桥灯在水里拉出金光，天上一轮满月
+//   8.8–13.4   站在樱花底下抬头看：发光的粉色花铺满头顶，下面是人群和纸灯笼
+//   13.4–24    全景高潮：花吹雪落进护城河，拉远展开花筏；最后几秒停在花筏上收尾
 // 樱花不用团块：每棵树按染井吉野的树形长出枝干，在枝梢上开出一朵朵五瓣的花。
-const T = 20;
+const T = 24;
+const CUT = [4.2, 8.8, 13.4];                     // 三个切点：近景 → 桥 → 花下 → 全景
 const WH = 2900;
 const SS = 2;
 const WATER = 1500, NEAR = 2280;                  // 护城河：对岸水边 → 这边岸边
@@ -573,7 +574,7 @@ const nearC = hiCanvas(W, WH - NEAR_Y0);
 // kind: walk（散步）、phone（停下来举手机拍，屏幕的光照亮脸）、look（停下来抬头看）、pair（两人并肩）、child（大人牵着小孩）
 function figure(x, y, h, t, ph, kind, face = 1) {
   const walking = kind === 'walk' || kind === 'pair' || kind === 'child';
-  const sw = walking ? Math.sin(TAU * 9 * t / T + ph * TAU) : 0;               // 一个循环 9 步，首尾接得上
+  const sw = walking ? Math.sin(TAU * 11 * t / T + ph * TAU) : 0;               // 一个循环 11 步，首尾接得上
   const bob = walking ? Math.abs(sw) * h * .012 : 0;
   const hip = [x, y - h * .47 - bob], sh = [x, y - h * .8 - bob];
   g.fillStyle = '#120c14'; g.strokeStyle = '#120c14'; g.lineCap = 'round';
@@ -629,7 +630,7 @@ function drawDrift(t) {
 }
 // 高潮：花吹雪。一阵风从左往右扫过：风到哪里，哪里的树就放出一大片花瓣（看得出一道风的前沿），
 // 花瓣在灯光里打转、往右下飘，落到护城河上，落点荡开一圈水纹，河面慢慢铺成花筏
-const FUBUKI = {t0: 13.2, t1: 19.4};
+const FUBUKI = {t0: CUT[2] + .2, t1: 20.6};
 const FP = Array.from({length: 1300}, (_, i) => {
   const bank = R(i, 120) < .75 ? 0 : 1;                         // 对岸的树 / 这边的树
   const x0 = R(i, 122) * (W + 300) - 300, y0 = bank ? 2200 + R(i, 123) * 200 : 1140 + R(i, 123) * 340;
@@ -666,13 +667,14 @@ function landAge(p) {                                            // 花瓣落到
 const RAFT = Array.from({length: 6}, (_, k) => ({y: WATER + 40 + k * (RH - 80) / 5.4 + R(k, 140) * 30, amp: 14 + R(k, 141) * 18, fq: .004 + R(k, 142) * .004, ph: R(k, 143) * TAU, w: 18 + R(k, 144) * 18}));
 const RAFT_P = [];
 RAFT.forEach((r, k) => { for (let i = 0; i < 1500; i++) { const x = R(i, 150 + k) * (W + 60) - 30, dens = .5 + .5 * Math.sin(x * .011 + k * 2.1) * Math.sin(x * .0047 + k); if (R(i, 155 + k) > .3 + dens * .7) continue; const dy = (R(i, 160 + k) + R(i, 170 + k) - 1) * r.w * (.5 + dens); RAFT_P.push({k, x, dy, s: 3 + R(i, 180 + k) * 2.8, a: R(i, 190 + k) * TAU, o: R(i, 200 + k) * .5 + clamp((x + 30) / (W + 60)) * .5}); } });
-const raftAmt = t => clamp((t - 14.6) / 4.2);
+const RAFT0 = 15.0;
+const raftAmt = t => clamp((t - RAFT0) / 4.6);
 function drawRaft(t) {
   const amt = raftAmt(t); if (amt <= 0) return;
   g.globalCompositeOperation = 'lighter'; g.globalAlpha = .16 * amt; g.fillStyle = '#ff9fc0'; g.fillRect(0, WATER, W, RH); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';   // 河面泛粉
   RAFT_P.forEach(p => {
     if (p.o > amt * 1.05) return;                                // 花瓣从左往右一点点聚起来（跟着风的方向）
-    const r = RAFT[p.k], x = p.x + (t - 14.6) * 9, y = r.y + p.dy + Math.sin(x * r.fq + r.ph + TAU * t / T) * r.amp;
+    const r = RAFT[p.k], x = p.x + (t - RAFT0) * 9, y = r.y + p.dy + Math.sin(x * r.fq + r.ph + TAU * t / T) * r.amp;
     g.globalAlpha = (.75 - Math.abs(p.dy) / r.w * .3) * clamp((amt * 1.05 - p.o) * 6); g.save(); g.translate(x, y); g.rotate(p.a); g.scale(1, .5); g.drawImage(PETAL, -p.s, -p.s * 1.3, p.s * 2, p.s * 2.6); g.restore();
   });
   g.globalAlpha = 1;
@@ -696,7 +698,7 @@ function drawBokeh(t) {
 // 站在岸边看：朱红的极乐桥从左下方斜着跨过护城河，通到对岸的草坡，坡上远远是三重橹；右上方一轮满月。
 // 桥按透视画（近大远小，桥柱、栏杆、灯越远越密），倒影按同样的透视把高度翻到水面下面，所以桥脚和倒影接得上。
 const BRIDGE_SHOT = (() => {
-  const T0 = 5, T1 = 9, BW = 1300, BH = 2300;
+  const T0 = CUT[0], T1 = CUT[1], BW = 1300, BH = 2300;
   const HY = 960, F = 1300, CAMH = 2.2, WL = HY + CAMH * F / 36;     // 地平线、焦距、眼睛离水面 2.2 米（和桥面差不多高）；对岸水边在 36 米外
   const MOON2 = {x: 330, y: 640, r: 54};
   const P = (X, Y, Z) => [560 + X * F / Z, HY + (CAMH - Y) * F / Z];      // 水面上 (X, 高 Y, 远 Z) 投到画面
@@ -834,7 +836,7 @@ function chochin(b, x, y, r) {                                    // 纸灯笼�
   b.fillStyle = '#1a1214'; b.fillRect(x - r * .5, y - r * 1.38, r, r * .24); b.fillRect(x - r * .5, y + r * 1.16, r, r * .24);
 }
 const CANOPY = (() => {
-  const T0 = 9, T1 = 13, CW = 1300, CH = 2300;
+  const T0 = CUT[1], T1 = CUT[2], CW = 1300, CH = 2300;
   const STR = [[1330, 40, 1280, 260], [1180, 26, 1110, 175]];          // 两串灯笼：[中间高度, 灯笼大小, 两端高度, 间距]，前面一串大、低，后面一串小、高
   const c = hiCanvas(CW, CH, 1);
   (() => { const b = hiCtx(c);
@@ -872,7 +874,7 @@ const CANOPY = (() => {
     const k = clamp((t - T0) / (T1 - T0)), y = lerp(CH - H, CH - H - 330, k), z = lerp(1, 1.04, k);   // 从人群慢慢抬头看花
     g.setTransform(z, 0, 0, z, W / 2 * (1 - z), H / 2 * (1 - z));
     g.drawImage(c, (CW - W) / 2, y, W, H, 0, 0, W, H);
-    g.globalAlpha = .62; g.drawImage(radialSprite([12, 8, 34], 1.2), -520, -260, 1500, 1060); g.globalAlpha = 1;   // 左上角的花暗一点（离灯远），旁白看得清
+    g.globalAlpha = .8; g.drawImage(radialSprite([12, 8, 34], 1.2), -520, -190, 1500, 1060); g.globalAlpha = 1;   // 左上角的花暗一点（离灯远），旁白看得清
     for (let i = 0; i < 30; i++) {                                                // 离眼睛很近的花瓣
       const u = fract(R(i, 430) + (t - T0) * (.1 + R(i, 431) * .08)), px = R(i, 432) * W + Math.sin(u * 7 + i) * 50, py = u * H;
       petal(px, py, 7 + R(i, 433) * 5, u * 4 + i, .85);
@@ -883,30 +885,36 @@ const CANOPY = (() => {
 })();
 
 // ======== 全景的镜头 ========
-// Keep the original 13–20s panorama and petal-raft climax. Only the opening
-// changes to an architectural close-up, reserving the full moat for the end.
-const KEYS = [[0, 1240, 1.0], [5, 1205, 1.1], [13, 1200, 1.25], [20, 1240, 1.0]];
+// 开场近景：先快后慢地推近（头一秒就有明显的运动，之后慢慢稳住，不完全停）。
+// 全景：从切入一直匀缓地拉远到片尾，最后几秒几乎停住，给花筏和交通信息一个落点。
 function camAt(t) {
-  if (t < 5) {
-    const u = clamp(t / 5);
-    return {x: lerp(600, 625, u), y: lerp(1000, 1005, u), z: lerp(1.75, 1.95, u)};
+  if (t < CUT[0]) {
+    const u = clamp(t / CUT[0]), k = .45 * u + .55 * easeOut(u);
+    return {x: lerp(592, 625, k), y: lerp(1012, 1005, k), z: Math.exp(lerp(Math.log(1.58), Math.log(1.95), k))};
   }
-  let i = 0; while (i < KEYS.length - 2 && t >= KEYS[i + 1][0]) i++;
-  if (t >= 5 && t < 13) i = 1;
-  const [t0, y0, z0] = KEYS[i], [t1, y1, z1] = KEYS[i + 1];
-  const u = clamp((t - t0) / (t1 - t0)), k = i === 0 ? u : .2 * u + .8 * ease(u);   // 封面匀速推，保留原样
-  const z = Math.exp(lerp(Math.log(z0), Math.log(z1), k)), hh = H / 2 / z;
-  return {x: W / 2, y: clamp(lerp(y0, y1, k), hh, WH - hh), z};
+  const u = clamp((t - CUT[2]) / (T - CUT[2])), k = .2 * u + .8 * ease(u);
+  const z = Math.exp(lerp(Math.log(1.25), 0, k)), hh = H / 2 / z;
+  return {x: W / 2, y: clamp(lerp(1200, 1240, k), hh, WH - hh), z};
+}
+// 开场镜头前的虚焦花瓣：第 0 秒就已经在画面里飘，给近景加一层景深和运动（不进标题区）
+function drawOpenPetals(t) {
+  for (let i = 0; i < 12; i++) {
+    const age = t + R(i, 500) * 5.5, x = -220 + age * (150 + R(i, 501) * 110), y = 660 + R(i, 502) * 1050 + age * 55 + Math.sin(age * 1.3 + i) * 26, s = 16 + R(i, 503) * 22;
+    if (x > W + 120) continue;
+    g.globalAlpha = .36; g.drawImage(radialSprite([255, 200, 220], 1.4), x - s * 1.6, y - s * 1.6, s * 3.2, s * 3.2);
+    petal(x, y, s * .6, age * .7 + i, .5);
+  }
+  g.globalAlpha = 1;
 }
 
 // ======== 文字 ========
 const P = {head: '#fff6f8', key: '#ffb3c9', sub: 'rgba(255,232,240,.9)', narr: 'rgba(255,232,240,.92)', accent: '#f2a6bf'};
 const STORY = [
-  [0.2, 4.6, '4 月上中旬，高田办观樱会。'],
-  [5.4, 8.8, '每晚 6 点到 9 点亮灯。'],
-  [9.0, 13.3, '日本人都知道的赏樱地，外国游客还很少。'],
-  [13.4, 16.6, '1926 年办起，一百多届了。'],
-  [16.8, 19.7, '高田站走过去约 15 分钟。'],
+  [0.2, 3.9, '4 月上中旬，高田办观樱会。'],
+  [4.5, 8.5, '每晚 6 点到 9 点亮灯。'],
+  [9.1, 13.1, '1926 年办起，一百多届了。'],
+  [13.8, 18.2, '日本人都知道的赏樱地，外国游客还很少。'],
+  [19.6, 23.5, '高田站走过去约 15 分钟。'],
 ];
 const HEADER = {title: '高田夜樱', place: '新潟县上越市', story: STORY, sheen: [60, 160, W - 120, 420], storyColor: P.narr, accent: P.accent};
 const LINE1 = 1440, LINE2 = 1500;      // 中下方大字的基线（全系列统一，按长冈）
@@ -926,7 +934,12 @@ function headline(s, segs, sub) {                                 // 中下方�
     g.shadowColor = 'transparent'; g.shadowBlur = 0;
   });
 }
-const TEXT_WINDOWS = [[19.9, 4.6], [6.4, 8.8], [10.0, 12.8], [17.8, 19.6]];   // 大字比同一镜头的旁白晚约 1 秒
+// [开始, 结束, 托底的深色带强度]：大字比同一镜头的旁白晚约 1 秒；「花筏」等花筏铺开之后才出，留 4 秒多读完
+const TEXT_WINDOWS = [[0, 3.9, 0], [5.4, 8.5, .4], [10.0, 13.1, .42], [18.8, 23.4, .62]];
+function band(a) {                                                // 大字背后一条很柔的深色带（跟着大字一起淡入淡出），亮的花和月亮倒影不再吃字
+  if (a <= 0) return;
+  g.globalAlpha = a; g.drawImage(verticalSprite('hlband', [[0, [8, 5, 22, 0]], [.3, [8, 5, 22, 190]], [.5, [8, 5, 22, 255]], [.7, [8, 5, 22, 190]], [1, [8, 5, 22, 0]]]), 0, 1230, W, 440); g.globalAlpha = 1;
+}
 const HEADLINES = [
   [[['日本三大', 0], ['夜樱', 1]], '高田城址公园 三重橹'],             // 第 0 秒就在画面上（封面）
   [[['樱花在', 0], ['水里', 1], ['再开一遍', 0]], '极乐桥'],
@@ -954,16 +967,20 @@ function render(t) {
     drawFubuki(t);
   }
   g.setTransform(1, 0, 0, 1, 0, 0);
+  if (t < CUT[0]) {
+    g.drawImage(verticalSprite('opengrade2', [[0, [22, 8, 36, 0]], [.57, [22, 8, 36, 0]], [.72, [22, 8, 36, 138]], [.85, [22, 8, 36, 150]], [1, [22, 8, 36, 105]]]), 0, 0, W, H);   // 开场调光：主光留给三重橹，前景的樱花往下渐渐暗下去，大字压在上面才读得清
+    drawOpenPetals(t);
+  }
   if (!(t >= BRIDGE_SHOT.t0 && t < CANOPY.t1)) drawBokeh(t);
   g.setTransform(1, 0, 0, 1, 0, 0);
   g.drawImage(verticalSprite('topscrim120', [[0, [4, 6, 20, 120]], [1, [4, 6, 20, 0]]]), 0, 0, W, 560);
   drawHeader(t, {light: .35, lc: [255, 214, 225], x: W * .6}, HEADER);
-  onBright = t < 5 || (t >= CANOPY.t0 && t < CANOPY.t1) || t >= 16.5;   // 开场近景也有亮樱花：沿用原来的深色字影，不改位置和字色
-  TEXT_WINDOWS.forEach(([a, b], i) => {
-    // Keep the cover text visible immediately at 0s, but do not pre-roll it
-    // over the final water shot at 19.9s merely to prepare a seamless loop.
-    if (i === 0 && t >= 4.6) return;
-    headline(scene(t, a, b), ...HEADLINES[i]);
+  onBright = !(t >= BRIDGE_SHOT.t0 && t < BRIDGE_SHOT.t1);            // 只有桥那个镜头的大字落在暗的水面上；其余镜头背后有亮的花，用更浓的字影
+  TEXT_WINDOWS.forEach(([a, b, dim], i) => {
+    const s = scene(t, a, b); if (!s) return;
+    if (i === 0) s.p = 1;                                             // 第 0 秒大字就在画面上（封面），不做浮起
+    band(dim * s.p * s.out);
+    headline(s, ...HEADLINES[i]);
   });
 }
 boot(render);
