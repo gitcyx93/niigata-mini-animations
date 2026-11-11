@@ -1,10 +1,10 @@
 // ======== 弥彦 V41：新时间轴、山顶重画、叶片（画法 / 飘落 / 落在标题上）========
 // 由 viz/tools/build-yahiko-v41.py 内嵌进 yahiko-v41.html；不要直接改 HTML 里的这一段。
-// 时间轴 N（秒，24.0 循环）：
-//   0–2.4   亮灯的红叶谷（封面；是片尾那一镜的延续）→ 一阵风，大叶子从镜头前扫过，切到白天
-//   2.4–5.4 一之鸟居      5.4–11.0 林中拜殿 → 缆车      11.0–15.0 山顶日落
-//   15.0–19.6 温泉街（两个人离开足汤往外走）      19.6–24.0 红叶谷：两人走上桥 → 三段点灯 → 亮着接回开头
-const V41={DUR:24.0,COVER:2.4,TORII:5.4,SUMMIT0:11.0,TOWN0:15.0,VALLEY0:19.6,VLEN:4.4};
+// 时间轴 N（秒，26.4 循环）：
+//   0–2.8   亮灯的红叶谷（封面；是片尾那一镜的延续）→ 一阵风，大叶子从镜头前扫过，切到白天
+//   2.8–6.0 一之鸟居      6.0–12.2 林中拜殿 → 缆车      12.2–16.6 山顶日落
+//   16.6–21.6 温泉街（两个人离开足汤往外走）      21.6–26.4 红叶谷：两人走上桥 → 三段点灯 → 亮着接回开头
+const V41={DUR:26.4,COVER:2.8,TORII:6.0,SUMMIT0:12.2,TOWN0:16.6,VALLEY0:21.6,VLEN:4.8};
 const v41Round=x=>Math.round(x*1e9)/1e9;
 
 // ---------------- 叶片画法：一张平的枫叶，按朝向压扁、翻面；不再用折面三角 ----------------
@@ -94,30 +94,35 @@ directionalLeaves=function(b,t,strength=1){if(NO_DIR41)return;const c=t%7;for(co
 
 // ---------------- 人物：平涂剪影，会走、会停、会抬手；难画的手和脸不画 ----------------
 // 单位：脚在 (0,0)，头顶约 -103。o：ph 步伐相位，walk 0..1，dir 朝向，back 背对/正对镜头，arm 抬手 0..1（point 指、phone 举手机），bow 鞠躬，robe 浴衣下摆
-function person41(b,x,y,s,o){
-  const ph=o.ph||0,w=o.walk||0,arm=o.arm||0,bow=o.bow||0,col=o.col||'#080e15';
-  b.save();b.translate(x,y-Math.abs(Math.sin(ph))*1.8*w*s);b.scale(s*(o.back?1:(o.dir||1)),s);b.fillStyle=col;b.strokeStyle=col;b.lineCap='round';b.lineJoin='round';b.lineWidth=5.2;
+const person41C=layer(()=>{},120,130,3);
+function person41(B,x,y,s,o){   // 先不透明地画在小画布上，再整体半透明贴上去：重叠的地方不会更黑；上深下浅，像被空气和地面的光托着
+  const ph=o.ph||0,w=o.walk||0,arm=o.arm||0,bow=o.bow||0,col=o.col||[30,34,52],b=person41C.getContext('2d');
+  b.setTransform(3,0,0,3,0,0);b.globalCompositeOperation='source-over';b.clearRect(0,0,120,130);
+  b.save();b.translate(60,118);b.fillStyle='#000';b.strokeStyle='#000';b.lineCap='round';b.lineJoin='round';b.lineWidth=5.2;
   for(const sd of [-1,1]){const q=ph+(sd>0?0:Math.PI);
     if(o.back){const k=Math.sin(q)*w;b.beginPath();b.moveTo(sd*4.5,-30);b.lineTo(sd*5+k*1.5,-2-Math.max(0,k)*5);b.stroke();}
     else{const th=Math.sin(q)*.45*w,fx=Math.sin(th)*30,fy=-Math.max(0,Math.cos(q))*4*w;b.beginPath();b.moveTo(sd*2,-30);b.quadraticCurveTo(Math.sin(th)*15+3*w,-15,fx,-1+fy);b.lineTo(fx+5,-1+fy);b.stroke();}}
   b.save();b.translate(0,-30);if(o.back)b.scale(1,1-bow*.3);else b.rotate(bow*.75);b.translate(0,30);
-  b.beginPath();b.moveTo(-10,-82);b.quadraticCurveTo(0,-88,10,-82);b.lineTo(12,-28);b.quadraticCurveTo(0,-24,-12,-28);b.closePath();b.fill();
-  if(o.robe){b.beginPath();b.moveTo(-12,-32);b.lineTo(-13,-6);b.lineTo(13,-6);b.lineTo(12,-32);b.closePath();b.fill();}
-  b.beginPath();b.ellipse(o.back?0:2,-94,7.2,9,0,0,TAU);b.fill();
-  b.lineWidth=5;const sw=Math.sin(ph+Math.PI)*.4*w;
+  b.beginPath();b.moveTo(-8,-83);b.quadraticCurveTo(0,-88,8,-83);b.quadraticCurveTo(12,-80,11.5,-62);b.lineTo(12.5,-28);b.quadraticCurveTo(0,-24,-12.5,-28);b.lineTo(-11.5,-62);b.quadraticCurveTo(-12,-80,-8,-83);b.closePath();b.fill();
+  if(o.robe){b.beginPath();b.moveTo(-12,-32);b.lineTo(-13.5,-6);b.lineTo(13.5,-6);b.lineTo(12,-32);b.closePath();b.fill();}
+  b.beginPath();b.ellipse(o.back?0:2,-94,7,8.6,0,0,TAU);b.fill();
+  b.lineWidth=4.6;const sw=Math.sin(ph+Math.PI)*.4*w;
   b.beginPath();b.moveTo(-9,-77);b.quadraticCurveTo(-13-sw*6,-60,-11-sw*14,-46);b.stroke();
   const ex=lerp(12+sw*6,20,arm),ey=lerp(-60,-84,arm),hx=lerp(11+sw*14,o.point?34:18,arm),hy=lerp(-46,o.point?-104:-100,arm);
-  b.beginPath();b.moveTo(9,-77);b.quadraticCurveTo(ex,ey,hx,hy);b.stroke();
-  if(o.phone&&arm>.6){b.fillStyle=`rgba(210,226,255,${(arm-.6)/.4*.9})`;b.fillRect(hx-3,hy-9,7,11);}
-  b.restore();b.restore();
+  b.beginPath();b.moveTo(9,-77);b.quadraticCurveTo(ex,ey,hx,hy);b.stroke();b.restore();b.restore();
+  b.setTransform(3,0,0,3,0,0);b.globalCompositeOperation='source-in';const q=b.createLinearGradient(0,10,0,120),lift=o.lift||[46,40,52];
+  q.addColorStop(0,`rgb(${col.join(',')})`);q.addColorStop(1,`rgb(${col.map((v,i)=>Math.round(v+(lift[i]))).join(',')})`);b.fillStyle=q;b.fillRect(0,0,120,130);b.globalCompositeOperation='source-over';
+  B.save();B.translate(x,y-Math.abs(Math.sin(ph))*1.8*w*s);B.scale(s*(o.back?1:(o.dir||1)),s);B.globalAlpha*=o.alpha??.8;B.drawImage(person41C,-60,-118,120,130);
+  if(o.phone&&arm>.6){B.globalAlpha=(arm-.6)/.4*.85;B.fillStyle='#d2e2ff';B.fillRect(hx-3,hy-9,7,11);}
+  B.restore();
 }
 // 桥上：两个人从左边走上桥，走到桥中间停下；灯亮了，一个抬手指，一个举起手机；封面里放下手，站着看
 bridgeVisitors=function(b,t,reflection=false){
   const v=V41V,deck=x=>1090-Math.sin(clamp((x-70)/950)*Math.PI)*60,u=easeOut(clamp(v/1.9)),xA=lerp(250,598,u),xB=xA-27,w=clamp((1-u)*7);
-  const point=ease(clamp((v-1.75)/.45))*(1-ease(clamp((v-4.7)/.8))),phone=ease(clamp((v-2.5)/.45))*(1-ease(clamp((v-5.4)/.8)));
+  const point=ease(clamp((v-1.95)/.45))*(1-ease(clamp((v-5.2)/.8))),phone=ease(clamp((v-2.8)/.45))*(1-ease(clamp((v-6.0)/.8)));
   b.save();if(reflection){b.translate(0,1300);b.scale(1,-.92);b.translate(0,-1300);b.globalAlpha=.13;}
-  person41(b,xB,deck(xB),1,{ph:xB*.16,walk:w,arm:phone,phone:true,robe:true});
-  person41(b,xA+Math.sin(t*.8)*.6,deck(xA),1,{ph:xA*.16+1.3,walk:w,arm:point,point:true,robe:true});
+  person41(b,xB,deck(xB),1,{ph:xB*.16,walk:w,arm:phone,phone:true,robe:true,col:NU?[14,18,30]:[24,14,24],lift:NU?[16,18,28]:[30,12,10],alpha:.9});
+  person41(b,xA+Math.sin(t*.8)*.6,deck(xA),1,{ph:xA*.16+1.3,walk:w,arm:point,point:true,robe:true,col:NU?[14,18,30]:[24,14,24],lift:NU?[16,18,28]:[30,12,10],alpha:.9});
   if(!reflection){const lo=Math.floor(xB-34),hi=Math.ceil(xA+44);   // 重画人前面的栏杆：人在桥里面
     for(let k=0;k<3;k++){b.strokeStyle=NU?(k?'#24222e':'#2c2a36'):(k?'#ad4f3b':'#d77953');b.lineWidth=k?5:8;b.beginPath();for(let x=lo;x<=hi;x+=2)b[x===lo?'moveTo':'lineTo'](x,deck(x)-51+k*18);b.stroke();}
     for(let x=lo;x<=hi;x++){if((x-70)%48===0){b.fillStyle=NU?'#26242f':'#b3513e';b.fillRect(x-3.2,deck(x)-51,6.4,51);}}}
@@ -126,8 +131,8 @@ bridgeVisitors=function(b,t,reflection=false){
 // 鸟居：一个人靠参道左边走过来，在鸟居前停一下、鞠一躬，再走进去
 function toriiWalker41(b,a){
   const Z=a<.8?lerp(6.2,8.0,a/.8):a<1.35?8.0:8.0+(a-1.35)*3.2,bow=a>.8&&a<1.35?Math.sin((a-.8)/.55*Math.PI):0,X=TOX-1.3,f=TP(X,0,Z),h=TP(X,1.7,Z),s=(f[1]-h[1])/100;
-  b.save();b.globalAlpha=.3;b.fillStyle='#1c1810';b.beginPath();b.ellipse(f[0]+10*s,f[1]+3*s,26*s,6*s,0,0,TAU);b.fill();b.restore();
-  person41(b,f[0],f[1],s,{back:true,ph:a*8.5,walk:bow>0?0:1,bow,col:'#231a14'});
+  b.save();b.globalAlpha=.18;b.fillStyle='#1c1810';b.beginPath();b.ellipse(f[0]+8*s,f[1]+3*s,22*s,5*s,0,0,TAU);b.fill();b.restore();
+  person41(b,f[0],f[1],s*.86,{back:true,ph:a*8.5,walk:bow>0?0:1,bow,col:[74,66,54],lift:[70,74,56],alpha:.74});
 }
 // 温泉街：一个人还在足汤里拨水；另外两个人穿好浴衣，离开足汤往街里走，去看夜里的红叶
 townCoupleV25=function(b,a){
@@ -140,7 +145,7 @@ townCoupleV25=function(b,a){
   b.beginPath();b.moveTo(-14,-65);b.quadraticCurveTo(-4,-70,3,-58);b.lineTo(8,-28);b.lineTo(-14,-25);b.lineTo(-18,-49);b.closePath();b.fill();
   b.lineWidth=5.3;b.beginPath();b.moveTo(-13,-58);b.quadraticCurveTo(-21,-39,-20,-23);b.moveTo(1,-56);b.quadraticCurveTo(7,-34,25,-23);b.stroke();b.restore();b.restore();
   const u=clamp((a-1.15)/4.6),q=1-u,P=[[742,1436],[640,1372],[560,1268]],x=q*q*P[0][0]+2*q*u*P[1][0]+u*u*P[2][0],y=q*q*P[0][1]+2*q*u*P[1][1]+u*u*P[2][1],s=lerp(1.42,.9,u);
-  person41(b,x-17*s,y-4*s,s,{back:true,ph:a*7.6+1.5,walk:1,robe:true});person41(b,x+15*s,y,s*.96,{back:true,ph:a*7.6,walk:1,robe:true});
+  person41(b,x-17*s,y-4*s,s,{back:true,ph:a*7.6+1.5,walk:1,robe:true,col:[22,28,46],lift:[60,46,30]});person41(b,x+15*s,y,s*.96,{back:true,ph:a*7.6,walk:1,robe:true,col:[22,28,46],lift:[60,46,30]});
 };
 
 // ---------------- 大叶子从镜头前扫过：封面→白天、温泉街→红叶谷 两处切镜各一次 ----------------
@@ -152,9 +157,9 @@ function wipe41(N){
 }
 
 // ---------------- 红叶谷（片尾 4.8 秒 + 封面 3 秒是同一镜，时钟 v = 0..7.8） ----------------
-const camV41=v=>({z:1.04+.021*v,x:540+6.6*v,y:955-2.4*v});
+const camV41=v=>({z:1.04+.019*v,x:540+6*v,y:955-2.2*v});
 let V41V=0;
-const V41_LIGHT=[1.3,1.75,2.2],V41_RAMP=.5;               // 左岸、右岸、桥和中间：一段一段亮
+const V41_LIGHT=[1.4,1.95,2.5],V41_RAMP=.55;               // 左岸、右岸、桥和中间：一段一段亮
 const valleyLit41=v=>V41_LIGHT.map(t0=>ease(clamp((v-t0)/V41_RAMP)));
 function valleyShot41(b,v){
   const lit=valleyLit41(v),vt=5.6+v;CAM_OVERRIDE=camV41(v);NIGHT_T=24.6+v*.2;NO_DIR41=true;V41V=v;
@@ -177,12 +182,12 @@ function valleyShot41(b,v){
   CAM_OVERRIDE=null;NO_DIR41=false;
 }
 // 红叶谷里的叶子：平时零星地落，有的落到水面上漂着；封面时一阵风从左边过来，带走一批，其中一片从镜头前掠过
-const VW41=gust41([{U:560,t0:5.5,c:1500,rise:.35,decay:1.05,up:-.2}]);
+const VW41=gust41([{U:560,t0:6.3,c:1500,rise:.35,decay:1.05,up:-.2}]);
 const valleyAmb41=Array.from({length:26},(_,i)=>{const r=k=>rnd(i,4400+k),q=r(1),size=q<.68?7+r(2)*6:q<.94?15+r(2)*9:30+r(2)*14,water=r(8)<.3&&size<26;
-  return mk41({x:40+r(3)*1000,y:330+r(4)*520,born:-2+r(5)*7.4,size,seed:4420+i,color:2+i%5,wind:VW41,life:10,
+  return mk41({x:40+r(3)*1000,y:330+r(4)*520,born:-2+r(5)*8.2,size,seed:4420+i,color:2+i%5,wind:VW41,life:10,
     land:water?((x,y,o)=>y>=o.wy?{x,y:o.wy,tilt:1.32,rz:(rnd(o.seed,9)-.5)*.3}:null):null,wy:1345+r(9)*210});});
 const valleyGust41=Array.from({length:18},(_,i)=>{const r=k=>rnd(i,4500+k),x=-40+r(1)*900;
-  return mk41({x,y:360+r(2)*560,born:5.55+(x+200)/1500+r(3)*.35,size:9+r(4)*17,seed:4520+i,color:2+i%5,wind:VW41,life:5});});
+  return mk41({x,y:360+r(2)*560,born:6.35+(x+200)/1500+r(3)*.35,size:9+r(4)*17,seed:4520+i,color:2+i%5,wind:VW41,life:5});});
 function valleyLeaves41(b,v){
   const lit=valleyLit41(v),dim=1-(lit[0]+lit[1]+lit[2])/3;
   // 水面上的叶子跟着镜头一起动（它们在水面上，不在屏幕上）
@@ -210,9 +215,9 @@ function toriiLeaves41Draw(b,t){const a=toriiA41(t);
 }
 
 // ---------------- 温泉街最后那阵风：带着叶子越过切点，吹进还没亮灯的红叶谷 ----------------
-const TW41=gust41([{U:620,t0:18.7,c:1500,rise:.35,decay:1.3,up:-.22}]);
+const TW41=gust41([{U:620,t0:20.7,c:1500,rise:.35,decay:1.3,up:-.22}]);
 const townGust41=Array.from({length:16},(_,i)=>{const r=k=>rnd(i,4800+k),x=-60+r(1)*1000;
-  return mk41({x,y:420+r(2)*900,born:18.75+(x+200)/1500+r(3)*.4,size:9+r(4)*16,seed:4820+i,color:2+i%5,wind:TW41,life:4.2});});
+  return mk41({x,y:420+r(2)*900,born:20.75+(x+200)/1500+r(3)*.4,size:9+r(4)*16,seed:4820+i,color:2+i%5,wind:TW41,life:4.2});});
 
 // ---------------- 落在标题上的叶子：真的碰到字的上沿才停，斜笔画上会滑下去，起风被掀走 ----------------
 let title41=null;
@@ -230,7 +235,7 @@ function titleLand41(x,y,o){
   if(l!=null&&r2!=null&&Math.abs(r2-l)<4.5)return {x,y:ys-o.size*.3,tilt:.82+rnd(o.seed,8)*.28,rz:Math.atan2(r2-l,12)+(rnd(o.seed,9)-.5)*.25,surface:ys};   // 够平：停下
   const dir=l==null?-1:r2==null?1:(r2>l?1:-1);return {slide:dir*70,y:ys-o.size*.3-.5};                                                // 斜的或到了笔画尽头：滑下去
 }
-const TITLE41_PLAN=[[21.9,1.45,5],[22.4,1.6,3],[23.0,19.0,4],[23.5,1.75,6],[3.0,13.2,6],[3.9,19.1,3],[6.0,13.4,5],[8.0,19.05,4],[15.8,19.2,5]];   // [出生, 被哪阵风带走, 颜色]（循环时钟）
+const TITLE41_PLAN=[[24.0,1.6,5],[24.5,1.8,3],[25.1,21.0,4],[25.6,1.95,6],[3.5,14.6,6],[4.4,21.1,3],[6.8,14.8,5],[9.0,21.05,4],[17.6,21.2,5]];   // [出生, 被哪阵风带走, 颜色]（循环时钟）
 let titleLeaves41=null;
 function buildTitleLeaves41(){
   titleMask41();titleLeaves41=[];
@@ -251,8 +256,48 @@ function drawTitleLeaves41(N){
     leaf41(g,{x:s.x,y:s.y,r:L.o.size,rz,tilt,r0:s.r0,color:L.o.color,alpha:Math.min(1,age*4)});}
 }
 
-// ---------------- 山顶（重画）：镜头只是很慢地往前；看的是太阳落向海面、佐渡岛、岸边一盏盏亮起来的灯 ----------------
-const SUM41={hy:862,fx:470,len:V41.TOWN0-V41.SUMMIT0,mid:[[-80,1420],[120,1395],[300,1420],[480,1380],[640,1400],[820,1350],[1000,1300],[1160,1280]]};
+// ---------------- 山顶（第二次重画）：人站在山顶的栏杆边往下看 ----------------
+// 从近到远：脚下的山顶平地和木栏杆（最大）→ 一路往下、越远越小的红叶山坡 → 山脚和海之间窄窄一条平地上的小镇、沿海公路、小渔港
+// → 海 → 海平线上的佐渡岛和落日。左边稍低的山头上是山顶的展望塔和电视塔。镜头几乎不动，只很慢地往前。
+const SUM41={hy:730,fx:470,len:V41.TOWN0-V41.SUMMIT0};
+const sumYc=x=>1012-26*Math.sin((x+140)/1360*Math.PI)-34*Math.exp(-Math.pow((x-930)/70,2));   // 海岸线（右边一个小岬角）
+const sumYf=x=>sumYc(x)+76+10*Math.sin(x*.006);                                               // 山脚：平地到这里为止
+const sumEdge=x=>1352+x*.02;
+const SUM_HILL=[[-60,1190],[20,1108],[128,1062],[236,1088],[340,1150],[420,1210]];   // 左边稍低的山头                                                                  // 脚下平地的边
+const SUM_HOUSES=(()=>{const L=[];for(let i=0;i<300;i++){const r=k=>rnd(i,5300+k),x=r(1)<.62?300+(r(2)+r(3))*.5*520:-20+r(2)*1120,row=Math.floor(r(4)*5),y=sumYc(x)+13+row*11.5+r(5)*3;if(y>sumYf(x)-8)continue;
+  L.push({x,y,w:7+r(6)*8,h:4+r(7)*3.2,c:i%4,lit:r(8)<.55,on:r(9)});}return L.sort((a,c)=>a.y-c.y);})();
+const summitLand41=layer(b=>{
+  // 山脚到海边的平地
+  b.beginPath();b.moveTo(-40,sumYc(-40));for(let x=-40;x<=1120;x+=8)b.lineTo(x,sumYc(x));for(let x=1120;x>=-40;x-=8)b.lineTo(x,sumYf(x)+14);b.closePath();
+  const q=b.createLinearGradient(0,970,0,1110);q.addColorStop(0,'#6a5c68');q.addColorStop(1,'#4a3c48');b.fillStyle=q;b.fill();
+  for(let i=0;i<26;i++){const x=-30+rnd(i,5401)*1120,y=sumYc(x)+16+rnd(i,5402)*44,w=30+rnd(i,5403)*54,h=9+rnd(i,5404)*11;if(x>280&&x<780&&rnd(i,5405)<.7)continue;b.fillStyle=['rgba(120,104,88,.5)','rgba(92,96,84,.5)','rgba(134,112,92,.45)'][i%3];poly(b,[[x,y],[x+w,y-2],[x+w+5,y+h-2],[x+5,y+h]],b.fillStyle);}   // 镇外的田块
+  const line=(off,col,w)=>{b.strokeStyle=col;b.lineWidth=w;b.beginPath();for(let x=-40;x<=1120;x+=8)b[x===-40?'moveTo':'lineTo'](x,sumYc(x)+off);b.stroke();};
+  line(3.5,'rgba(222,196,170,.75)',5);line(-.5,'rgba(255,244,232,.8)',2);line(41,'rgba(150,134,138,.9)',2.4);   // 沙滩、浪花、沿海公路
+  // 小渔港：两道防波堤
+  b.strokeStyle='#74687a';b.lineWidth=3.2;b.lineJoin='round';b.beginPath();b.moveTo(226,sumYc(226));b.lineTo(214,sumYc(226)-36);b.lineTo(266,sumYc(226)-42);b.moveTo(306,sumYc(306));b.lineTo(296,sumYc(306)-28);b.stroke();
+  // 岬角上一点树
+  for(let i=0;i<26;i++){const x=880+rnd(i,5411)*110,y=sumYc(x)+6+rnd(i,5412)*12;treeCrown(b,x,y,7+rnd(i,5413)*5,6,5420+i,['#43303a','#6a3a3c','#8c4a40']);}
+  // 房子：从高处看，先看到屋顶，下面一条墙
+  for(const h of SUM_HOUSES){b.fillStyle='#3a3340';b.fillRect(h.x,h.y+h.h*.55,h.w,h.h*.7);b.fillStyle=['#857680','#96827e','#746a78','#a08a80'][h.c];poly(b,[[h.x-.6,h.y+h.h*.6],[h.x+1.2,h.y],[h.x+h.w-1.2,h.y],[h.x+h.w+.6,h.y+h.h*.6]],b.fillStyle);}
+  // 山坡：从山脚一路上到脚下，树越近越大；远处蒙一层傍晚的空气
+  b.beginPath();b.moveTo(-40,sumYf(-40));for(let x=-40;x<=1120;x+=8)b.lineTo(x,sumYf(x));b.lineTo(1120,1500);b.lineTo(-40,1500);b.closePath();const sq=b.createLinearGradient(0,1080,0,1460);sq.addColorStop(0,'#5a4252');sq.addColorStop(1,'#4a2226');b.fillStyle=sq;b.fill();
+  const T=[];for(let i=0;i<1900;i++){const r=k=>rnd(i,5500+k),x=-40+r(1)*1160,d=Math.pow(r(2),.8),y=1076+d*390;if(y<sumYf(x)+4)continue;T.push({x,y,d,i});}
+  T.sort((a,c)=>a.y-c.y).forEach(({x,y,d,i})=>{const h=6+Math.pow(d,1.45)*60*(.75+rnd(i,5503)*.5),ever=rnd(i,5504)<.12,air=(1-d)*.62,patch=Math.sin(x*.008+y*.02)+Math.cos(y*.013-x*.005);
+    const pal=ever?['#22343a','#34504a','#56705c']:patch>.5&&d>.3?['#7a4a2c','#b87838','#e0aa58']:patch<-.6?['#4a2030','#84303a','#b8503e']:['#5c2630','#a83c36','#dc6c44'];
+    treeCrown(b,x,y,h,h*(ever?.5:.72),5600+i,pal.map(c=>blendTone(c,'#6a5266',air)),ever);});
+  // 左边稍低的山头：展望塔（细细的塔身、中间一圈观景舱）和两座电视塔
+  const P=SUM_HILL;b.beginPath();b.moveTo(-60,1330);P.forEach(([x,y])=>b.lineTo(x,y));b.lineTo(420,1330);b.closePath();const hq=b.createLinearGradient(0,1040,0,1300);hq.addColorStop(0,'#3e2a36');hq.addColorStop(1,'#4a2630');b.fillStyle=hq;b.fill();
+  for(let i=0;i<190;i++){const x=-50+rnd(i,5701)*460,y=contourY(P,clamp(x,-59,419))+5+rnd(i,5702)*150;treeCrown(b,x,y,15+rnd(i,5703)*15,13,5710+i,rnd(i,5704)<.2?['#1e2e34','#2e4640','#4c6452']:['#4c1e2a','#8a2e34','#c0523c'],rnd(i,5704)<.2);}
+  for(const [x,hh] of [[66,78],[196,92]]){const y0=contourY(P,x);b.lineWidth=1.6;for(let k=0;k<6;k++){b.strokeStyle=k%2?'#e8dcd4':'#b8483c';b.beginPath();b.moveTo(x,y0-hh*k/6);b.lineTo(x,y0-hh*(k+1)/6);b.stroke();}b.strokeStyle='rgba(60,44,54,.8)';b.lineWidth=.8;b.beginPath();b.moveTo(x-5,y0);b.lineTo(x,y0-hh*.7);b.lineTo(x+5,y0);b.stroke();}
+  const tx=128,ty=contourY(P,128);const tg=b.createLinearGradient(tx-4,0,tx+4,0);tg.addColorStop(0,'#f4dcc0');tg.addColorStop(1,'#8a7480');b.fillStyle=tg;b.fillRect(tx-3.5,ty-190,7,192);b.fillRect(tx-1,ty-222,2,32);
+  b.fillStyle='#5a4a5c';b.beginPath();b.ellipse(tx,ty-108,16,6,0,0,TAU);b.fill();b.fillStyle='#f0d2b0';b.beginPath();b.ellipse(tx,ty-112,16,5.4,0,0,TAU);b.fill();b.fillStyle='#4a3c50';b.fillRect(tx-11,ty-113,22,2.4);
+},W,H,1.5);
+const summitFore41=layer(b=>{   // 脚下：山顶的平地、草、木栏杆
+  b.beginPath();b.moveTo(-40,sumEdge(-40));for(let x=-40;x<=1120;x+=20)b.lineTo(x,sumEdge(x)+4*Math.sin(x*.05));b.lineTo(1120,H);b.lineTo(-40,H);b.closePath();const q=b.createLinearGradient(0,1340,0,1700);q.addColorStop(0,'#3a2428');q.addColorStop(.3,'#2a1a20');q.addColorStop(1,'#140e14');b.fillStyle=q;b.fill();
+  b.lineCap='round';for(let i=0;i<170;i++){const x=-30+rnd(i,5801)*1140,y=sumEdge(x)+2+rnd(i,5802)*10,l=10+rnd(i,5803)*20;b.strokeStyle=i%3?'#3e2a2a':'#6a4434';b.lineWidth=1.4;b.beginPath();b.moveTo(x,y);b.quadraticCurveTo(x+(rnd(i,5804)-.5)*8,y-l*.6,x+(rnd(i,5805)-.5)*18,y-l);b.stroke();}
+  for(const [dy,w] of [[-74,9],[-40,6.5]]){b.strokeStyle='#2c1c20';b.lineWidth=w;b.beginPath();b.moveTo(-40,sumEdge(-40)+dy);b.lineTo(1120,sumEdge(1120)+dy);b.stroke();b.strokeStyle='rgba(236,150,96,.45)';b.lineWidth=1.6;b.beginPath();b.moveTo(-40,sumEdge(-40)+dy-w/2);b.lineTo(1120,sumEdge(1120)+dy-w/2);b.stroke();}
+  for(let x=-24;x<=1100;x+=124){const y=sumEdge(x);b.fillStyle='#2a1a1e';b.fillRect(x-6,y-84,12,96);b.fillStyle='rgba(236,150,96,.4)';b.fillRect(x-6,y-84,2.2,90);}
+},W,H,1.5);
 const summitBough41=layer(b=>{   // 右上角伸进来的一枝红叶：逆光，偏暗，边上被夕阳染亮
   b.strokeStyle='#2a1a16';b.lineCap='round';
   const tw=(x0,y0,x1,y1,x2,y2,w)=>{b.lineWidth=w;b.beginPath();b.moveTo(x0,y0);b.quadraticCurveTo(x1,y1,x2,y2);b.stroke();};
@@ -263,68 +308,74 @@ const summitBough41=layer(b=>{   // 右上角伸进来的一枝红叶：逆光�
 },560,340,1.5);
 const summitDrift41=Array.from({length:4},(_,i)=>mk41({x:800+rnd(i,5001)*200,y:470+rnd(i,5002)*120,born:.3+i*.9,size:9+rnd(i,5003)*8,seed:5010+i,color:3+i%4,life:6,wind:(x,y,t)=>[-46-18*Math.sin(t*1.1+i),8*Math.sin(t*.8+i)]}));
 function summitSea41(b,hy,sunX,u,t){
-  const sea=b.createLinearGradient(0,hy,0,H);sea.addColorStop(0,blendTone('#e8bc92','#dda686',u));sea.addColorStop(.2,blendTone('#9a92ac','#8a829e',u));sea.addColorStop(.6,'#5e7090');sea.addColorStop(1,blendTone('#33506c','#2c4562',u));b.fillStyle=sea;b.fillRect(0,hy,W,H-hy);
-  b.save();b.beginPath();b.rect(0,hy,W,H-hy);b.clip();glow(b,sunX,hy+250,190,570,[248,191,128],.24);
-  for(let i=0;i<190;i++){const v=Math.pow(i/190,1.7),yy=hy+3+v*(H-hy),n=5+Math.round(v*4);
-    for(let j=0;j<n;j++){const id=i*9+j,len=8+v*110+rnd(id,2621)*v*60,xx=fract(rnd(id,2622)+t*.004*(1+v))*(W+200)-100+Math.sin(t*.6+id)*2*(1+v*3),th=.5+v*2.4;
-      b.fillStyle=`rgba(255,226,190,${(.1+.14*(1-v))*(.6+.4*rnd(id,2623))})`;b.fillRect(xx,yy,len,th);b.fillStyle=`rgba(24,38,64,${.12+.16*v})`;b.fillRect(xx+len*.1,yy+th+.5+v*2,len*.85,th*1.3);}}
-  for(let i=0;i<240;i++){const v=i/240,yy=hy+4+v*(H-hy),spread=(12+v*v*190)*(1-.35*u),xx=sunX+Math.sin(i*2.31+t*.55)*spread*.5,tw=.55+.45*Math.sin(t*5+i*1.7);
-    b.fillStyle=`rgba(255,226,176,${(.38+.42*rnd(i,2612))*(1-v*.6)*tw})`;b.fillRect(xx-(7+v*42)/2,yy,7+v*42,1+v*1.6);}   // 太阳的倒影：一条碎开的光路，太阳越低越窄
+  const sea=b.createLinearGradient(0,hy,0,1220);sea.addColorStop(0,blendTone('#e8bc92','#dda686',u));sea.addColorStop(.25,blendTone('#a498ae','#9488a2',u));sea.addColorStop(1,blendTone('#5a6c8c','#4c5c7e',u));b.fillStyle=sea;b.fillRect(0,hy,W,H-hy);
+  b.save();b.beginPath();b.rect(0,hy,W,440);b.clip();glow(b,sunX,hy+170,170,400,[248,191,128],.24);
+  for(let i=0;i<150;i++){const v=Math.pow(i/150,1.5),yy=hy+3+v*400,n=5+Math.round(v*3);
+    for(let j=0;j<n;j++){const id=i*9+j,len=6+v*52+rnd(id,2621)*v*30,xx=fract(rnd(id,2622)+t*.003*(1+v))*(W+200)-100,th=.5+v*1.3;
+      b.fillStyle=`rgba(255,226,190,${(.1+.12*(1-v))*(.6+.4*rnd(id,2623))})`;b.fillRect(xx,yy,len,th);b.fillStyle=`rgba(24,38,64,${.08+.1*v})`;b.fillRect(xx+len*.1,yy+th+.5+v,len*.85,th);}}
+  for(let i=0;i<200;i++){const v=i/200,yy=hy+4+v*380,spread=(10+v*v*120)*(1-.4*u),xx=sunX+Math.sin(i*2.31+t*.55)*spread*.5,tw=.55+.45*Math.sin(t*5+i*1.7);
+    b.fillStyle=`rgba(255,226,176,${(.4+.42*rnd(i,2612))*(1-v*.55)*tw})`;b.fillRect(xx-(6+v*26)/2,yy,6+v*26,1+v*1.2);}   // 太阳的倒影：一条碎开的光路，太阳越低越窄
   b.restore();
 }
 function summitShot41(b,s){
-  const p=clamp(s/SUM41.len),hy=SUM41.hy,sx=392+16*p,sy=636+(hy-10-636)*(.12*p+.88*p*p),dol=k=>1+k*(.25*p+.75*ease(p));
-  const zoom=(k,f)=>{b.save();b.translate(SUM41.fx,hy);b.scale(dol(k),dol(k));b.translate(-SUM41.fx,-hy);f();b.restore();};
+  const p=clamp(s/SUM41.len),hy=SUM41.hy,sx=404+14*p,sy=556+(hy-8-556)*(.12*p+.88*p*p),dol=k=>1+k*(.25*p+.75*ease(p));
+  const zoom=(k,cx,cy,f)=>{b.save();b.translate(cx,cy);b.scale(dol(k),dol(k));b.translate(-cx,-cy);f();b.restore();};
   b.setTransform(1,0,0,1,0,0);
-  zoom(.012,()=>{sunsetSky(b,.25+.75*p,hy,sx,sy);
-    // 佐渡岛：北边高的大佐渡、中间低平、南边矮一些的小佐渡，占住海平线右半边
-    const x0=548,x1=1016,wd=x1-x0;const q=b.createLinearGradient(0,hy-58,0,hy);q.addColorStop(0,blendTone('#6d6488','#5d5580',p));q.addColorStop(1,blendTone('#9a86a0','#84728f',p));b.fillStyle=q;b.globalAlpha=.9;b.beginPath();b.moveTo(x0,hy+1);
-    for(let x=x0;x<=x1;x+=3){const k=(x-x0)/wd,big=Math.max(0,1-Math.abs(k-.68)/.3),small=Math.max(0,1-Math.abs(k-.2)/.2);b.lineTo(x,hy-1-50*Math.pow(big,.75)-25*Math.pow(small,.85)-8*Math.pow(Math.sin(Math.PI*k),.5)-3*Math.sin(x*.13)*(big+small)-1.5*Math.sin(x*.41)*big);}
-    b.lineTo(x1,hy+1);b.closePath();b.fill();b.globalAlpha=1;
-    b.fillStyle='rgba(255,214,170,.16)';b.fillRect(x0-30,hy-9,wd+60,9);                       // 岛脚的海雾
-    // 归巢的鸟，小小几只，朝太阳那边飞
-    for(let i=0;i<5;i++){const bx=930-s*46-i*38-rnd(i,5101)*30,by=600+i*13+rnd(i,5102)*40+Math.sin(s*1.2+i)*5,fl=Math.sin(s*7+i*1.9)*.5+.2,w=8+rnd(i,5103)*3;b.strokeStyle='rgba(52,38,62,.7)';b.lineWidth=1.7;b.lineCap='round';b.beginPath();b.moveTo(bx-w,by-w*fl);b.quadraticCurveTo(bx-w*.4,by-w*.15,bx,by);b.quadraticCurveTo(bx+w*.4,by-w*.15,bx+w,by-w*fl);b.stroke();}
+  zoom(.012,SUM41.fx,hy,()=>{sunsetSky(b,.25+.75*p,hy,sx,sy);
+    const x0=560,x1=1012,wd=x1-x0;const q=b.createLinearGradient(0,hy-54,0,hy);q.addColorStop(0,blendTone('#6d6488','#5d5580',p));q.addColorStop(1,blendTone('#9a86a0','#84728f',p));b.fillStyle=q;b.globalAlpha=.9;b.beginPath();b.moveTo(x0,hy+1);
+    for(let x=x0;x<=x1;x+=3){const k=(x-x0)/wd,big=Math.max(0,1-Math.abs(k-.68)/.3),small=Math.max(0,1-Math.abs(k-.2)/.2);b.lineTo(x,hy-1-46*Math.pow(big,.75)-23*Math.pow(small,.85)-8*Math.pow(Math.sin(Math.PI*k),.5)-3*Math.sin(x*.13)*(big+small)-1.5*Math.sin(x*.41)*big);}
+    b.lineTo(x1,hy+1);b.closePath();b.fill();b.globalAlpha=1;b.fillStyle='rgba(255,214,170,.16)';b.fillRect(x0-30,hy-9,wd+60,9);
+    for(let i=0;i<5;i++){const bx=930-s*46-i*38-rnd(i,5101)*30,by=598+i*11+rnd(i,5102)*34+Math.sin(s*1.2+i)*5,fl=Math.sin(s*7+i*1.9)*.5+.2,w=8+rnd(i,5103)*3;b.strokeStyle='rgba(52,38,62,.7)';b.lineWidth=1.7;b.lineCap='round';b.beginPath();b.moveTo(bx-w,by-w*fl);b.quadraticCurveTo(bx-w*.4,by-w*.15,bx,by);b.quadraticCurveTo(bx+w*.4,by-w*.15,bx+w,by-w*fl);b.stroke();}
     summitSea41(b,hy,sx,p,s+20);});
-  const base=hy-930;
-  zoom(.035,()=>{b.drawImage(coastLand,0,base+40,W,H);
-    for(const l of coastLights){const a=clamp((p-.3-(l.x+60)/1180*.42-l.on*.07)/.06);/* 天色一暗，岸边的灯从左到右一路亮过去 */if(a<=0)continue;const x=l.x,y=l.y+base+40;glow(b,x,y,15,11,[255,200,130],.55*a);b.fillStyle=`rgba(255,228,176,${a})`;b.fillRect(x-l.s/2,y-l.s/2,l.s,l.s);}});
-  zoom(.075,()=>{b.drawImage(slopeMidV2,0,base+130,W,H);
-    // 山坡上的观景栏杆和两个看日落的人：一个举起手机，一个指给同伴看佐渡岛
-    const gy=x=>contourY(SUM41.mid,x)+base+146;
-    person41(b,848,gy(848)+2,1.22,{back:true,arm:ease(clamp((s-.5)/.5)),phone:true,col:'#1a1218'});
-    person41(b,902+Math.sin(s*.9)*.8,gy(902)+3,1.16,{back:true,arm:ease(clamp((s-1.5)/.45))*(1-ease(clamp((s-3.1)/.6))),point:true,col:'#1a1218'});
-    b.strokeStyle='#1c1418';b.lineCap='round';for(const [dy,w2] of [[-46,5],[-24,3.5]]){b.lineWidth=w2;b.beginPath();for(let x=770;x<=985;x+=5)b[x===770?'moveTo':'lineTo'](x,gy(x)+dy+12);b.stroke();}
-    b.lineWidth=6;for(let x=772;x<=985;x+=53){b.beginPath();b.moveTo(x,gy(x)+14);b.lineTo(x,gy(x)-36);b.stroke();}});
-  zoom(.13,()=>b.drawImage(slopeNearV2,0,base+250,W,H));
+  zoom(.03,SUM41.fx,hy,()=>b.drawImage(summitLand41,0,0,W,H));
+  zoom(.075,540,1560,()=>b.drawImage(summitFore41,0,0,W,H));
   // 傍晚的色调：越来越暖、越来越沉，最后不到半秒才暗下来接夜景
-  const dark=ease(clamp((s-(SUM41.len-.5))/.5)),rgb=[lerp(255,244,p)-70*dark,lerp(250,220,p)-70*dark,lerp(240,206,p)-40*dark].map(Math.round),c=tintC.getContext('2d');
+  const dark=ease(clamp((s-(SUM41.len-.5))/.5)),rgb=[lerp(255,240,p)-70*dark,lerp(250,214,p)-70*dark,lerp(240,204,p)-40*dark].map(Math.round),c=tintC.getContext('2d');
   c.setTransform(1,0,0,1,0,0);c.globalCompositeOperation='source-over';c.fillStyle=`rgb(${rgb.join(',')})`;c.fillRect(0,0,W,H);
   b.save();b.globalCompositeOperation='multiply';b.drawImage(tintC,0,0,W,H);b.globalCompositeOperation='lighter';glow(b,sx,sy,480,190,[255,196,140],.16*Math.sin(Math.PI*clamp(p*1.1)));b.restore();
-  // 近处的红叶枝：比远景动得多一点，被海风吹得轻轻晃
+  // 天色一暗：镇上的窗、沿海公路的路灯从左到右一路亮过去；公路上两辆车；港口的灯和塔顶的灯一闪一闪
+  zoom(.03,SUM41.fx,hy,()=>{const sweep=x=>clamp((p-.28-(x+60)/1180*.4)/.07);b.save();b.globalCompositeOperation='lighter';
+    for(const h of SUM_HOUSES){if(!h.lit)continue;const a=clamp(sweep(h.x)*1.2-h.on*.2);if(a<=0)continue;glow(b,h.x+h.w/2,h.y+h.h,7,5,[255,196,120],.5*a);b.fillStyle=`rgba(255,226,168,${a})`;b.fillRect(h.x+h.w*.3,h.y+h.h*.75,1.8,1.5);}
+    for(let x=-30;x<=1110;x+=44){const a=sweep(x+90);if(a<=0)continue;const y=sumYc(x)+40;glow(b,x,y,6,4,[255,214,150],.5*a);b.fillStyle=`rgba(255,236,196,${.9*a})`;b.fillRect(x-.8,y-.8,1.6,1.6);}
+    for(const [k,dir] of [[0,1],[1,-1]]){const x=fract(k*.47+dir*s*.03)*1180-50,y=sumYc(x)+41,a=clamp((p-.3)/.2);glow(b,x+dir*5,y,13,5,[255,240,200],.6*a);b.fillStyle=`rgba(255,246,220,${a})`;b.fillRect(x-1,y-1,2.4,2);}
+    const blink=q2=>Math.pow(Math.max(0,Math.sin(s*q2)),6);glow(b,266,sumYc(226)-42,16,12,[190,255,210],.75*blink(3.2));b.fillStyle=`rgba(210,255,224,${.5+.5*blink(3.2)})`;b.fillRect(264.5,sumYc(226)-44,3,3);
+    glow(b,128,contourY(SUM_HILL,128)-222,14,14,[255,90,70],.8*blink(2.3));b.restore();});
+  // 栏杆边的两个人（最近、最大）：一个举起手机，一个指给同伴看佐渡岛
+  zoom(.075,540,1560,()=>{
+    person41(b,790,sumEdge(790)+30,1.86,{back:true,arm:ease(clamp((s-.5)/.5)),phone:true,col:[44,26,36],lift:[40,18,10],alpha:.9});
+    person41(b,872+Math.sin(s*.9)*1.2,sumEdge(872)+34,1.76,{back:true,arm:ease(clamp((s-1.6)/.45))*(1-ease(clamp((s-3.3)/.6))),point:true,col:[44,26,36],lift:[40,18,10],alpha:.9});});
   const sway=Math.sin(s*1.3)*.012+Math.sin(s*2.9+1)*.006;b.save();b.translate(1100+30*p,300-18*p);b.rotate(sway);b.scale(1+.16*p,1+.16*p);b.drawImage(summitBough41,-540,-60,560,340);b.restore();
   drawGroup41(b,summitDrift41,s);
 }
 
 // ---------------- 字幕（新时间轴） ----------------
-const STORY41=[[-2,0,'红叶最好看在 11 月上中旬。'],[V41.COVER,0,'新潟坐电车，约一个半小时。'],[6.4,0,'弥彦山 634 米，和晴空塔一样高。'],[V41.SUMMIT0,0,'天晴时，能看到佐渡岛。'],[V41.TOWN0,0,'下山后，住一晚弥彦温泉。'],[V41.VALLEY0,0,'天黑后，红叶谷每晚点灯。'],[23.3,0,'红叶最好看在 11 月上中旬。']];
-function townCard41(N){   // 温泉街：左对齐，让开往街里走的两个人；下面一行是出发前要知道的事
-  rise(sc41(N,15.7,19.4),()=>{g.drawImage(verticalSprite('type-trial-end',[[0,[5,12,20,0]],[.4,[5,12,20,72]],[.7,[5,12,20,72]],[1,[5,12,20,0]]]),0,1300,W,440);
-    for(const pass of [0,1]){g.shadowColor=pass?'rgba(8,16,26,.95)':'rgba(6,12,22,.8)';g.shadowBlur=pass?6:20;g.shadowOffsetY=pass?2:0;
-      const w1=measure('日落之后 ',64,300,6)+6;text('日落之后 ',92,1470,64,HL_C.head,300,'left',6);text('住进温泉街',92+w1,1470,64,HL_C.key,300,'left',6);
-      g.fillStyle=TYPE.coral;g.beginPath();g.arc(100,1532,6,0,TAU);g.fill();text('缆车傍晚 5 点前就收班',120,1546,40,HL_C.subColor,500,'left',2);}g.shadowColor='transparent';g.shadowBlur=0;});
-}
+const STORY41=[[-2,0,'红叶最好看在 11 月上中旬。'],[V41.COVER,0,'新潟坐电车，约一个半小时。'],[7.2,0,'弥彦山 634 米，和晴空塔一样高。'],[V41.SUMMIT0,0,'天晴时，能看到佐渡岛。'],[V41.TOWN0,0,'下山后，住一晚弥彦温泉。'],[V41.VALLEY0,0,'天黑后，红叶谷每晚点灯。'],[25.7,0,'红叶最好看在 11 月上中旬。']];
 const sc41=(N,from,to)=>N<from||N>to?0:{p:easeOut((N-from)/.55),out:clamp((to-N)/.35)};   // 不跨循环的出场/退场
+// 极简：大字细、宽字距，不加任何字影；下面一行小、轻，只是补充。看不清时只把字后面的景物压暗一点（一条很淡的渐变）
+const HL41={size:68,weight:300,sp:8,y1:1440,sub:30,subW:400,subSp:5,y2:1504,subCol:'rgba(255,246,230,.8)'};
+const scrim41=()=>verticalSprite('type-v41-caption',[[0,[5,12,20,0]],[.42,[5,12,20,96]],[.72,[5,12,20,96]],[1,[5,12,20,0]]]);
+headlineC=function(s,segs,sub){
+  rise(s,()=>{g.shadowColor='transparent';g.shadowBlur=0;g.shadowOffsetY=0;g.drawImage(scrim41(),0,1300,W,330);
+    const ws=segs.map(([q])=>measure(q,HL41.size,HL41.weight,HL41.sp)+HL41.sp);let x=(W-ws.reduce((p,q)=>p+q,0)+HL41.sp)/2;
+    segs.forEach(([q,key],i)=>{text(q,x,HL41.y1,HL41.size,key?HL_C.key:HL_C.head,HL41.weight,'left',HL41.sp);x+=ws[i];});
+    if(sub)text(sub,W/2,HL41.y2,HL41.sub,HL41.subCol,HL41.subW,'center',HL41.subSp);});
+};
+function townCard41(N){   // 温泉街：左对齐，让开往街里走的两个人；小字是出发前要知道的事
+  rise(sc41(N,17.4,21.4),()=>{g.shadowColor='transparent';g.shadowBlur=0;g.drawImage(scrim41(),0,1310,W,330);
+    const w1=measure('日落之后 ',HL41.size,300,HL41.sp)+HL41.sp;text('日落之后 ',92,1440,HL41.size,HL_C.head,300,'left',HL41.sp);text('住进温泉街',92+w1,1440,HL41.size,HL_C.key,300,'left',HL41.sp);
+    g.fillStyle=TYPE.coral;g.beginPath();g.arc(99,1494,4,0,TAU);g.fill();text('缆车傍晚 5 点前就收班',116,1504,HL41.sub,HL41.subCol,HL41.subW,'left',HL41.subSp);});
+}
 function titles41(N){
-  const day=N>=V41.COVER&&N<V41.TOWN0,ss=N-V41.SUMMIT0,sunset=day?ease(clamp((N-8.6)/1.8)):0,lit=N<V41.COVER?1:N>=V41.VALLEY0?valleyLit41(N-V41.VALLEY0)[2]:N>=V41.TOWN0?1:0;
+  const day=N>=V41.COVER&&N<V41.TOWN0,ss=N-V41.SUMMIT0,sunset=day?ease(clamp((N-9.8)/1.8)):0,lit=N<V41.COVER?1:N>=V41.VALLEY0?valleyLit41(N-V41.VALLEY0)[2]:N>=V41.TOWN0?1:0;
   g.save();drawHeader(12,{light:.12+.55*sunset+.28*lit,lc:sunset>0?[255,188,111]:lit>0?[255,213,156]:[224,234,241],x:sunset>0?(ss>=0?400:760):600},{title:'弥彦',place:'新潟县弥彦村',story:STORY41,storyT:N,storyShadow:'rgba(8,16,26,.95)',sheen:[440,560,500,260],reflect:true,accent:'#deb985',storyColor:'#fff6e6'});g.restore();
   // 封面那句在片尾最后半秒多先升起来，循环回到第 0 秒时已经在画面上
-  headlineC(N>=23.4?{p:easeOut(clamp((N-23.4)/.5)),out:1}:N<2.05?{p:1,out:clamp((2.05-N)/.3)}:0,[['上山看海 ',0],['入夜看秋',1]],'新潟 · 弥彦');
-  headlineC(sc41(N,3.1,5.25),[['一之鸟居',1]],'弥彦神社');
-  headlineC(sc41(N,5.9,8.0),[['山下参拜 ',0],['山上看海',1]],'十一月，还有菊花祭');
-  headlineC(sc41(N,8.6,10.85),[['缆车 ',0],['5',1],[' 分钟到山顶',0]],'走表参道上山 约 90 分钟');
-  headlineC(sc41(N,11.9,14.8),[['上山之后 是',0],['海',1]],'山顶望向日本海');
+  headlineC(N>=25.8?{p:easeOut(clamp((N-25.8)/.5)),out:1}:N<2.4?{p:1,out:clamp((2.4-N)/.3)}:0,[['上山看海 ',0],['入夜看秋',1]],'新潟 · 弥彦');
+  headlineC(sc41(N,3.6,5.85),[['一之鸟居',1]],'弥彦神社');
+  headlineC(sc41(N,6.6,8.8),[['山下参拜 ',0],['山上看海',1]],'十一月，还有菊花祭');
+  headlineC(sc41(N,9.5,12.05),[['缆车 ',0],['5',1],[' 分钟到山顶',0]],'走表参道上山 约 90 分钟');
+  headlineC(sc41(N,13.1,16.4),[['上山之后 是',0],['海',1]],'山顶望向日本海');
   townCard41(N);
-  headlineC(sc41(N,21.9,23.3),[['弥彦公园 ',0],['红叶谷',1]],'观月桥');
+  headlineC(sc41(N,24.1,25.65),[['弥彦公园 ',0],['红叶谷',1]],'观月桥');
 }
 
 // ---------------- 每一帧 ----------------
@@ -337,7 +388,7 @@ function render(N){
   if(N<V41.COVER||N>=V41.VALLEY0){const v=N<V41.COVER?V41.VLEN+N:N-V41.VALLEY0;clear();valleyShot41(b,v);b.setTransform(1,0,0,1,0,0);
     if(N>=V41.VALLEY0)drawGroup41(b,townGust41,N,1-valleyLit41(v)[1]);valleyLeaves41(b,v);}
   else if(N<V41.TORII){const t=v41Round(3.2+N-V41.COVER);paintShot(screenA,'torii',t);b.setTransform(1,0,0,1,0,0);toriiLeaves41Draw(b,t);}
-  else if(N<V41.SUMMIT0){const t=v41Round(7.0+N-V41.TORII);paintShot(screenA,shotAt(t),t);}
+  else if(N<V41.SUMMIT0){const t=v41Round(6.8+N-V41.TORII);paintShot(screenA,shotAt(t),t);}
   else if(N<V41.TOWN0){clear();summitShot41(b,N-V41.SUMMIT0);}
   else{clear();tTown=v41Round(TOWN0+1+(N-V41.TOWN0));townShot(b,tTown);b.setTransform(1,0,0,1,0,0);drawGroup41(b,townGust41,N);}
   g.setTransform(1,0,0,1,0,0);g.drawImage(screenA,0,0);
