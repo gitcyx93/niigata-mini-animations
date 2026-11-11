@@ -1,6 +1,6 @@
 # 弥彦 V43 试作：去掉开场地图的顺序 + 日月主线和换景转场（折中版）
 
-入口：`viz/autumn/yahiko-v43.html`，28.1 秒，无声自循环。源码 `viz/autumn/yahiko-v43-fx.js`，用 `python3 viz/tools/build-yahiko-v43.py` 从 V40 页面内嵌。预览：https://claude.ai/artifact/4dummy 见聊天记录里的链接。尚未经用户确认。
+入口：`viz/autumn/yahiko-v43.html`，28.1 秒，无声自循环。源码 `viz/autumn/yahiko-v43-fx.js`，用 `python3 viz/tools/build-yahiko-v43.py` 从 V40 页面内嵌。预览：https://claude.ai/artifact/Uqjt56JLNWF4f3TAPeE21A 。尚未经用户确认。
 
 ## 用户意见（2026-11-11）
 
