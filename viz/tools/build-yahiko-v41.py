@@ -14,6 +14,7 @@ rep("function duration(){return NEW_DUR;}","function duration(){return 26.4;}")
 # ropeway shot no longer hands over to the old summit set; the summit is its own shot after a cut
 rep("const ASTAGE_OUT=[13.85,.45],ASTAGE_IN=[14.0,.6];","const ASTAGE_OUT=[99,.45],ASTAGE_IN=[99,.6];")
 rep("morningLight(b,a);toriiGroundLeaves(b);b.restore();","morningLight(b,a);toriiGroundLeaves(b);toriiWalker41(b,a);b.restore();")
+rep("for(let k=0;k<3;k++){\n  const u=fract(a*.35+k/3),foot=townFeet(","for(let k=0;k<0;k++){\n  const u=fract(a*.35+k/3),foot=townFeet(")   # 足汤边不再坐人，也就没有脚拨出的水纹
 # --- torii cedars: uneven spacing, a few very old thick trunks, slight leans
 rep("for(let i=0;i<20;i++){const side=i%2?1:-1,X=TOX+side*(3.2+rnd(i,3011)*9),Z=TOZ+3+rnd(i,3012)*22;trunks.push([Z,X,.55+rnd(i,3013)*.45,i]);}",
     "for(let i=0;i<27;i++){const side=rnd(i,3016)<.5?1:-1,X=TOX+side*(3.0+Math.pow(rnd(i,3011),1.25)*11.5),Z=TOZ+2.5+rnd(i,3012)*26;trunks.push([Z,X,.3+Math.pow(rnd(i,3013),2.2)*1.0,i]);}")
