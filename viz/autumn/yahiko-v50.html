@@ -3366,12 +3366,14 @@ function person41(B,x,y,s,o){   // 先不透明地画在小画布上，再整体
   b.beginPath();b.ellipse(o.back?0:2,-94,7,8.6,0,0,TAU);b.fill();
   b.lineWidth=4.6;const sw=Math.sin(ph+Math.PI)*.4*w;
   b.beginPath();b.moveTo(-9,-77);b.quadraticCurveTo(-13-sw*6,-60,-11-sw*14,-46);b.stroke();
-  const ex=lerp(12+sw*6,20,arm),ey=lerp(-60,-84,arm),hx=lerp(11+sw*14,o.point?34:18,arm),hy=lerp(-46,o.point?-104:-100,arm);
+  const ex=o.hand?(9+o.hand[0])/2:lerp(12+sw*6,20,arm),ey=o.hand?-66:lerp(-60,-84,arm),hx=o.hand?o.hand[0]:lerp(11+sw*14,o.point?34:18,arm),hy=o.hand?o.hand[1]:lerp(-46,o.point?-104:-100,arm);
   b.beginPath();b.moveTo(9,-77);b.quadraticCurveTo(ex,ey,hx,hy);b.stroke();b.restore();b.restore();
   b.setTransform(3,0,0,3,0,0);b.globalCompositeOperation='source-in';const q=b.createLinearGradient(0,10,0,120),lift=o.lift||[10,8,8];
   q.addColorStop(0,`rgb(${col.join(',')})`);q.addColorStop(1,`rgb(${col.map((v,i)=>Math.round(v+(lift[i]))).join(',')})`);b.fillStyle=q;b.fillRect(0,0,120,130);b.globalCompositeOperation='source-over';
   B.save();B.translate(x,y-Math.abs(Math.sin(ph))*1.8*w*s);B.scale(s*(o.back?1:(o.dir||1)),s);B.globalAlpha*=o.alpha??1;B.drawImage(person41C,-60,-118,120,130);
-  if(o.phone&&arm>.6){B.globalAlpha=(arm-.6)/.4*.85;B.fillStyle='#d2e2ff';B.fillRect(hx-3,hy-9,7,11);}
+  if(o.phone&&arm>.6){B.globalAlpha=(arm-.6)/.4*.85;B.fillStyle='#d2e2ff';B.fillRect(hx-3,hy-9,7,11);
+    if(o.phoneLight){const [,,,c,ts,r]=o.phoneLight,px=hx+.5,py=hy-3.5;B.save();B.globalCompositeOperation='lighter';glow(B,px,py,16,16,[190,214,255],.3);
+      for(const t0 of ts){const age=o.phoneTime-t0,f=age<0?0:Math.exp(-age/.38)*(1-Math.exp(-age/.05));if(f>.02){glow(B,px,py,r*(1+.5*f),r*(1+.5*f),c,.55*f);glow(B,px,py,9,9,[255,255,255],.8*f);}}B.restore();}}
   B.restore();
 }
 function flash41(b,x,y,f,s){b.save();b.globalCompositeOperation='lighter';glow(b,x,y,150*s*(.6+f),150*s*(.6+f),[255,250,236],.85*f);glow(b,x,y,34*s,34*s,[255,255,255],f);
@@ -3384,7 +3386,7 @@ const SHORE49=[[246,1340,1.5,1,[2.3,5.6,7.9]]];   // 岸边架着三脚架拍桥
 const PHONE50=[[722,-1,1.0,[255,244,224],[2.9,6.3],70],[466,1,1.0,[214,230,255],[4.2,7.3],52],[778,1,1.02,[255,232,196],[5.0],60]];   // 桥上会亮一下的手机：[x, 朝向, 身高, 光色, 时刻, 光的大小]
 function heart47(b,x,y,s){b.save();b.translate(x,y);b.scale(s,s);b.fillStyle='#ff7fa8';b.beginPath();b.moveTo(0,16);b.bezierCurveTo(-34,-8,-22,-34,0,-16);b.bezierCurveTo(22,-34,34,-8,0,16);b.closePath();b.fill();b.restore();}
 bridgeVisitors=function(b,t,reflection=false){
-  const v=V41V,deck=x=>1090-Math.sin(clamp((x-70)/950)*Math.PI)*60,col=[9,14,22],lit=ease(clamp((v-1.6)/.4)),P=(x,h,o)=>person41(b,x,deck(x),h,Object.assign({col},o));
+  const v=V41V,deck=x=>1090-Math.sin(clamp((x-70)/950)*Math.PI)*60,col=[9,14,22],lit=ease(clamp((v-1.6)/.4)),P=(x,h,o)=>person41(b,x,deck(x),h,Object.assign({col,phoneLight:reflection?null:PHONE50.find(([px])=>x===px+(px===466?sh:0)),phoneTime:v},o));
   b.save();if(reflection){b.translate(0,1300);b.scale(1,-.92);b.translate(0,-1300);b.globalAlpha=.13;}
   // 排队的人；每拍完一张，队伍往前挪半步
   const step=.5-.5*Math.cos(Math.PI*clamp((v-4.7)/.7)),sh=14*step,wk=step>0&&step<1?.5:0;
@@ -3413,9 +3415,6 @@ bridgeVisitors=function(b,t,reflection=false){
     b.lineWidth=4.6*sc;b.beginPath();b.moveTo(x+dir*8*sc,y-70*sc);b.quadraticCurveTo(x+dir*26*sc,y-74*sc,cxm-dir*8*sc,cym);b.stroke();
     b.fillStyle='#070a12';b.fillRect(cxm-11*sc,cym-9*sc,22*sc,15*sc);b.beginPath();b.arc(cxm+dir*13*sc,cym-2*sc,5.5*sc,0,TAU);b.fill();
     for(const t0 of shots){const f=v<t0?0:Math.exp(-(v-t0)/.26);if(f>.02)flash41(b,cxm+dir*16*sc,cym-3*sc,f,2.1);}}
-  // 手机：屏幕一直有一点冷光照在脸前；偶尔补光灯亮一下——一团柔光，没有星芒，颜色、大小各不一样
-  if(lit>0){b.save();b.globalCompositeOperation='lighter';for(const [x,dir,h,c,ts,r] of PHONE50){const px=x+dir*19*h,py=deck(x)-100*h;glow(b,px,py,16,16,[190,214,255],.3*lit);
-    for(const t0 of ts){const f=v<t0?0:Math.exp(-(v-t0)/.38)*(1-Math.exp(-(v-t0)/.05));if(f>.02){glow(b,px,py,r*(1+.5*f),r*(1+.5*f),c,.55*f);glow(b,px,py,9,9,[255,255,255],.8*f);}}}b.restore();}
 };
 // 拜殿：两人在殿前并排拜两下
 function hallCouple45(b,age){const bw=Math.max(Math.pow(Math.sin(Math.PI*clamp((age-.45)/.7)),2),Math.pow(Math.sin(Math.PI*clamp((age-1.3)/.7)),2));
@@ -3737,16 +3736,18 @@ townCoupleV25=function(b,a){
     b.save();b.beginPath();b.rect(xe,dy-dh,gap,dh);b.clip();
     const q=b.createLinearGradient(0,dy-dh,0,dy);q.addColorStop(0,'#b98552');q.addColorStop(.55,'#f0cf96');q.addColorStop(1,'#ffe9bc');b.fillStyle=q;b.fillRect(xe,dy-dh,gap,dh);   // 玄关：里面深处暗一些，脚下亮
     b.fillStyle='rgba(120,80,48,.5)';b.fillRect(dx,dy-14,hw,3);b.fillStyle='rgba(96,62,40,.35)';b.fillRect(dx+hw-10,dy-dh,10,dh);                                           // 上框的台阶、门柱的影子
-    if(out<1){const px=dx+hw-22,py=dy-2;person41(b,px,py,.78,{dir:-1,robe:true,col:[34,22,22],lift:[30,18,8]});                                                            // 人还在门里：侧身，手搭着门边往左拉
-      b.strokeStyle='rgb(40,26,24)';b.lineWidth=4;b.lineCap='round';b.beginPath();b.moveTo(px-6,py-58);b.quadraticCurveTo((px+xe)/2,py-50,xe+3,py-46);b.stroke();}
     b.restore();
+    // 同一个人从门内迈到门口；手随门沿移动，松手后朝左前方的两位游客鞠躬。
+    const px=dx+hw-22-6*out,py=dy-2+15*out,release=ease(clamp((a-2.4)/.15));
+    b.save();b.beginPath();b.rect(xe,dy-dh,gap,dh+40);b.clip();
+    person41(b,px,py,.78,{dir:-1,ph:out*4,walk:.6*Math.sin(Math.PI*out),robe:true,bow:.55*greet,
+      hand:release<1?[lerp((px-xe-2)/.78,11,release),lerp((dy-46-py)/.78,-46,release)]:null,col:[34,22,22],lift:[30,18,8]});b.restore();
     // 被拉开的那扇格子门，叠到左边那扇前面
     b.fillStyle='#e9d1a0';b.fillRect(xe-hw,dy-dh,hw,dh);b.strokeStyle='#3a2c22';b.lineWidth=1.2;for(let k=1;k<3;k++){b.beginPath();b.moveTo(xe-hw+k*hw/3,dy-dh);b.lineTo(xe-hw+k*hw/3,dy);b.stroke();}
     for(let k=1;k<4;k++){b.beginPath();b.moveTo(xe-hw,dy-dh+k*dh/4);b.lineTo(xe,dy-dh+k*dh/4);b.stroke();}b.lineWidth=3;b.strokeRect(xe-hw+1.5,dy-dh+1.5,hw-3,dh-3);
     b.fillStyle=`rgba(20,14,12,${.22*open})`;b.fillRect(xe-hw,dy-dh,hw,dh);                                                                                                  // 两扇叠在一起，透进来的光少了
     b.save();b.globalCompositeOperation='lighter';glow(b,dx+hw-gap/2,dy+24,90*open,40*open,[255,206,140],.36*open);b.restore();
   }
-  if(out>0)person41(b,dx+hw-22-6*out,dy-2+15*out,.78,{ph:out*4,walk:out<1?.6:0,robe:true,bow:.55*greet,col:[34,22,22],lift:[30,18,8]});                                      // 迈到门口，鞠躬
   const u=clamp((a-.5)/2.9),e=1-Math.pow(1-u,1.35),q=1-e,P=[[672,2030],[676,1660],[752,1432]],x=q*q*P[0][0]+2*q*e*P[1][0]+e*e*P[2][0],y=q*q*P[0][1]+2*q*e*P[1][1]+e*e*P[2][1];
   const s=lerp(1.45,2.5,clamp((y-1432)/600)),walk=clamp((1-u)/.07),ph=e*24,back=Math.pow(Math.sin(Math.PI*clamp((a-3.5)/1.0)),2),col=[9,14,22];
   person41(b,x-17*s,y-3*s,s,{back:true,ph:ph+1.5,walk,robe:true,col,arm:.8*ease(clamp((a-4.4)/.45))});   // 一个伸手去接落叶

@@ -1,0 +1,55 @@
+{
+  "version": "V52",
+  "duration": 28.1,
+  "sample_rate": 32000,
+  "peak": 0.1588444709777832,
+  "encoded_peak": 0.15381422638893127,
+  "wind_source": {
+    "id": 245824,
+    "author": "1ratatosk1",
+    "url": "https://freesound.org/people/1ratatosk1/sounds/245824/",
+    "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "range_seconds": [
+      8,
+      36.1
+    ],
+    "gain": 0.5225641506826114,
+    "boundary_fades_seconds": [
+      0.06,
+      0.06
+    ]
+  },
+  "kept_foley_sha256": {
+    "door": "242f000b9ef904b9c5f3dff71a48a4a74bd269f9494c3bc9425c4376ebbcc7e7",
+    "shutter": "90feb50b4c2f6f618a76375338e22c7f29806fdefbab824b7703f3afdab38e12",
+    "steps": "468d0c9603fa8bdeea13a5a8c5a738dc5614d078c9c171417c50a030b5f4bce0"
+  },
+  "removed": [
+    "extra shrine forest wind",
+    "old opening and leaf wind beds",
+    "old ascent air wind bed",
+    "park recording throughout",
+    "old town quiet wind beds"
+  ],
+  "kept": [
+    "wind chimes",
+    "sea",
+    "ropeway",
+    "bird phrases",
+    "town water/window/cat details",
+    "door",
+    "camera +4dB",
+    "footsteps +4dB"
+  ],
+  "validation": [
+    "accepted first 9.8 seconds matches within PCM quantization; excerpt-only end fade removed",
+    "28.1-second encoded duration",
+    "no clipping",
+    "breeze boundary zero crossing",
+    "V50 FX byte content unchanged"
+  ],
+  "limitations": [
+    "Town wind subtraction may retain small codec residuals",
+    "New full-film mix not independently listened to; opening direction approved by user"
+  ]
+}

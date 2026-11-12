@@ -1,0 +1,35 @@
+{
+  "scope": "0–10s audition only; full film unchanged",
+  "removed": [
+    "extra shrine forest-wind layer",
+    "old opening/forest/leaf/ascent-air mixed environmental beds",
+    "added park recording in the opening"
+  ],
+  "preserved": [
+    "archival chime aligned -0.4s",
+    "V51 r2 camera and footstep stems with +4dB unchanged"
+  ],
+  "reconstructed": [
+    "ropeway at 9.4s",
+    "bird phrase at 9.75s"
+  ],
+  "limitations": [
+    "Incidental voices/birds embedded in replaced wind recordings are not separable and are also removed",
+    "Reconstructed archival layers may differ slightly from the lossy old master",
+    "No human listening verification; excerpt is not a final full-film loop"
+  ],
+  "new_source": {
+    "id": 245824,
+    "author": "1ratatosk1",
+    "url": "https://freesound.org/people/1ratatosk1/sounds/245824/",
+    "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source_range_seconds": [
+      8,
+      18
+    ],
+    "preview_mp3": true
+  },
+  "breeze_rms_dbfs": -70.2855224609375,
+  "mix_peak": 0.058423154056072235,
+  "original_v51_sha256": "aa4f9fd0061483504fa28bab1cd77f95daa33ae3bc1b07fc49ffd18a2c6f11c1"
+}

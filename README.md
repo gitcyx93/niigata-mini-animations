@@ -17,9 +17,15 @@ GitHub 文件页显示源码，不会直接播放 HTML。克隆或下载本仓�
 | 秋 | [弥彦 V38](viz/autumn/yahiko-v38.html) · [English](viz/autumn/yahiko-v38-en.html) · [繁體](viz/autumn/yahiko-v38-tw.html) | 27.8 秒首尾循环，红叶谷与温泉街风叶互动；环境音、海浪、风铃、鸟鸣、猫叫与窗框声，**无配乐** |
 | 冬 | [越后汤泽](viz/winter/yuzawa-yukiguni.html) · [台湾繁体](viz/winter/yuzawa-yukiguni-tw.html) | 三维滑雪、SNS 运镜与新稿；保留原 20 秒循环 |
 
-### 弥彦 V50 / V49 / V48 / V47 / V46 / V45 / V44 / V43 / V42：试作（未确认）
+### 弥彦 V52：当前中文修改版
 
-- [V50 页面](viz/autumn/yahiko-v50.html) · [记录](stories/yahiko-v50.md)：最新试作。V49 + 拉开半边门的动作重做、岸边一个架三脚架的人、手机各有柔光、山顶推近加大。
+- **[打开 V52 轻微风版](viz/autumn/yahiko-v52.html)** · [本轮记录](stories/yahiko-v52.md) · [音效来源与授权](viz/autumn/audio/yahiko-v52/LICENSES.md)。
+- 28.1 秒，沿用修正拉门、鞠躬和手机灯光后的 V50 画面；全片采用用户认可的轻微风实录，删除额外树林风与旧风声叠层。相机、脚步保留加大后的音量，风铃、拉门、猫叫等保留。
+- 页面内嵌音频，点击播放；页面下方可单听微风及动作分轨。当前为简体中文 HTML，未导出新版 MP4。
+
+### 弥彦 V50 / V49 / V48 / V47 / V46 / V45 / V44 / V43 / V42：此前试作
+
+- [V50 页面](viz/autumn/yahiko-v50.html) · [记录](stories/yahiko-v50.md)：此前试作。V49 + 拉开半边门的动作重做、岸边一个架三脚架的人、手机各有柔光、山顶推近加大。
 - [V49 页面](viz/autumn/yahiko-v49.html) · [记录](stories/yahiko-v49.md)：V48 + 旅馆早点拉开大门、岸边用相机拍桥的人、片尾字按长冈的位置、声音按事件重排。
 - [V48 页面](viz/autumn/yahiko-v48.html) · [记录](stories/yahiko-v48.md)：V47 + 字不带阴影、日月一换就切景、鸟居鞠躬、旅馆开门迎客、桥上各种拍照的人；V38 环境音按新顺序重剪放回。
 - [V47 页面](viz/autumn/yahiko-v47.html) · [记录](stories/yahiko-v47.md)：V46 + 桥上排队拍照和粉色爱心、片尾左侧提醒、月亮从右边山坡后升起、大字加粗放大；无声。
@@ -29,7 +35,7 @@ GitHub 文件页显示源码，不会直接播放 HTML。克隆或下载本仓�
 - [V43 页面](viz/autumn/yahiko-v43.html) · [记录](stories/yahiko-v43.md)：去掉开场地图的镜头顺序，日月主线和换景转场跟着调整，全片同一对两个人；无声。
 - [V42 页面](viz/autumn/yahiko-v42.html) · [记录](stories/yahiko-v42.md)：V38 原顺序、转场和声音，换了山顶布景、人物、叶片画法和字的样式。V39–V41 是中间试作。
 
-### 弥彦 V38：当前版本
+### 弥彦 V38：此前发布版本（含英／繁体）
 
 - [完整动画](viz/autumn/yahiko-v38.html) · [本轮记录](stories/yahiko-v38.md) · [音效来源与授权](viz/autumn/audio/yahiko-v38/LICENSES.md)。
 - 保留 `viz/autumn/audio/yahiko-v38/` 目录；运行 `node viz/tools/preview-yahiko-v38.cjs` 后打开 **http://127.0.0.1:8941/yahiko**。点击“有声播放”，可按时间表单听音效。英文预览 `/en`，繁体预览 `/tw`。

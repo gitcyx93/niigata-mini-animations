@@ -1,0 +1,357 @@
+{
+  "version": "V51 audition r2",
+  "duration": 28.1,
+  "sample_rate": 32000,
+  "base_gain": 1,
+  "stem_adjustment_db": {
+    "shutter": 4,
+    "steps": 4,
+    "door": 0,
+    "park": 0
+  },
+  "base_sha256": "a9eaf0f2b5eb5db849600565d40fa88a6cc3f945d64ec07b8e666068ffb755bc",
+  "base_peak": 0.15606024861335754,
+  "mixed_peak": 0.15606024861335754,
+  "encoded_peak": 0.15160903334617615,
+  "events": [
+    {
+      "stem": "door",
+      "at": 18.5,
+      "length": 0.9,
+      "source": 381966,
+      "source_start": 0.7,
+      "wraps": false,
+      "note": "Right sliding panel: 0.9s pull; speed-shaped envelope"
+    },
+    {
+      "stem": "shutter",
+      "at": 2.1,
+      "length": 0.26184,
+      "source": 231286,
+      "source_start": 0,
+      "wraps": false,
+      "note": "One camera on the left bank; no phone click layer"
+    },
+    {
+      "stem": "shutter",
+      "at": 24.6,
+      "length": 0.26184,
+      "source": 231286,
+      "source_start": 0,
+      "wraps": false,
+      "note": "One camera on the left bank; no phone click layer"
+    },
+    {
+      "stem": "shutter",
+      "at": 27.9,
+      "length": 0.26184,
+      "source": 231286,
+      "source_start": 0,
+      "wraps": true,
+      "note": "One camera on the left bank; no phone click layer"
+    },
+    {
+      "stem": "steps",
+      "at": 17.64827,
+      "length": 0.28,
+      "source": 521590,
+      "source_start": 0.6,
+      "wraps": false,
+      "note": "Visitor foot plant from eased V50 walking phase"
+    },
+    {
+      "stem": "steps",
+      "at": 17.94023,
+      "length": 0.24,
+      "source": 521590,
+      "source_start": 1.16,
+      "wraps": false,
+      "note": "Visitor foot plant from eased V50 walking phase"
+    },
+    {
+      "stem": "steps",
+      "at": 18.24489,
+      "length": 0.22,
+      "source": 521590,
+      "source_start": 0.08,
+      "wraps": false,
+      "note": "Visitor foot plant from eased V50 walking phase"
+    },
+    {
+      "stem": "steps",
+      "at": 18.56551,
+      "length": 0.28,
+      "source": 521590,
+      "source_start": 0.6,
+      "wraps": false,
+      "note": "Visitor foot plant from eased V50 walking phase"
+    },
+    {
+      "stem": "steps",
+      "at": 18.90721,
+      "length": 0.24,
+      "source": 521590,
+      "source_start": 1.16,
+      "wraps": false,
+      "note": "Visitor foot plant from eased V50 walking phase"
+    },
+    {
+      "stem": "steps",
+      "at": 19.27917,
+      "length": 0.22,
+      "source": 521590,
+      "source_start": 0.08,
+      "wraps": false,
+      "note": "Visitor foot plant from eased V50 walking phase"
+    },
+    {
+      "stem": "steps",
+      "at": 19.70202,
+      "length": 0.28,
+      "source": 521590,
+      "source_start": 0.6,
+      "wraps": false,
+      "note": "Visitor foot plant from eased V50 walking phase"
+    },
+    {
+      "stem": "steps",
+      "at": 20.26885,
+      "length": 0.24,
+      "source": 521590,
+      "source_start": 1.16,
+      "wraps": false,
+      "note": "Visitor foot plant from eased V50 walking phase"
+    },
+    {
+      "stem": "steps",
+      "at": 17.78625,
+      "length": 0.24,
+      "source": 521590,
+      "source_start": 1.16,
+      "wraps": false,
+      "note": "Visitor foot plant from eased V50 walking phase"
+    },
+    {
+      "stem": "steps",
+      "at": 18.08394,
+      "length": 0.22,
+      "source": 521590,
+      "source_start": 0.08,
+      "wraps": false,
+      "note": "Visitor foot plant from eased V50 walking phase"
+    },
+    {
+      "stem": "steps",
+      "at": 18.39573,
+      "length": 0.28,
+      "source": 521590,
+      "source_start": 0.6,
+      "wraps": false,
+      "note": "Visitor foot plant from eased V50 walking phase"
+    },
+    {
+      "stem": "steps",
+      "at": 18.7256,
+      "length": 0.24,
+      "source": 521590,
+      "source_start": 1.16,
+      "wraps": false,
+      "note": "Visitor foot plant from eased V50 walking phase"
+    },
+    {
+      "stem": "steps",
+      "at": 19.0802,
+      "length": 0.22,
+      "source": 521590,
+      "source_start": 0.08,
+      "wraps": false,
+      "note": "Visitor foot plant from eased V50 walking phase"
+    },
+    {
+      "stem": "steps",
+      "at": 19.4725,
+      "length": 0.28,
+      "source": 521590,
+      "source_start": 0.6,
+      "wraps": false,
+      "note": "Visitor foot plant from eased V50 walking phase"
+    },
+    {
+      "stem": "steps",
+      "at": 19.93823,
+      "length": 0.24,
+      "source": 521590,
+      "source_start": 1.16,
+      "wraps": false,
+      "note": "Visitor foot plant from eased V50 walking phase"
+    },
+    {
+      "stem": "steps",
+      "at": 19.82,
+      "length": 0.22,
+      "source": 521590,
+      "source_start": 0.08,
+      "wraps": false,
+      "note": "Single quiet step over the threshold"
+    },
+    {
+      "stem": "steps",
+      "at": 5.65603,
+      "length": 0.22,
+      "source": 648338,
+      "source_start": 1.34366,
+      "wraps": false,
+      "note": "Torii foot plant includes sourceTime easing, not a uniform time offset"
+    },
+    {
+      "stem": "steps",
+      "at": 5.30793,
+      "length": 0.22,
+      "source": 648338,
+      "source_start": 1.34366,
+      "wraps": false,
+      "note": "Torii foot plant includes sourceTime easing, not a uniform time offset"
+    },
+    {
+      "stem": "steps",
+      "at": 5.98573,
+      "length": 0.22,
+      "source": 648338,
+      "source_start": 1.34366,
+      "wraps": false,
+      "note": "Torii foot plant includes sourceTime easing, not a uniform time offset"
+    },
+    {
+      "stem": "park",
+      "at": 22.3,
+      "length": 8.6,
+      "source": 75273,
+      "source_start": 30,
+      "wraps": true,
+      "note": "Low-level Tokyo dusk park recording, not Yahiko location sound or isolated crowd"
+    }
+  ],
+  "sources": [
+    {
+      "key": "fs:75273",
+      "title": "tokyo_park_at_dusk.wav",
+      "dur": "123.6s",
+      "author": "markystar",
+      "license": "CC0",
+      "preview": "https://cdn.freesound.org/previews/75/75273_384438-hq.mp3",
+      "url": "https://cdn.freesound.org/previews/75/75273_384438-hq.mp3",
+      "downloads": 523,
+      "stats": "↓523 ★4.5(6)",
+      "desc": "",
+      "label": "黄昏公园 · 氛围备选",
+      "cue": "22.3–28.1 → 0–2.8 秒",
+      "reason": "东京小公园黄昏，远处年轻人、风树、鸟和交通；不是弥彦实录。若交通或鸟声抢戏就淘汰，不能冒充纯人群分轨。",
+      "page": "https://freesound.org/people/markystar/sounds/75273/",
+      "license_urls": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "source_description": "Follow Soundscapes > Urban A small park in Higashi-Koenji, Tokyo at dusk. There are some university aged kids drinking and smoking in the background. I wanted to record the fountain sound as well, but the fountain had already been turned off. You can hear some bird, rustling of the wind in the trees and traffic in the distance. Recorded with a pair of mics at 120 degrees. ",
+      "file": "candidates/fs_75273_tokyo_park_at_dusk-wav.mp3",
+      "status": "candidate_not_listened_or_mixed",
+      "format_note": "Freesound HQ MP3 preview; not original WAV"
+    },
+    {
+      "key": "fs:231286",
+      "title": "5DMkII shutter sound.wav",
+      "dur": "0.3s",
+      "author": "ulose2piranha",
+      "license": "CC0",
+      "preview": "https://cdn.freesound.org/previews/231/231286_4168822-hq.mp3",
+      "url": "https://cdn.freesound.org/previews/231/231286_4168822-hq.mp3",
+      "downloads": 3819,
+      "stats": "↓3819 ★4.4(35)",
+      "desc": "",
+      "label": "快门 B · CC0 备选",
+      "cue": "2.1 / 24.6 / 27.9 秒",
+      "reason": "5D MkII 单次快门；与 A 二选一，最终需压低以符合岸边距离。27.9 秒的尾音可能跨循环，要处理边界。",
+      "page": "https://freesound.org/people/ulose2piranha/sounds/231286/",
+      "license_urls": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "source_description": "Follow Sound effects > Objects / House appliances Single shutter actuation of a Canon 5D Mk. II camera body recorded in stereo WAV format. *EDIT: I never thought people would care about this audio file, but I just saw that it already has 2,000 downloads! I'm so happy to be able to contribute something back to this fantastic website. If you happen to use any of my audio clips, I'd love to know what kind of project you've used them for. I'd be even more excited if you put links to finished projects in the comments section! Thank you to everyone who has download it and even more thanks to all the folks who have uploaded the clips I have used! ",
+      "file": "candidates/fs_231286_5DMkII-shutter-sound-wav.mp3",
+      "status": "candidate_not_listened_or_mixed",
+      "format_note": "Freesound HQ MP3 preview; not original WAV"
+    },
+    {
+      "key": "fs:381966",
+      "title": "sliding wooden  door close mic follow door scrape 2.wav",
+      "dur": "3.2s",
+      "author": "MattRuthSound",
+      "license": "BY",
+      "preview": "https://cdn.freesound.org/previews/381/381966_7107243-hq.mp3",
+      "url": "https://cdn.freesound.org/previews/381/381966_7107243-hq.mp3",
+      "downloads": 2327,
+      "stats": "↓2327 ★4.8(21)",
+      "desc": "a wooden sliding door being opened",
+      "label": "拉门 A · 优先试听",
+      "cue": "18.5–19.4 秒",
+      "reason": "明确是木制滑门打开；3.2 秒素材需挑出约 0.9 秒摩擦段，保留轻停门声。近距离录音，最终应降低到旅馆远景的距离。",
+      "page": "https://freesound.org/people/MattRuthSound/sounds/381966/",
+      "license_urls": [
+        "https://creativecommons.org/licenses/by/4.0/"
+      ],
+      "source_description": "Follow Sound effects > Objects / House appliances Doors a wooden sliding door being opened ",
+      "file": "candidates/fs_381966_sliding-wooden-door-close-mic-follow-doo.mp3",
+      "status": "candidate_not_listened_or_mixed",
+      "format_note": "Freesound HQ MP3 preview; not original WAV"
+    },
+    {
+      "key": "fs:521590",
+      "title": "Hiking Boot Footsteps on Stone",
+      "dur": "3.5s",
+      "author": "Fission9",
+      "license": "CC0",
+      "preview": "https://cdn.freesound.org/previews/521/521590_9395330-hq.mp3",
+      "url": "https://cdn.freesound.org/previews/521/521590_9395330-hq.mp3",
+      "downloads": 10955,
+      "stats": "↓10955 ★4.9(238)",
+      "desc": "Six footsteps on stone with hiking boots. Each step is separated by about 250 ms of silenc",
+      "label": "石地脚步 · 动作素材",
+      "cue": "约 17.5–20.4 秒；店家 19.5–20.0 秒",
+      "reason": "六个登山鞋石地脚步，有间隔，便于按实际落脚剪切；不是木屐，必须试听鞋底质感再决定，不直接照原节奏循环。",
+      "page": "https://freesound.org/people/Fission9/sounds/521590/",
+      "license_urls": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "source_description": "Follow Sound effects > Human sounds and actions Footsteps Six footsteps on stone with hiking boots. Each step is separated by about 250 ms of silence. Recorded with a H4n Pro on 06/06/2020 Edited with Audacity. ",
+      "file": "candidates/fs_521590_Hiking-Boot-Footsteps-on-Stone.mp3",
+      "status": "candidate_not_listened_or_mixed",
+      "format_note": "Freesound HQ MP3 preview; not original WAV"
+    },
+    {
+      "key": "fs:648338",
+      "title": "Walking gravel.wav",
+      "dur": "12.0s",
+      "author": "Rimmer",
+      "license": "CC0",
+      "preview": "https://cdn.freesound.org/previews/648/648338_11944544-hq.mp3",
+      "url": "https://cdn.freesound.org/previews/648/648338_11944544-hq.mp3",
+      "downloads": 1488,
+      "stats": "↓1488 ★4.6(22)",
+      "desc": "Recorded with ZOOM H2n Two people walking together in gravel",
+      "label": "砂砾脚步 · 两人同行",
+      "cue": "约 4.3–6.0 秒",
+      "reason": "描述明确为两人在砂砾上走，ZOOM H2n 录制；用于鸟居参道候选。应先检查原分轨，避免重复叠脚步。",
+      "page": "https://freesound.org/people/Rimmer/sounds/648338/",
+      "license_urls": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "source_description": "Follow Sound effects > Human sounds and actions Walking footsteps Recorded with ZOOM H2n Two people walking together in gravel ",
+      "file": "candidates/fs_648338_Walking-gravel-wav.mp3",
+      "status": "candidate_not_listened_or_mixed",
+      "format_note": "Freesound HQ MP3 preview; not original WAV"
+    }
+  ],
+  "listened": false,
+  "limits": [
+    "Old V49 wind/window layers retained; not independently remixed",
+    "Park candidate contains distant traffic/birds; not a clean crowd stem",
+    "No new cable-car pass sound; existing ropeway bed retained"
+  ]
+}
