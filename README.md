@@ -17,9 +17,10 @@ GitHub 文件页显示源码，不会直接播放 HTML。克隆或下载本仓�
 | 秋 | [弥彦 V38](viz/autumn/yahiko-v38.html) · [English](viz/autumn/yahiko-v38-en.html) · [繁體](viz/autumn/yahiko-v38-tw.html) | 27.8 秒首尾循环，红叶谷与温泉街风叶互动；环境音、海浪、风铃、鸟鸣、猫叫与窗框声，**无配乐** |
 | 冬 | [越后汤泽](viz/winter/yuzawa-yukiguni.html) · [台湾繁体](viz/winter/yuzawa-yukiguni-tw.html) | 三维滑雪、SNS 运镜与新稿；保留原 20 秒循环 |
 
-### 弥彦 V47 / V46 / V45 / V44 / V43 / V42：试作（未确认）
+### 弥彦 V48 / V47 / V46 / V45 / V44 / V43 / V42：试作（未确认）
 
-- [V47 页面](viz/autumn/yahiko-v47.html) · [记录](stories/yahiko-v47.md)：最新试作。V46 + 桥上排队拍照和粉色爱心、片尾左侧提醒、月亮从右边山坡后升起、大字加粗放大；无声。
+- [V48 页面](viz/autumn/yahiko-v48.html) · [记录](stories/yahiko-v48.md)：最新试作。V47 + 字不带阴影、日月一换就切景、鸟居鞠躬、旅馆开门迎客、桥上各种拍照的人；V38 环境音按新顺序重剪放回。
+- [V47 页面](viz/autumn/yahiko-v47.html) · [记录](stories/yahiko-v47.md)：V46 + 桥上排队拍照和粉色爱心、片尾左侧提醒、月亮从右边山坡后升起、大字加粗放大；无声。
 - [V46 页面](viz/autumn/yahiko-v46.html) · [记录](stories/yahiko-v46.md)：V45 + 照实拍重画的山顶站和塔上的光、两节缆车交会挥手、桥上自拍、日月走弧线；无声。
 - [V45 页面](viz/autumn/yahiko-v45.html) · [记录](stories/yahiko-v45.md)：V44 + 俯视的山顶终点站、日落在左月亮从另一边升、两个人每个镜头都有动作；无声。
 - [V44 页面](viz/autumn/yahiko-v44.html) · [记录](stories/yahiko-v44.md)：以 V39 为底，红叶谷在首尾，两个人贯穿全片，大片落叶从温泉街吹到红叶谷；无声。
