@@ -16,6 +16,7 @@ GitHub 文件页显示源码，不会直接播放 HTML。克隆或下载本仓�
 | 夏 | [长冈花火 A](viz/summer/nagaoka-hanabi-a.html) · [台湾繁体](viz/summer/nagaoka-hanabi-a-tw.html) | 保留原已发布版本，不改画面或文案 |
 | 秋 | [弥彦 V38](viz/autumn/yahiko-v38.html) · [English](viz/autumn/yahiko-v38-en.html) · [繁體](viz/autumn/yahiko-v38-tw.html) | 27.8 秒首尾循环，红叶谷与温泉街风叶互动；环境音、海浪、风铃、鸟鸣、猫叫与窗框声，**无配乐** |
 | 冬 | [越后汤泽](viz/winter/yuzawa-yukiguni.html) · [台湾繁体](viz/winter/yuzawa-yukiguni-tw.html) | 三维滑雪、SNS 运镜与新稿；保留原 20 秒循环 |
+| 冬 | [越后汤泽 · 独立新稿](viz/winter/yuzawa-claude.html) | 试作：竖向一镜到底，从云上滑进温泉；[记录](stories/yuzawa-claude.md) |
 
 ### 弥彦 V38：当前版本
 
