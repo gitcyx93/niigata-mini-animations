@@ -17,9 +17,10 @@ GitHub 文件页显示源码，不会直接播放 HTML。克隆或下载本仓�
 | 秋 | [弥彦 V38](viz/autumn/yahiko-v38.html) · [English](viz/autumn/yahiko-v38-en.html) · [繁體](viz/autumn/yahiko-v38-tw.html) | 27.8 秒首尾循环，红叶谷与温泉街风叶互动；环境音、海浪、风铃、鸟鸣、猫叫与窗框声，**无配乐** |
 | 冬 | [越后汤泽](viz/winter/yuzawa-yukiguni.html) · [台湾繁体](viz/winter/yuzawa-yukiguni-tw.html) | 三维滑雪、SNS 运镜与新稿；保留原 20 秒循环 |
 
-### 弥彦 V43 / V42：试作（未确认）
+### 弥彦 V44 / V43 / V42：试作（未确认）
 
-- [V43 页面](viz/autumn/yahiko-v43.html) · [记录](stories/yahiko-v43.md)：最新试作。去掉开场地图的镜头顺序，日月主线和换景转场跟着调整，全片同一对两个人；无声。
+- [V44 页面](viz/autumn/yahiko-v44.html) · [记录](stories/yahiko-v44.md)：最新试作。以 V39 为底，红叶谷在首尾，两个人贯穿全片，大片落叶从温泉街吹到红叶谷；无声。
+- [V43 页面](viz/autumn/yahiko-v43.html) · [记录](stories/yahiko-v43.md)：去掉开场地图的镜头顺序，日月主线和换景转场跟着调整，全片同一对两个人；无声。
 - [V42 页面](viz/autumn/yahiko-v42.html) · [记录](stories/yahiko-v42.md)：V38 原顺序、转场和声音，换了山顶布景、人物、叶片画法和字的样式。V39–V41 是中间试作。
 
 ### 弥彦 V38：当前版本
