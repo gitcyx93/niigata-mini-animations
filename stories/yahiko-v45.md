@@ -1,6 +1,6 @@
 # 弥彦 V45 试作：在 V44 上按指令逐条改
 
-入口：`viz/autumn/yahiko-v45.html`，28.1 秒，无声自循环。源码 `viz/autumn/yahiko-v45-fx.js`，用 `python3 viz/tools/build-yahiko-v45.py` 从 V40 页面内嵌。预览：https://claude.ai/artifact/pjNvkSmTNbY2Z69jPj67nQ 。尚未经用户确认。
+入口：`viz/autumn/yahiko-v45.html`，28.1 秒，无声自循环。源码 `viz/autumn/yahiko-v45-fx.js`，用 `python3 viz/tools/build-yahiko-v45.py` 从 V40 页面内嵌。预览：https://claude.ai/artifact/CrWhDRYtc348HjnmpkCTxf 。尚未经用户确认。
 
 ## 用户意见（2026-11-12，第二轮）
 
