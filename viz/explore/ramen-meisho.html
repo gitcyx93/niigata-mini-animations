@@ -74,7 +74,7 @@ function makeKit(g, S) {
 /* 拉面小史：江户名所绘风格的六张册页（给中国观众）。
    印刷工具来自上方 print-kit（STYLES.meisho）。render(t) 确定性：同一 t 同一画面。 */
 const W = 1080, H = 1920, TURN = 0.7;
-const PLAN = [['yokohama', 0, 5.4], ['asakusa', 5.4, 10.8], ['yatai', 10.8, 16.2], ['daily', 16.2, 21.6], ['craft', 21.6, 27], ['world', 27, 32.4], ['china', 32.4, 37.8], ['niigata', 37.8, 44.8]];
+const PLAN = [['yokohama', 0, 5.4], ['asakusa', 5.4, 10.8], ['yatai', 10.8, 16.2], ['daily', 16.2, 21.6], ['craft', 21.6, 27], ['world', 27, 32.4], ['china', 32.4, 37.8], ['niigata', 37.8, 45.8]];
 const N = PLAN.length, T = PLAN[N - 1][2];
 const PX = 60, PY = 350, PW = 960, PH = 1440;
 const cv = document.getElementById('c'), g = cv.getContext('2d');
@@ -99,8 +99,9 @@ const COPY = [
   {name: '中国', l1: '转了一圈，又回到中国。', l2: '1996 年起，熊本的味千拉面在中国开枝散叶。',
     note: '2024 年中国（含香港）吃掉 438 亿份速食面，全球第一'},
   {name: '新潟', l1: '最爱吃拉面的城市之一，在新潟。', l2: '燕市的刀叉工匠叫外卖，背脂拉面就此诞生。',
-    l2b: '从中国来的一碗面，在这里最热乎。', swap: 3.4,
-    note: '新潟市外食拉面支出全国第 2（2024 家计调查）· 新潟五大拉面'}
+    l2b: '据说，做出它的杭州饭店，店主也来自中国。', swap: 3.1,
+    l2c: '从中国来的一碗面，在这里最热乎。', swap2: 5.1,
+    note: '新潟市外食拉面支出全国第 2（2024 家计调查）· 燕背脂元祖：杭州饭店'}
 ];
 const NIIGATA5 = ['生姜酱油', '燕背脂', '浓厚味噌', '清淡酱油', '三条咖喱'];
 const NIIGATA5_PLACE = ['长冈', '燕', '新潟', '新潟', '三条'];
@@ -388,7 +389,7 @@ const DRAW_V2 = {
     if (u < 4.2) bike(((t * 200) % 1300) - 150, hz + 186, 1.6, t);       // 出前：骑车送面
     k.band(-80, hz + 230, 640, 56, C.white, 1); k.band(420, hz + 270, 640, 50, C.white, 1);
     // 五块色纸（换句之后挂出）
-    NIIGATA5.forEach((nm, i) => { const a = clamp((u - 3.7 - i * .3) / .2); if (a <= 0) return; const x = 80 + i * 118, y = 140 + (i % 2) * 34;
+    NIIGATA5.forEach((nm, i) => { const a = clamp((u - 5.2 - i * .25) / .2); if (a <= 0) return; const x = 80 + i * 118, y = 140 + (i % 2) * 34;
       g.save(); g.globalAlpha = a; g.translate(0, (1 - a) * -30); k.key(() => { g.moveTo(x, y - 30); g.lineTo(x, y); }, 2);
       const h = cartouche(x, y, nm, 32, i % 2 ? C.c4 : C.white); htext(NIIGATA5_PLACE[i], x, y + h + 34, 26, C.sumi, 700, SERIF, 'center'); g.restore(); });
     // 近景：大碗 + 背脂
@@ -411,7 +412,7 @@ const DRAW_V2 = {
     g.save(); g.translate(820, 1020); g.rotate(.8 + Math.PI);
     k.shape(C.c5, () => poly([[0, -12], [-640, -22], [-640, 22], [0, 12]]), 3);
     k.shape(C.c5, ell(90, 0, 100, 62), 3); k.key(() => g.ellipse(84, 0, 70, 40, 0, 0, TAU), 2, C.white); g.restore();
-    seal(480, 900, 170, clamp((u - 5.6) / .3));
+    seal(480, 900, 170, clamp((u - 6.5) / .3));
   }
 };
 
@@ -589,9 +590,9 @@ function sheet(i, u, dx, dim) {
   g.fillStyle = C.c3; g.fillRect(PX, 144, 120, 3);
   const a1 = ss(u, .15, .7), a2 = ss(u, 1.3, 1.9), a3 = ss(u, 2.3, 2.9);
   g.globalAlpha = a1; htext(c.l1, PX - 2 + (1 - a1) * 18, 236, 62, C.sumi, 400, BRUSH, 'left', W - PX * 2);
-  if (c.l2b) { const o = 1 - ss(u, c.swap - .35, c.swap), n2 = ss(u, c.swap + .05, c.swap + .6);
-    g.globalAlpha = a2 * o; htext(c.l2, PX + (1 - a2) * 18, 306, 38, C.sumi, 700, SERIF, 'left', W - PX * 2);
-    g.globalAlpha = n2; htext(c.l2b, PX + (1 - n2) * 18, 306, 38, C.c3, 700, SERIF, 'left', W - PX * 2);
+  if (c.l2b) { const L = [[c.l2, 1.3, c.swap, C.sumi], [c.l2b, c.swap, c.swap2, C.sumi], [c.l2c, c.swap2, 99, C.c3]];
+    L.forEach(([txt, t0, t1, col]) => { const a = ss(u, t0 + .05, t0 + .6) * (1 - ss(u, t1 - .35, t1));
+      if (a > 0) { g.globalAlpha = a; htext(txt, PX + (1 - ss(u, t0 + .05, t0 + .6)) * 18, 306, 38, col, 700, SERIF, 'left', W - PX * 2); } });
   } else { g.globalAlpha = a2; htext(c.l2, PX + (1 - a2) * 18, 306, 38, C.sumi, 700, SERIF, 'left', W - PX * 2); }
   g.globalAlpha = 1;
   // 版心
@@ -635,7 +636,7 @@ window.render = render; window.LOOP_SECONDS = T; window.START_SECONDS = 0; windo
 /* ---------- 启动 ---------- */
 texP = k.texture(PW, PH); texF = k.texture(W, H);
 const RECORD = new URLSearchParams(location.search).has('record');
-const allText = COPY.map(c => c.name + c.l1 + c.l2 + (c.l2b || '') + c.note).join('') + NIIGATA5.join('') + NIIGATA5_PLACE.join('') +
+const allText = COPY.map(c => c.name + c.l1 + c.l2 + (c.l2b || '') + (c.l2c || '') + c.note).join('') + NIIGATA5.join('') + NIIGATA5_PLACE.join('') +
   '拉面小史其一二三四五六七八考南京町来轩雷门中华大阪池田食券酱油味噌盐豚骨替玉煎饺一星纽约巴黎旧金山日式拉面熊本中国燕';
 const fontsReady = (document.fonts && document.fonts.load ? Promise.race([
   Promise.all([document.fonts.load('400 62px "Ma Shan Zheng"', allText), document.fonts.load('700 38px "Noto Serif SC"', allText),
