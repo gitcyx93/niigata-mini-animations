@@ -71,10 +71,10 @@ function makeKit(g, S) {
 </script>
 <script>
 'use strict';
-/* 拉面小史：江户名所绘风格的七张册页（给中国观众）。v3 放宽了人物、动法和两个辅色，见 stories/explore-ramen.md。
+/* 拉面小史：江户名所绘风格的六张册页（给中国观众）。v3 放宽了人物、动法和两个辅色，见 stories/explore-ramen.md。
    印刷工具来自上方 print-kit（STYLES.meisho）。render(t) 确定性：同一 t 同一画面。 */
-const W = 1080, H = 1920, TURN = 0.7;
-const PLAN = [['yokohama', 0, 5.4], ['asakusa', 5.4, 10.8], ['yatai', 10.8, 16.2], ['daily', 16.2, 21.6], ['world', 21.6, 27], ['travel', 27, 32.4], ['niigata', 32.4, 40.4]];
+const W = 1080, H = 1920, TURN = 0.5;
+const PLAN = [['yokohama', 0, 4.4], ['asakusa', 4.4, 8.8], ['sapporo', 8.8, 13.2], ['kitakata', 13.2, 17.6], ['daily', 17.6, 22], ['niigata', 22, 28.6]];
 const N = PLAN.length, T = PLAN[N - 1][2];
 const PX = 60, PY = 368, PW = 960, PH = 1420, DY = 10;     // 画内坐标仍按 1440 高设计，上移 DY
 const cv = document.getElementById('c'), g = cv.getContext('2d');
@@ -83,23 +83,21 @@ const BRUSH = S.titleFont;
 C.skin = '#f2d9b8'; C.soup = '#9a5a2c';                    // v3 放宽：肤色、酱油汤两个辅色
 const SERIF = '"Noto Serif SC","Source Han Serif SC","Noto Serif CJK SC","Songti SC","STSong","SimSun",serif';
 const LATIN = 'Sora,"Helvetica Neue",Arial,sans-serif';
-const NUM = ['一', '二', '三', '四', '五', '六', '七'];
+const NUM = ['一', '二', '三', '四', '五', '六'];
 const COPY = [
   {name: '横滨', l1: '拉面的老家，在中国。', l2: '横滨开港后，中国厨师的汤面被叫作「南京面」。',
     note: '1859 年横滨开港 · 一说江户时代朱舜水曾为德川光圀煮汤面'},
   {name: '浅草', l1: '1910 年，浅草开了来来轩。', l2: '请来横滨的中国厨师，汤里加一勺酱油。',
     note: '浅草来来轩 · 被视为日本第一波拉面热的起点'},
-  {name: '屋台', l1: '战后，面摊照亮了夜里的城。', l2: '1958 年，世界第一包速食面在大阪诞生。',
-    note: '鸡汤速食面（チキンラーメン）· 安藤百福 · 大阪池田'},
+  {name: '札幌', l1: '「拉面」这个词，可能来自中国话。', l2: '1922 年，札幌竹家食堂的山东厨师王文彩，出菜时喊一声「好了」。',
+    note: '竹家食堂 · 札幌拉面的起点 · 名字由来有多种说法'},
+  {name: '喜多方', l1: '浙江人潘钦星，推着面摊走进喜多方。', l2: '吹着喇叭卖了两年面，1926 年开了源来轩。',
+    note: '喜多方拉面的元祖 · 源来轩'},
   {name: '日常', l1: '今天，拉面是日本人的日常。', l2: '门口买券，看图按键，不会日语也能点一碗。',
-    note: '替玉＝加一份面 · 很多店只有一排吧台座'},
-  {name: '世界', l1: '日本拉面，走向世界。', l2: '旧金山、纽约、巴黎……拉面店开到了世界各地。',
-    note: '海外日本料理店约 18.1 万家（2025 年 · 日本农林水产省）'},
-  {name: '旅行', l1: '来日本，记得吃一碗拉面。', l2: '外国游客最满意的一餐，拉面排在寿司前面。',
-    note: '观光厅 2024 年 1–3 月调查：肉类 31.9% · 拉面 19.3% · 寿司 14.5%'},
+    note: '1958 年，速食面也在日本诞生 · 替玉＝加一份面'},
   {name: '新潟', l1: '最爱吃拉面的城市之一，在新潟。', l2: '燕市的刀叉工匠叫外卖，背脂拉面就此诞生。',
-    l2b: '据说，做出它的杭州饭店，店主也来自中国。', swap: 3.1,
-    l2c: '从中国来的一碗面，在这里最热乎。', swap2: 5.1,
+    l2b: '据说，做出它的杭州饭店，店主也来自中国。', swap: 2.4,
+    l2c: '从中国来的一碗面，在这里最热乎。', swap2: 4.2,
     note: '新潟市拉面外食支出全国第 2（2024）· 燕背脂元祖：杭州饭店'}
 ];
 const NIIGATA5 = ['生姜酱油', '燕背脂', '浓厚味噌', '清淡酱油', '三条咖喱'];
@@ -214,6 +212,7 @@ function figure(x, y, s, o = {}) {
   const talking = o.talk && Math.floor((o.tw || 0) * 4) % 2 === 0;
   if (o.map) { limb([sh, [9, -40], [17, -48]], modern ? 5 : 8, robe); kp.shape(C.white, () => poly([[12, -60], [30, -58], [30, -40], [12, -42]]), 1.1);
     kp.blk(C.c2, () => poly([[16, -55], [24, -56], [26, -48], [18, -46]])); kp.key(() => { g.moveTo(21, -59); g.lineTo(21, -41); }, .6); }
+  else if (o.horn) limb([sh, [10, -52], [9, -61]], modern ? 5 : 8, robe);
   else if (o.reach) { limb([sh, [10, -48], [20, -54]], modern ? 5 : 8, robe); kp.shape(C.skin, circ(20, -54, 2.6), .8); }
   else if (o.ticket) { limb([sh, [9, -50], [13, -66]], modern ? 5 : 8, robe); kp.shape(C.white, rect(10, -78, 9, 12), 1); kp.shape(C.skin, circ(13, -66, 2.6), .8); }
   else if (talking) { limb([sh, [9, -40], [15, -50]], modern ? 5 : 8, robe); kp.shape(C.skin, circ(15, -50, 2.6), .8); }
@@ -234,6 +233,7 @@ function figure(x, y, s, o = {}) {
   if (face) { kp.key(() => { g.moveTo(5.2, -66.5); g.lineTo(7.2, -66.5); }, 1.3); kp.key(() => { g.moveTo(4.6, -69.4); g.lineTo(7.6, -69.8); }, .9);
     if (talking) kp.shape(C.c3, () => g.ellipse(7, -61.6, 1.6, 1.3, 0, 0, TAU), .6); else kp.key(() => { g.moveTo(6.2, -61.6); g.lineTo(7.8, -61.8); }, .9, C.c3); }
   if (o.hat) hat(o.hat, 1.5, -68, 8.5);
+  if (o.horn) kp.shape(C.c4, () => poly([[7, -63], [20, -65], [30, -72], [31, -58], [20, -61]]), 1);   // 喇叭（チャルメラ）
   g.restore();
 }
 /* 正面的半身（店主、厨师）。o: robe, apron, band, eyes('open'|'down'), arms: [[肘], [手]] x2 */
@@ -376,7 +376,7 @@ const DRAW_V2 = {
       vt(m, x, y + 40, 40, C.sumi, BRUSH, 400, 1.12); });
     // 厨房：锅、蒸汽、店主
     k.shape(C.c5, rect(-10, 406, PW + 20, 360), 3); k.blk(C.white, rect(0, 420, PW, 330), .6);
-    const give = u > 3 ? ss(u, 3, 3.5) : 0;                               // 店主把碗端上吧台
+    const give = u > 2.2 ? ss(u, 2.2, 2.6) : 0;                               // 店主把碗端上吧台
     chef(560, 780, 2.3, {apron: C.c1, eyes: give > 0 ? 'open' : 'down', arms: [[[-34, -26], [-10, -10]], [[38, -30], [64 - give * 30, -44 + give * 30]]],
       tool: give > 0 ? () => bowl(64 - give * 30, -50 + give * 30, 16) : null});
     [[700, 3], [830, 2]].forEach(([px, n], j) => { k.shape(C.c5, rect(px - 60, 640, 120, 100), 2.6); k.shape(C.sumi, rect(px - 66, 630, 132, 16), 0); steam(px, 620, 1.1, u + j, n, 30); });
@@ -384,11 +384,11 @@ const DRAW_V2 = {
     // 吧台
     k.shape(C.c4, rect(-10, 766, PW + 20, 60), 3); k.shape(C.c4, rect(-10, 826, PW + 20, 140), 3);
     k.key(() => { for (let i = 1; i < 10; i++) { g.moveTo(i * 100, 826); g.lineTo(i * 100, 966); } }, 1.4);
-    for (let i = 0; i < 5; i++) { const x = 330 + i * 130, on = t > .5 + i * .45; if (on) { bowl(x, 756, 34); steam(x, 736, .5, u + i, 2, 18); } }
+    for (let i = 0; i < 5; i++) { const x = 330 + i * 130, on = t > .3 + i * .3; if (on) { bowl(x, 756, 34); steam(x, 736, .5, u + i, 2, 18); } }
     for (let i = 0; i < 4; i++) k.shape(C.c5, rect(395 + i * 130, 650, 10, 126), 1.6);       // 一人座的隔板
     g.fillStyle = C.paper; g.fillRect(0, 966, PW, 500); k.blk(C.c4, rect(0, 966, PW, 500), .25);
     const R = [C.c1, C.sumi, C.c2, C.c3, C.c1];
-    for (let i = 0; i < 5; i++) { const x = 330 + i * 130, got = t > .5 + i * .45; stool(x, 1110, 1.2);
+    for (let i = 0; i < 5; i++) { const x = 330 + i * 130, got = t > .3 + i * .3; stool(x, 1110, 1.2);
       diner(x, 1100, 2.2, R[i], got ? (step12(u) * .7 + i * .29) % 1 : .9, {hat: i === 3 ? 'cap' : '', hair: i === 1 ? 'bun' : ''}); }
     // 近景：券売機（左边、下边切边）
     k.shape(C.c5, rect(-60, 760, 300, 720), 4);
@@ -396,98 +396,101 @@ const DRAW_V2 = {
     const lit = 7;
     for (let r = 0; r < 6; r++) for (let c = 0; c < 3; c++) { const id = r * 3 + c; k.shape(id === lit ? C.c3 : (id % 4 === 0 ? C.c4 : C.white), rect(-30 + c * 86, 880 + r * 66, 76, 52), 2); }
     k.shape(C.sumi, rect(40, 1300, 120, 18), 0); k.shape(C.white, rect(-30, 1350, 250, 60), 2);
-    const ph = u < 1.8 ? 0 : u < 2.6 ? 1 : 2;                             // 按键 → 出券 → 转身举券
+    const ph = u < 1.2 ? 0 : u < 1.8 ? 1 : 2;                             // 按键 → 出券 → 转身举券
     if (ph === 0 && Math.floor(step12(u) * 3) % 2) k.shape(C.c4, rect(-30 + 86, 880 + 2 * 66, 76, 52), 2);
-    if (ph >= 1) { const e = ph === 1 ? ss(u, 1.8, 2.4) : 1; if (ph === 1) k.shape(C.white, rect(70, 1300 + 16 - e * 30, 60, 34), 2); }
+    if (ph >= 1) { const e = ph === 1 ? ss(u, 1.2, 1.7) : 1; if (ph === 1) k.shape(C.white, rect(70, 1300 + 16 - e * 30, 60, 34), 2); }
     figure(300, 1426, 3.4, {kind: 'modern', robe: C.c2, pants: C.c1, hat: 'cap', bag: C.c3, dir: ph === 2 ? 1 : -1, reach: ph === 0, ticket: ph === 2});
+      const ka = clamp((u - 1.4) / .25);                                    // 速食面一笔带过
+    koma(700, 300, 220, 170, ka, (w, h) => { g.fillStyle = C.paper; g.fillRect(0, 0, w, h);
+      k.shape(C.c4, () => g.roundRect(30, 74, 160, 70, 12), 2.4);
+      k.key(() => { for (let r = 0; r < 3; r++) { const y = 92 + r * 18; g.moveTo(42, y); for (let i = 0; i < 7; i++) g.quadraticCurveTo(42 + (i + .5) * 19, y + (i % 2 ? 6 : -6), 42 + (i + 1) * 19, y); } }, 1.6);
+      htext('1958', w / 2, 56, 46, C.c3, 600, LATIN, 'center', 0, 3); });
   },
-  /* 世界：以太平洋为中心的世界地图，航线从日本画到旧金山、纽约、巴黎 */
-  world: u => {
-    const t = step(u), hz = 330;
-    g.fillStyle = C.paper; g.fillRect(0, 0, PW, PH); sky(hz, 140);
-    kasumi(u, [[100, 150, 360, 28, 10], [560, 230, 280, 24, -8]]);
-    g.fillStyle = C.c1; g.fillRect(0, hz, PW, PH - hz);
-    for (let i = 0; i < 4; i++) { const y = hz + 30 + i * 36, off = t * (10 + i * 6) * (i % 2 ? 1 : -.7) + hash(i + 60) * 60;
-      kp.key(() => k.humpRow(y, 70, 6, off, PW), 1.6, rgba(C.white, .7)); }
-    // 地图色纸
-    const MX = 30, MY = 500, KX = 2.5, KY = 2.6, MW = 900, MH = 360;
-    const P = (lon, lat) => [MX + ((((lon - 150) % 360) + 540) % 360 - 180 + 180) * KX, MY + (80 - lat) * KY];
-    k.shape(C.white, rect(MX - 16, MY - 16, MW + 32, MH + 32), 3.4);
-    g.save(); g.beginPath(); g.rect(MX, MY, MW, MH); g.clip();
-    g.fillStyle = '#2f67a8'; g.fillRect(MX, MY, MW, MH);
-    for (let i = 0; i < 7; i++) kp.key(() => k.humpRow(MY + 30 + i * 52, 46, 4, hash(i + 70) * 46 + t * 4 * (i % 2 ? 1 : -1), MX + MW), 1.2, rgba(C.white, .45));
-    const land = pts => () => poly(pts.map(p => P(p[0], p[1])));
-    const LAND = [
-      [[-10, 36], [-9, 43], [-2, 44], [-5, 48], [2, 51], [8, 54], [10, 58], [5, 62], [15, 69], [28, 71], [40, 67], [60, 70], [80, 73], [100, 77], [120, 73], [140, 72], [160, 70], [179, 68], [179, 65], [170, 60], [160, 58], [156, 51], [142, 59], [135, 54], [140, 48], [132, 43], [129, 40], [126, 35], [122, 40], [122, 31], [120, 25], [110, 20], [108, 12], [105, 9], [100, 13], [98, 8], [100, 3], [104, 1], [98, 16], [94, 16], [92, 22], [88, 22], [80, 15], [77, 8], [73, 17], [70, 23], [66, 25], [57, 25], [50, 30], [48, 30], [52, 24], [56, 24], [59, 22], [55, 17], [45, 13], [43, 13], [39, 21], [35, 28], [33, 30], [35, 36], [27, 37], [26, 40], [20, 40], [19, 42], [13, 45], [16, 41], [18, 40], [12, 38], [10, 44], [3, 43], [-1, 37], [-6, 36]],
-      [[-17, 21], [-10, 30], [-6, 36], [10, 37], [20, 32], [32, 31], [35, 28], [43, 12], [51, 12], [50, 2], [40, -15], [35, -25], [27, -34], [18, -34], [12, -18], [13, -5], [9, 4], [-8, 5], [-16, 11]],
-      [[-168, 66], [-162, 70], [-140, 70], [-120, 74], [-95, 72], [-80, 73], [-62, 66], [-55, 52], [-66, 45], [-70, 42], [-76, 35], [-81, 31], [-80, 25], [-83, 29], [-90, 30], [-97, 27], [-97, 21], [-90, 21], [-87, 16], [-83, 10], [-79, 8], [-85, 11], [-92, 15], [-105, 20], [-110, 23], [-112, 30], [-117, 32], [-124, 40], [-124, 48], [-130, 55], [-140, 60], [-152, 58], [-165, 61]],
-      [[-50, 60], [-40, 65], [-20, 70], [-20, 80], [-60, 82], [-72, 77], [-55, 70]],
-      [[-79, 8], [-72, 12], [-62, 10], [-50, 0], [-35, -6], [-40, -22], [-48, -28], [-58, -38], [-65, -41], [-68, -52], [-72, -50], [-74, -40], [-71, -30], [-70, -18], [-76, -14], [-81, -5], [-78, 1]],
-      [[114, -22], [122, -17], [130, -12], [137, -12], [142, -11], [146, -19], [153, -27], [150, -37], [144, -38], [138, -35], [132, -32], [124, -34], [115, -34]],
-      [[-6, 50], [1, 51], [0, 53], [-3, 56], [-5, 58], [-6, 55], [-3, 54], [-5, 52]],
-      [[172, -35], [178, -38], [174, -41], [167, -46], [170, -46]],
-      [[95, 5], [105, -6], [115, -8], [125, -9], [120, -4], [110, -2], [104, 2]]];
-    LAND.forEach(pts => k.shape(C.c2, land(pts), 2));
-    const JP = [[130.9, 34.0], [132.1, 35.0], [134.4, 35.6], [136.1, 36.4], [136.9, 37.4], [138.5, 37.4], [139.9, 39.3], [140.0, 40.2], [140.3, 41.2], [141.4, 41.3], [141.9, 39.5], [141.0, 37.0], [140.6, 35.7], [139.8, 35.0], [138.3, 34.6], [136.9, 34.3], [135.3, 33.7], [133.3, 34.4], [131.5, 33.2], [130.2, 31.3], [129.7, 32.7]];
-    k.shape(C.c3, land(JP), 2); k.shape(C.c3, land([[140.0, 41.5], [141.7, 42.6], [143.9, 42.9], [145.5, 43.3], [141.7, 45.4], [140.5, 43.2]]), 2);
-    const [jx, jy] = P(139.7, 35.7), pulse = Math.floor(t * 3) % 2;
-    kp.key(() => g.arc(jx, jy, pulse ? 26 : 20, 0, TAU), 2.4, C.c4);
-    // 航线：旧金山 → 纽约 → 巴黎
-    const R = [[-122.4, 37.8, '旧金山', .4, -1], [-74, 40.7, '纽约', 1.4, 1], [2.35, 48.9, '巴黎', 2.4, -1]];
-    R.forEach(([lo, la, nm, t0, side]) => {
-      const [cx, cy] = P(lo, la), la1 = ss(u, t0, t0 + .9), mx = (jx + cx) / 2, my = Math.min(jy, cy) - 70 - Math.abs(cx - jx) * .12;
-      if (la1 > 0) { g.save(); g.setLineDash([2, 14]); g.lineCap = 'round';
-        kp.key(() => { g.moveTo(jx, jy); const n = 40; for (let i = 1; i <= n * la1; i++) { const q = i / n; g.lineTo((1 - q) * (1 - q) * jx + 2 * (1 - q) * q * mx + q * q * cx, (1 - q) * (1 - q) * jy + 2 * (1 - q) * q * my + q * q * cy); } }, 6, C.c4);
-        g.restore(); }
-      const a = clamp((u - t0 - .85) / .25);
-      if (a > 0) { g.save(); g.globalAlpha = a; g.translate(cx, cy); g.scale(1 + (1 - a) * .6, 1 + (1 - a) * .6);
-        k.shape(C.c4, circ(0, 0, 7), 1.6); bowl(0, -40, 24); steam(0, -50, .35, u, 2, 16); g.restore(); }
-    });
+  /* 札幌 1922：雪中的竹家食堂，山东厨师王文彩喊"好了" */
+  sapporo: u => {
+    const t = step(u), tw = step12(u), hz = 470;
+    g.fillStyle = C.paper; g.fillRect(0, 0, PW, PH); sky(hz, 220, .45);
+    k.far(C.c5, () => poly([[-20, hz], [140, hz - 130], [260, hz - 90], [400, hz - 170], [560, hz - 60], [720, hz - 120], [980, hz - 30], [980, hz + 6], [-20, hz + 6]]));
+    k.shape(C.white, () => poly([[100, hz - 96], [140, hz - 130], [190, hz - 104], [160, hz - 98]]), 1.6);
+    k.shape(C.white, () => poly([[350, hz - 128], [400, hz - 170], [450, hz - 132], [420, hz - 120], [390, hz - 134]]), 1.6);
+    kasumi(u, [[0, 240, 380, 30, 10], [520, 320, 300, 26, -8]]);
+    roofRow(hz + 50, 60, 33, C.white, -40, PW + 40, C.c5);                      // 积雪的屋顶
+    g.fillStyle = C.white; g.fillRect(0, hz + 60, PW, 1000); k.blk(C.paper, rect(0, hz + 60, PW, 1000), .5);
+    // 竹家食堂（右、上切边）
+    const bx = 300;
+    k.shape(C.sumi, () => poly([[bx - 40, 640], [bx + 20, 570], [PW + 30, 570], [PW + 30, 640]]), 0);
+    k.shape(C.white, () => poly([[bx - 46, 640], [bx + 14, 562], [PW + 30, 562], [PW + 30, 586], [bx + 24, 586], [bx - 30, 646]]), 2);   // 屋檐积雪
+    k.shape(C.c4, rect(bx, 640, 700, 560), 3);
+    k.key(() => { for (let i = 1; i < 9; i++) { g.moveTo(bx + i * 80, 640); g.lineTo(bx + i * 80, 1200); } }, 1, rgba(C.sumi, .35));
+    k.shape(C.white, rect(bx + 90, 650, 330, 76), 3); htext('竹家食堂', bx + 255, 708, 56, C.sumi, 400, BRUSH, 'center', 0, 10);
+    // 厨房窗口里的王文彩
+    const wx = bx + 70, wy = 760, ww = 360, wh = 220;
+    k.shape(C.white, rect(wx, wy, ww, wh), 3);
+    g.save(); g.beginPath(); g.rect(wx, wy, ww, wh); g.clip();
+    k.shape(C.c5, rect(wx + 220, wy + 120, 110, 80), 2); steam(wx + 275, wy + 120, .9, u, 2, 30);
+    const hand = Math.floor(tw * 2) % 4 < 2 ? 0 : 8;
+    chef(wx + 140, wy + wh + 60, 2.3, {robe: C.white, band: C.white, arms: [[[-34, -30], [-6, -50 - hand]], [[34, -30], [8, -50 - hand]]], tool: () => bowl(0, -58 - hand, 16)});
     g.restore();
-    // 城市名色纸挂在地图框外
-    R.forEach(([lo, la, nm, t0]) => { const a = clamp((u - t0 - .85) / .25); if (a <= 0) return; const [cx] = P(lo, la);
-      g.save(); g.globalAlpha = a; kp.key(() => { g.moveTo(cx, MY + MH + 16); g.lineTo(cx, MY + MH + 40); }, 2); cartouche(cx, MY + MH + 40, nm, 38, C.c4); g.restore(); });
-    vt('日本', jx + 34, MY + 30, 34, C.c3, BRUSH, 400, 1.1);
-    // 下方：一艘运着大碗的远洋船
-    for (let i = 0; i < 5; i++) {
-      const q = i / 4, y = 1060 + q * 340, w = 110 + q * 150, h = 18 + q * 30, off = t * (12 + q * 30) * (i % 2 ? 1 : -.7) + hash(i + 80) * w;
-      if (i === 2) { const sx = 160 + (t * 26) % 220; g.save(); g.translate(sx, y - 10);
-        k.shape(C.white, rect(60, -110, 260, 44), 2.4); k.shape(C.c3, rect(250, -170, 40, 60), 2.4);
-        bowl(150, -150, 70); steam(150, -170, .9, u, 3, 30);
-        k.shape(C.sumi, () => poly([[-60, -66], [440, -66], [400, 0], [-20, 0]]), 0); k.blk(C.c3, rect(-50, -50, 476, 8));
-        g.restore(); }
-      k.blk(i % 2 ? C.c1 : '#2f67a8', () => { k.waveRow(y, w, h, off, PW); g.lineTo(PW + w * 2, PH + 60); g.lineTo(-w * 2, PH + 60); });
-      k.key(() => k.waveRow(y, w, h, off, PW), 2 + q * 3, C.white); k.key(() => k.waveRow(y + 5 + q * 4, w, h, off, PW), 1.4);
-    }
+    k.key(() => { g.moveTo(wx + ww / 2, wy); g.lineTo(wx + ww / 2, wy + 40); }, 0);
+    k.shape(C.c4, rect(wx - 20, wy + wh, ww + 40, 22), 2.6);
+    // "好了！"：两次盖章式弹出
+    const pop = Math.max(clamp((u - .9) / .2) * (1 - clamp((u - 2.2) / .2)), clamp((u - 2.5) / .2));
+    if (pop > 0) { g.save(); g.globalAlpha = pop; g.translate(wx + ww + 120, wy - 10); g.scale(1 + (1 - pop) * .5, 1 + (1 - pop) * .5); g.rotate(-.05);
+      k.shape(C.c3, () => g.roundRect(-110, -56, 220, 112, 14), 3); kp.shape(C.c3, () => poly([[-60, 50], [-90, 90], [-20, 52]]), 0);
+      htext('好了！', 0, 26, 74, C.white, 400, BRUSH, 'center'); g.restore(); }
+    // 门口暖帘
+    for (let i = 0; i < 2; i++) kp.shape(C.c1, rect(bx + 470 + i * 104, 780, 98, 150), 2);
+    htext('拉', bx + 519, 880, 50, C.white, 400, BRUSH, 'center'); htext('面', bx + 623, 880, 50, C.white, 400, BRUSH, 'center');
+    // 吧台前吃面的学生和铁路工人
+    k.shape(C.c4, rect(bx - 20, 990, 520, 30), 2.4);
+    [[bx + 60, C.sumi, 'cap'], [bx + 200, C.c1, 'cap'], [bx + 340, C.sumi, '']].forEach(([x, col, h], i) => { stool(x, 1200, 1.3);
+      diner(x, 1190, 2.3, col, (tw * .7 + i * .33) % 1, {hat: h, turn: i === 2 && Math.floor(tw * 1.5) % 3 === 1 ? 1 : 0, drink: i === 1 && Math.floor(tw / 1.4) % 2 === 1}); });
+    // 雪地里走来的人
+    figure(120 - ((tw * 20) % 60), 1330, 2.6, {kind: 'meiji', robe: C.sumi, hat: 'cap', dir: 1, walk: tw * 2.2});
+    figure(220 - ((tw * 16) % 50), 1390, 2.9, {kind: 'modern', robe: C.c1, pants: C.sumi, hat: 'cap', dir: 1, walk: tw * 2 + .5, talk: 1, tw});
+    // 落雪
+    for (let i = 0; i < 90; i++) { const x = ((hash(i + 900) * PW + Math.sin(t * 1.4 + i) * 14) % PW + PW) % PW, y = ((hash(i + 950) * 1440 + t * (60 + hash(i) * 50)) % 1440);
+      kp.shape(C.white, circ(x, y, 3 + hash(i + 990) * 4), .9); }
   },
-  /* 旅行：拉面店门口排队的游客 + 前景喝汤闭眼的人 */
-  travel: u => {
-    const t = step(u), tw = step12(u), hz = 520;
-    g.fillStyle = C.paper; g.fillRect(0, 0, PW, PH); sky(hz, 170);
-    k.far(C.c5, () => poly([[480, hz], [610, hz - 150], [640, hz - 158], [790, hz]]));                        // 远山
-    k.shape(C.white, () => poly([[574, hz - 104], [610, hz - 150], [640, hz - 158], [680, hz - 110], [650, hz - 118], [628, hz - 104], [604, hz - 116]]), 2);
-    kasumi(u, [[0, 250, 360, 30, 10], [520, 330, 300, 26, -8]]);
-    roofRow(hz + 40, 60, 91, C.c5);
-    g.fillStyle = C.paper; g.fillRect(0, hz + 50, PW, 900); k.blk(C.c4, rect(0, hz + 50, PW, 900), .3);
-    k.band(-60, hz + 40, 560, 50, C.white, 1);
-    // 右边：拉面店（右、上切边）
-    k.shape(C.sumi, () => poly([[440, 640], [500, 580], [PW + 30, 580], [PW + 30, 640]]), 0);
-    k.shape(C.white, rect(470, 640, 520, 520), 3);
-    k.shape(C.c4, rect(520, 660, 360, 80), 3); htext('拉面', 700, 720, 58, C.sumi, 400, BRUSH, 'center', 0, 30);
+  /* 喜多方：浙江人潘钦星推着面摊、吹着喇叭走过白墙仓库 */
+  kitakata: u => {
+    const t = step(u), tw = step12(u), hz = 560;
+    g.fillStyle = C.paper; g.fillRect(0, 0, PW, PH);
+    k.bokashi(0, 0, PW, 260, C.c1, 1, 0); k.bokashi(0, hz - 220, PW, 220, C.c3, 0, .85);
+    k.shape(C.c4, circ(760, hz - 120, 56), 2.2);                                     // 夕阳
+    k.far(C.c5, () => poly([[-20, hz], [180, hz - 150], [300, hz - 110], [460, hz - 190], [620, hz - 80], [980, hz - 40], [980, hz + 6], [-20, hz + 6]]));
+    k.shape(C.white, () => poly([[410, hz - 152], [460, hz - 190], [510, hz - 150], [480, hz - 140], [455, hz - 156]]), 1.6);
+    kasumi(u, [[100, 230, 360, 28, 9], [540, 300, 300, 24, -7]]);
+    // 蔵：白墙、黑瓦、海鼠墙
+    for (let i = 0; i < 5; i++) { const x = -60 + i * 220, w = 200, top = hz - 10 + (i % 2) * 30;
+      k.shape(C.white, rect(x, top, w, 300), 2.6);
+      k.shape(C.sumi, () => poly([[x - 16, top + 6], [x + w / 2, top - 54], [x + w + 16, top + 6]]), 0);
+      k.shape(C.sumi, rect(x - 6, top + 2, w + 12, 12), 0);
+      k.shape(C.sumi, rect(x, top + 200, w, 100), 0);
+      kp.key(() => { for (let a = -100; a < w + 100; a += 22) { g.moveTo(x + a, top + 200); g.lineTo(x + a + 100, top + 300); g.moveTo(x + a + 100, top + 200); g.lineTo(x + a, top + 300); } }, 2, C.white);
+      k.shape(C.sumi, rect(x + w / 2 - 24, top + 70, 48, 60), 0); kp.key(() => g.rect(x + w / 2 - 30, top + 64, 60, 72), 2, C.white); }
+    k.blk(C.c4, rect(0, hz + 290, PW, 900), .4); k.key(() => { g.moveTo(-10, hz + 290); g.lineTo(PW + 10, hz + 290); }, 2.4);
+    // 面摊（从右往左慢慢推）
+    const cx = 400 - (t * 22) % 80, cy = 1290;
+    k.shape(C.c4, rect(cx - 220, cy - 400, 16, 280), 2.4); k.shape(C.c4, rect(cx + 204, cy - 400, 16, 280), 2.4);
+    k.shape(C.sumi, () => poly([[cx - 260, cy - 390], [cx + 260, cy - 390], [cx + 222, cy - 450], [cx - 222, cy - 450]]), 0);
     const flap = Math.floor(t * 3) % 2;
-    for (let i = 0; i < 4; i++) { const x0 = 500 + i * 110; kp.shape(C.c1, () => poly([[x0, 760], [x0 + 104, 760], [x0 + 104 + (flap && i % 2 ? 6 : 0), 900], [x0 + (flap && i % 2 ? 6 : 0), 900]]), 2); }
-    htext('拉', 555, 860, 52, C.white, 400, BRUSH, 'center'); htext('面', 775, 860, 52, C.white, 400, BRUSH, 'center');
-    lantern(470, 720, 70, 100, C.c3, '', Math.sin(t * 2) * .05);
-    steam(880, 760, 1, u, 2, 26);
-    // 排队的游客：行李箱、看地图、拍照、聊天
-    const Q = [{robe: C.c3, pants: C.c1, hat: 'cap', suitcase: C.c4}, {robe: C.c2, pants: C.sumi, hair: 'long', map: true}, {robe: C.white, pants: C.c1, phone: true},
-      {robe: C.c1, pants: C.sumi, hair: 'bun', talk: 1, look: -1}, {robe: C.c4, pants: C.c1, talk: 1}, {robe: C.sumi, pants: C.c1, hat: 'cap', bag: C.c3, suitcase: C.c3}];
-    Q.forEach((o, i) => { o.kind = 'modern'; o.dir = 1; o.tw = tw + i * .21; figure(440 - i * 74, 1110 + (i % 2) * 10, 2.5, o); });
-    // 前景：端碗喝汤、满足闭眼（下边切边）
-    const sip = Math.floor(tw * 2) % 4 < 2 ? 0 : 6;
-    chef(250, 1460, 4.2, {robe: C.c3, band: false, eyes: 'down', arms: [[[-34, -40], [-14, -58 - sip * .5]], [[34, -40], [14, -58 - sip * .5]]],
-      tool: () => { bowl(0, -64 - sip * .5, 16, C.c1, C.c4, false); }});
-    steam(250, 1060, 1.1, u, 2, 30);
+    for (let i = 0; i < 4; i++) { const x0 = cx - 204 + i * 102; k.shape(C.c3, () => poly([[x0, cy - 390], [x0 + 100, cy - 390], [x0 + 100 + (flap && i % 2 ? 5 : 0), cy - 300], [x0 + (flap && i % 2 ? 5 : 0), cy - 300]]), 2); }
+    htext('拉', cx - 154, cy - 330, 44, C.white, 400, BRUSH, 'center'); htext('面', cx + 154, cy - 330, 44, C.white, 400, BRUSH, 'center');
+    k.shape(C.c5, rect(cx + 40, cy - 250, 90, 74), 2.4); steam(cx + 85, cy - 260, 1.2, u, 3, 22);
+    k.shape(C.c4, rect(cx - 250, cy - 180, 500, 34), 2.4);
+    k.shape(C.c4, rect(cx - 230, cy - 146, 460, 130), 2.4); k.key(() => { for (let i = 1; i < 5; i++) { g.moveTo(cx - 230 + i * 92, cy - 146); g.lineTo(cx - 230 + i * 92, cy - 16); } }, 1.4);
+    bowl(cx - 120, cy - 186, 26); bowl(cx - 40, cy - 186, 26);
+    [cx - 180, cx + 180].forEach(wx => { k.shape(C.c4, circ(wx, cy + 16, 50), 2.6);
+      k.key(() => { for (let i = 0; i < 4; i++) { const a = i * Math.PI / 4 + t * .8; g.moveTo(wx + Math.cos(a) * 48, cy + 16 + Math.sin(a) * 48); g.lineTo(wx - Math.cos(a) * 48, cy + 16 - Math.sin(a) * 48); } }, 1.2); });
+    k.key(() => { g.moveTo(cx + 230, cy - 120); g.lineTo(cx + 330, cy - 160); }, 4);              // 推把
+    // 潘钦星：吹喇叭
+    figure(cx + 360, cy + 70, 3.3, {kind: 'tang', robe: C.c1, hat: 'tang', dir: -1, horn: true, walk: tw * 1.6});
+    const blow = Math.floor(tw * 3) % 2;
+    if (blow) kp.key(() => { const hx = cx + 360 - 100, hy = cy + 70 - 240; for (let i = 0; i < 3; i++) { g.moveTo(hx - i * 18, hy - 30 - i * 8); g.quadraticCurveTo(hx - 12 - i * 18, hy - i * 4, hx - i * 18, hy + 24 + i * 8); } }, 3, C.sumi);
+    // 跟着跑的孩子
+    [[cx + 470, C.c3, 'bun'], [cx + 540, C.c2, undefined]].forEach(([x, col, hair], i) =>
+      figure(x - ((tw * 30) % 40), cy + 70 + i * 8, 2, {robe: col, hair, obi: C.c4, dir: -1, walk: tw * 3.2 + i * .5}));
   },
   /* 新潟：燕的刀叉、出前、背脂、五大拉面 */
   niigata: u => {
@@ -502,10 +505,10 @@ const DRAW_V2 = {
       k.shape(C.c5, () => { for (let j = 0; j < 3; j++) { const a = ((t * 1.5 + j + s) % 3); g.moveTo(cx + 30 + a * 30, hz - 170 - a * 26); g.arc(cx + 20 + a * 30, hz - 170 - a * 26, 12 + a * 6, 0, TAU); } }, 1.6, .9); });
     htext('燕', 72, hz + 98, 40, C.sumi, 400, BRUSH, 'center');
     k.blk(C.c4, rect(0, hz + 120, PW, 80), .35); k.key(() => { g.moveTo(-10, hz + 200); g.lineTo(PW + 10, hz + 200); }, 2);
-    if (u < 4.2) bike(((t * 200) % 1300) - 150, hz + 186, 1.6, t);       // 出前：骑车送面
+    if (u < 3.6) bike(((t * 200) % 1300) - 150, hz + 186, 1.6, t);       // 出前：骑车送面
     k.band(-80, hz + 230, 640, 56, C.white, 1); k.band(420, hz + 270, 640, 50, C.white, 1);
     // 五块色纸（换句之后挂出）
-    NIIGATA5.forEach((nm, i) => { const a = clamp((u - 5.2 - i * .25) / .2); if (a <= 0) return; const x = 84 + i * 120, y = 110 + (i % 2) * 30;
+    NIIGATA5.forEach((nm, i) => { const a = clamp((u - 4.3 - i * .2) / .2); if (a <= 0) return; const x = 84 + i * 120, y = 110 + (i % 2) * 30;
       g.save(); g.globalAlpha = a; g.translate(0, (1 - a) * -30); k.key(() => { g.moveTo(x, y - 30); g.lineTo(x, y); }, 2);
       const h = cartouche(x, y, nm, 40, i % 2 ? C.c4 : C.white); htext(NIIGATA5_PLACE[i], x, y + h + 38, 34, C.sumi, 700, SERIF, 'center'); g.restore(); });
     // 近景：大碗 + 背脂
@@ -528,7 +531,7 @@ const DRAW_V2 = {
     g.save(); g.translate(820, 1020); g.rotate(.8 + Math.PI);
     k.shape(C.c5, () => poly([[0, -12], [-640, -22], [-640, 22], [0, 12]]), 3);
     k.shape(C.c5, ell(90, 0, 100, 62), 3); k.key(() => g.ellipse(84, 0, 70, 40, 0, 0, TAU), 2, C.white); g.restore();
-    seal(480, 900, 170, clamp((u - 6.5) / .3));
+    seal(480, 900, 170, clamp((u - 5.6) / .3));
   }
 };
 
@@ -640,55 +643,6 @@ const DRAW_V1 = {
     k.shape(C.sumi, rect(-150, 470, 300, 50), 0); k.shape(C.c4, rect(-150, 470, 300, 8), 0); k.shape(C.sumi, rect(-90, 520, 180, 14), 0);
     vt('雷门', 0, 130, 150, C.sumi, BRUSH, 400, 1.12);
     g.restore();
-  },
-  yatai:u => {
-    const t = step(u), hz = 840;
-    g.fillStyle = C.c1; g.fillRect(0, 0, PW, PH);
-    k.bokashi(0, 0, PW, 240, C.sumi, .65, 0); k.bokashi(0, hz - 90, PW, 90, C.c3, 0, .55);
-    k.shape(C.c4, circ(230, 300, 70), 2.4);
-    kasumi(u, [[60, 330, 320, 22, 9], [520, 420, 280, 20, -7]]);
-    // 城市剪影 + 窗
-    for (let i = 0, x = -20; x < PW + 40; i++) { const w = 70 + hash(i + 70) * 80, h = 90 + hash(i + 90) * 200;
-      k.shape(C.sumi, rect(x, hz - h, w, h + 4), 1.6, .92);
-      for (let r = 0; r < Math.floor(h / 44); r++) for (let c = 0; c < Math.floor(w / 32); c++) { const on = hash(i * 31 + r * 7 + c + Math.floor(t * 1.5)) > .55;
-        if (on) k.blk(C.c4, rect(x + 10 + c * 32, hz - h + 16 + r * 44, 14, 18)); }
-      x += w + 6; }
-    k.blk(C.c5, rect(0, hz, PW, PH - hz)); k.key(() => { g.moveTo(-10, hz); g.lineTo(PW + 10, hz); }, 3);
-    k.key(() => { for (let i = 0; i < 6; i++) { g.moveTo(-10, hz + 70 + i * i * 22); g.lineTo(PW + 10, hz + 70 + i * i * 22); } }, 1.2, rgba(C.sumi, .5));
-    // 屋台
-    const cx = 380, cy = 1290;
-    k.shape(C.c4, rect(cx - 250, cy - 420, 18, 300), 2.4); k.shape(C.c4, rect(cx + 232, cy - 420, 18, 300), 2.4);
-    k.shape(C.sumi, () => poly([[cx - 290, cy - 410], [cx + 290, cy - 410], [cx + 250, cy - 470], [cx - 250, cy - 470]]), 0);
-    const flap = Math.floor(t * 3) % 2;
-    for (let i = 0; i < 5; i++) { const x0 = cx - 232 + i * 93; k.shape(C.c3, () => poly([[x0, cy - 410], [x0 + 90, cy - 410], [x0 + 90 + (flap && i % 2 ? 5 : 0), cy - 320], [x0 + (flap && i % 2 ? 5 : 0), cy - 320]]), 2); }
-    htext('拉', cx - 95, cy - 350, 44, C.white, 400, BRUSH, 'center'); htext('面', cx + 95, cy - 350, 44, C.white, 400, BRUSH, 'center');
-    const stir = Math.floor(step12(u) * 4) % 2 * 8;
-    chef(cx + 10, cy - 190, 1.5, {apron: C.c1, eyes: 'down', arms: [[[-34, -26], [-12, -14]], [[38, -34 - stir], [62, -58 - stir]]], tool: () => k.key(() => { g.moveTo(62, -58 - stir); g.lineTo(70, -100 - stir); }, 2.4)});   // 老板
-    k.shape(C.c5, rect(cx + 90, cy - 250, 80, 70), 2.4);               // 汤锅
-    steam(cx + 130, cy - 260, 1.3, u, 3, 22);
-    k.shape(C.c4, rect(cx - 280, cy - 190, 560, 34), 2.4);
-    k.shape(C.c4, rect(cx - 260, cy - 156, 520, 130), 2.4); k.key(() => { for (let i = 1; i < 6; i++) { g.moveTo(cx - 260 + i * 87, cy - 156); g.lineTo(cx - 260 + i * 87, cy - 26); } }, 1.4);
-    bowl(cx - 120, cy - 196, 26); bowl(cx + 20, cy - 196, 26);
-    k.shape(C.c4, circ(cx - 200, cy + 10, 50), 2.6); k.shape(C.c4, circ(cx + 200, cy + 10, 50), 2.6);
-    k.key(() => { [cx - 200, cx + 200].forEach(wx => { for (let i = 0; i < 4; i++) { const a = i * Math.PI / 4; g.moveTo(wx + Math.cos(a) * 48, cy + 10 + Math.sin(a) * 48); g.lineTo(wx - Math.cos(a) * 48, cy + 10 - Math.sin(a) * 48); } }); }, 1.2);
-    lantern(cx + 300, cy - 360, 70, 100, C.c3, '中华', Math.sin(t * 2) * .06);
-    // 客人背影
-    const drink = Math.floor(step12(u) / 1.8) % 2 === 1, turn = Math.floor(step12(u) * 1.2) % 3 === 1 ? 1 : 0;
-    [[cx - 170, C.c1, 'cap', ''], [cx + 10, C.sumi, '', ''], [cx + 180, C.c2, '', 'bun']].forEach(([x, col, h, hair], i) =>
-      diner(x, cy + 60, 2.2, col, (step12(u) * .6 + i * .37) % 1, {hat: h, hair, drink: i === 1 && drink, turn: i === 0 ? turn : 0}));
-    k.key(() => { g.moveTo(cx - 20, cy + 60); g.lineTo(cx + 260, cy + 60); }, 0);
-    // 插画小窗（コマ絵）：1958 速食面
-    const a = clamp((u - 2.2) / .35), sc = 1 + (1 - a) * .35;
-    if (a > 0) {
-      g.save(); g.globalAlpha = a; g.translate(745, 520); g.scale(sc, sc); g.rotate(-.02);
-      k.shape(C.white, rect(-180, -170, 360, 340), 4); k.key(() => g.rect(-166, -156, 332, 312), 2, C.c3);
-      k.shape(C.c4, () => { g.roundRect(-110, -30, 220, 110, 18); }, 3);
-      k.key(() => { for (let r = 0; r < 4; r++) { const y = -10 + r * 24; g.moveTo(-96, y); for (let i = 0; i < 9; i++) g.quadraticCurveTo(-96 + (i + .5) * 21, y + (i % 2 ? 8 : -8), -96 + (i + 1) * 21, y); } }, 2);
-      htext('1958', 0, -76, 64, C.c3, 600, LATIN, 'center', 0, 4);
-      htext('大阪 · 池田', 0, 132, 38, C.sumi, 400, BRUSH, 'center', 0, 4);
-      steam(70, -40, .5, u, 2, 30);
-      g.restore();
-    }
   }
 };
 const DRAW = PLAN.map(p => DRAW_V2[p[0]] || DRAW_V1[p[0]]);
@@ -714,11 +668,11 @@ function sheet(i, u, dx, dim) {
   htext('拉面小史 · 其' + NUM[i], W - PX, 94, 36, rgba(C.sumi, .82), 400, BRUSH, 'right', 0, 4);
   g.fillStyle = C.sumi; g.fillRect(PX, 114, W - PX * 2, 3);
   g.fillStyle = C.c3; g.fillRect(PX, 114, 120, 3);
-  const a1 = ss(u, .15, .7), a2 = ss(u, 1.3, 1.9), a3 = ss(u, 2.3, 2.9);
+  const a1 = ss(u, .05, .45), a3 = ss(u, 1.0, 1.5);
   g.font = '400 100px ' + BRUSH; const s1 = Math.min(80, Math.floor(100 * (W - PX * 2) / g.measureText(c.l1).width));
   g.globalAlpha = a1; htext(c.l1, PX - 2 + (1 - a1) * 18, 204, s1, C.sumi, 400, BRUSH, 'left');
-  const L2 = c.l2b ? [[c.l2, 1.3, c.swap, C.sumi], [c.l2b, c.swap, c.swap2, C.sumi], [c.l2c, c.swap2, 99, C.c3]] : [[c.l2, 1.3, 99, C.sumi]];
-  L2.forEach(([txt, t0, t1, col]) => { const ai = ss(u, t0, t0 + .6), a = ai * (1 - ss(u, t1 - .35, t1));
+  const L2 = c.l2b ? [[c.l2, .5, c.swap, C.sumi], [c.l2b, c.swap, c.swap2, C.sumi], [c.l2c, c.swap2, 99, C.c3]] : [[c.l2, .5, 99, C.sumi]];
+  L2.forEach(([txt, t0, t1, col]) => { const ai = ss(u, t0, t0 + .5), a = ai * (1 - ss(u, t1 - .35, t1));
     if (a > 0) { g.globalAlpha = a; wrapText(txt, PX + (1 - ai) * 18, 274, 46, col, 700, SERIF, W - PX * 2, 58); } });
   g.globalAlpha = 1;
   // 版心
@@ -763,7 +717,7 @@ window.render = render; window.LOOP_SECONDS = T; window.START_SECONDS = 0; windo
 texP = k.texture(PW, PH); texF = k.texture(W, H);
 const RECORD = new URLSearchParams(location.search).has('record');
 const allText = COPY.map(c => c.name + c.l1 + c.l2 + (c.l2b || '') + (c.l2c || '') + c.note).join('') + NIIGATA5.join('') + NIIGATA5_PLACE.join('') +
-  '拉面小史其一二三四五六七考南京町来轩雷门中华大阪池田食券酱油味噌盐豚骨替玉煎饺纽约巴黎旧金山日本燕';
+  '拉面小史其一二三四五六考南京町来轩雷门中华食券酱油味噌盐豚骨替玉煎饺竹家食堂好了！燕';
 const fontsReady = (document.fonts && document.fonts.load ? Promise.race([
   Promise.all([document.fonts.load('400 80px "Ma Shan Zheng"', allText), document.fonts.load('700 46px "Noto Serif SC"', allText),
     document.fonts.load('500 32px "Noto Serif SC"', allText), document.fonts.load('600 22px Sora', 'RAMEN A SHORT HISTORY 1958')]).catch(() => 0),
