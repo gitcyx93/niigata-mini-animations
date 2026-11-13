@@ -17,3 +17,7 @@
 
 - `viz/tools/inspect-animation.cjs`：无需依赖截图，通过渲染采样、像素哈希、运行状态和错误检测检查动画。
 - 使用说明：`docs/AI_INSPECTION.md`。
+
+可选风格：
+
+- 用户说「新版画风格」或「名所绘风格」时，按 `docs/STYLES.md` 做（预览与工具代码：`viz/styles/print-styles.html`）；没说时沿用上面的设计语言。
