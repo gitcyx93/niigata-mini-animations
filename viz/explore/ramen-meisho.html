@@ -71,7 +71,7 @@ function makeKit(g, S) {
 </script>
 <script>
 'use strict';
-/* 拉面小史：江户名所绘风格的八张册页（给中国观众）。v9：收紧中国厨师→友善命名→地域流变→新潟主线；改进命名牌的前后写法。v3 放宽了人物、动法和两个辅色，见 stories/explore-ramen.md。
+/* 拉面小史：江户名所绘风格的七张册页（给中国观众）。v9：收紧中国厨师→友善命名→地域流变→新潟主线；改进命名牌的前后写法。v3 放宽了人物、动法和两个辅色，见 stories/explore-ramen.md。
    印刷工具来自上方 print-kit（STYLES.meisho）。render(t) 确定性：同一 t 同一画面。 */
 const W = 1080, H = 1920, TURN = 0.5;
 const PLAN = [['yokohama', 0, 4.8], ['asakusa', 4.8, 9.6], ['sapporo1', 9.6, 15], ['sapporo2', 15, 20.4], ['regions', 20.4, 25.2], ['daily', 25.2, 30.4], ['niigata', 30.4, 38.4]];
@@ -538,7 +538,7 @@ const DRAW_V2 = {
     chef(270, 1110, 4.3, {robe: C.white, band: C.white, mouth: Math.floor(tw * 4) % 2 ? 'open' : '', arms: [[[-34, -30], [-16, -40 - lift]], [[34, -30], [16, -40 - lift]]], tool: () => { bowl(0, -44 - lift, 24); steam(0, -54 - lift, .45, u, 2, 16); }});   // 双手把碗往前一递
     tag(270, 1150, '王文彩（山东）', 30, C.pink);
     say(270, 650, '好了！（ハオラー）', win(u, .2, 2.4), {bg: C.pink, size: 46, dy: 20});
-    // 木牌菜单（近景，右边切边）：一笔一笔写出ラーメン
+    // 木牌菜单（近景，右边切边）：先写拉麺，再改写ラーメン
     k.shape(C.white, rect(700, 80, 230, 980), 4); k.key(() => g.rect(716, 96, 198, 948), 1.6, C.c3);
     k.key(() => { g.moveTo(815, 0); g.lineTo(815, 80); }, 3);
     // 先写汉字「拉麺」，随后换成片假名「ラーメン」：对应北海道交流机构所载说法
