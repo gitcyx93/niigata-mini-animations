@@ -1,0 +1,234 @@
+{
+ "duration": 43.0,
+ "sampleRate": 44100,
+ "effects_rms_db": -24.7,
+ "music_rms_db": -30.0,
+ "master_peak": 0.828,
+ "music": "synthesized here: D yo-scale plucks + pad, ~66 BPM, ducked under key cues",
+ "cues": [
+  {
+   "t": 0.55,
+   "cue": "thought cloud pop"
+  },
+  {
+   "t": 0.8,
+   "cue": "chopstick / bowl clink"
+  },
+  {
+   "t": 1.05,
+   "cue": "slurp"
+  },
+  {
+   "t": 2.1,
+   "cue": "chopstick / bowl clink"
+  },
+  {
+   "t": 2.32,
+   "cue": "furin: Hokkaido appears"
+  },
+  {
+   "t": 2.9,
+   "cue": "slurp"
+  },
+  {
+   "t": 3.6,
+   "cue": "chopstick / bowl clink"
+  },
+  {
+   "t": 4.1,
+   "cue": "page turn"
+  },
+  {
+   "t": 4.95,
+   "cue": "distant ship horn"
+  },
+  {
+   "t": 5.45,
+   "cue": "noodle slap"
+  },
+  {
+   "t": 5.6,
+   "cue": "speech bubble"
+  },
+  {
+   "t": 6.88,
+   "cue": "noodle slap"
+  },
+  {
+   "t": 8.31,
+   "cue": "noodle slap"
+  },
+  {
+   "t": 9.1,
+   "cue": "page turn"
+  },
+  {
+   "t": 10.5,
+   "cue": "speech bubble"
+  },
+  {
+   "t": 11.12,
+   "cue": "geta step"
+  },
+  {
+   "t": 11.36,
+   "cue": "geta step"
+  },
+  {
+   "t": 11.6,
+   "cue": "geta step"
+  },
+  {
+   "t": 13.02,
+   "cue": "geta step"
+  },
+  {
+   "t": 13.26,
+   "cue": "geta step"
+  },
+  {
+   "t": 13.5,
+   "cue": "geta step"
+  },
+  {
+   "t": 14.1,
+   "cue": "page turn"
+  },
+  {
+   "t": 15.62,
+   "cue": "「好了！」 bubble"
+  },
+  {
+   "t": 16.25,
+   "cue": "bowl set down"
+  },
+  {
+   "t": 18.1,
+   "cue": "slur lands"
+  },
+  {
+   "t": 18.55,
+   "cue": "pensive thought"
+  },
+  {
+   "t": 21.1,
+   "cue": "page turn"
+  },
+  {
+   "t": 22.2,
+   "cue": "brush stroke"
+  },
+  {
+   "t": 22.66,
+   "cue": "brush stroke"
+  },
+  {
+   "t": 23.12,
+   "cue": "brush stroke"
+  },
+  {
+   "t": 23.58,
+   "cue": "brush stroke"
+  },
+  {
+   "t": 24.04,
+   "cue": "brush stroke"
+  },
+  {
+   "t": 24.5,
+   "cue": "brush stroke"
+  },
+  {
+   "t": 24.96,
+   "cue": "brush stroke"
+  },
+  {
+   "t": 25.35,
+   "cue": "la / men cards"
+  },
+  {
+   "t": 26.22,
+   "cue": "seal stamp"
+  },
+  {
+   "t": 27.5,
+   "cue": "page turn"
+  },
+  {
+   "t": 28.1,
+   "cue": "route drawn"
+  },
+  {
+   "t": 28.62,
+   "cue": "regional bowl"
+  },
+  {
+   "t": 28.85,
+   "cue": "Yokohama"
+  },
+  {
+   "t": 28.94,
+   "cue": "regional bowl"
+  },
+  {
+   "t": 29.26,
+   "cue": "regional bowl"
+  },
+  {
+   "t": 29.58,
+   "cue": "regional bowl"
+  },
+  {
+   "t": 29.9,
+   "cue": "regional bowl"
+  },
+  {
+   "t": 30.22,
+   "cue": "regional bowl"
+  },
+  {
+   "t": 30.54,
+   "cue": "regional bowl"
+  },
+  {
+   "t": 31.02,
+   "cue": "furin: Niigata"
+  },
+  {
+   "t": 32.85,
+   "cue": "seal stamp"
+  },
+  {
+   "t": 34.5,
+   "cue": "page turn"
+  },
+  {
+   "t": 35.65,
+   "cue": "Niigata bowl"
+  },
+  {
+   "t": 36.45,
+   "cue": "Niigata bowl"
+  },
+  {
+   "t": 38.65,
+   "cue": "Niigata bowl"
+  },
+  {
+   "t": 39.15,
+   "cue": "Niigata bowl"
+  },
+  {
+   "t": 39.65,
+   "cue": "Niigata bowl"
+  },
+  {
+   "t": 41.1,
+   "cue": "seal stamp"
+  },
+  {
+   "t": 42.45,
+   "cue": "page turn"
+  }
+ ]
+}
