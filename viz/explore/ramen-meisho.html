@@ -71,10 +71,10 @@ function makeKit(g, S) {
 </script>
 <script>
 'use strict';
-/* 拉面小史：江户名所绘风格的八张册页（给中国观众）。v7：札幌命名两页、新潟五大拉面。v3 放宽了人物、动法和两个辅色，见 stories/explore-ramen.md。
+/* 拉面小史：江户名所绘风格的八张册页（给中国观众）。v8：札幌两页分为店外远景、店内近景；人物动作跟台词走。v3 放宽了人物、动法和两个辅色，见 stories/explore-ramen.md。
    印刷工具来自上方 print-kit（STYLES.meisho）。render(t) 确定性：同一 t 同一画面。 */
 const W = 1080, H = 1920, TURN = 0.5;
-const PLAN = [['yokohama', 0, 4.6], ['asakusa', 4.6, 9.2], ['sapporo1', 9.2, 14.4], ['sapporo2', 14.4, 19.6], ['regions', 19.6, 24.2], ['daily', 24.2, 28.8], ['today', 28.8, 33.4], ['niigata', 33.4, 40]];
+const PLAN = [['yokohama', 0, 4.6], ['asakusa', 4.6, 9.2], ['sapporo1', 9.2, 14.4], ['sapporo2', 14.4, 19.6], ['daily', 19.6, 24.2], ['today', 24.2, 28.8], ['regions', 28.8, 33.4], ['niigata', 33.4, 40]];
 const N = PLAN.length, T = PLAN[N - 1][2];
 const PX = 60, PY = 368, PW = 960, PH = 1420, DY = 10;     // 画内坐标仍按 1440 高设计，上移 DY
 const cv = document.getElementById('c'), g = cv.getContext('2d');
@@ -95,12 +95,12 @@ const COPY = [
     note: '据北海道国际交流·合作综合中心《北海道与中国的交流故事》，引《竹家食堂的故事》'},
   {name: '札幌', l1: '老板娘从一声「好了」里，取了新名字。', l2: '「好了（ハオラー）」的「ラー」＋「面（メン）」＝ ラーメン',
     note: '老板娘大久タツ想给这碗面一个友善、好记的名字 · 名字由来另有他说'},
-  {name: '三大', l1: '日本三大拉面：札幌、喜多方、博多。', l2: '其中两地拉面的起点，都有一位中国厨师。',
-    note: '喜多方：浙江人潘钦星推着面摊卖了两年，1926 年开了源来轩'},
   {name: '日常', l1: '今天，拉面是日本人的日常。', l2: '门口买券，看图按键，不会日语也能点一碗。',
     note: '1958 年，速食面也在日本诞生 · 替玉＝加一份面'},
   {name: '今天', l1: '如今，拉面又回到了它的老家。', l2: '海外的日本料理店，开得最多的是中国，比美国多一倍多。',
     note: '海外日本料理店约 18.1 万家（2025 年 · 日本农林水产省）'},
+  {name: '三大', l1: '日本三大拉面：札幌、喜多方、博多。', l2: '其中两地拉面的起点，都有一位中国厨师。',
+    note: '喜多方：浙江人潘钦星推着面摊卖了两年，1926 年开了源来轩'},
   {name: '新潟', l1: '到新潟，一个县就能吃到五种拉面。', l2: '新潟市的拉面外食支出，全国第二。',
     note: '新潟五大拉面（新潟县观光协会）· 拉面外食支出：总务省家计调查 2024'}
 ];
@@ -214,7 +214,13 @@ function figure(x, y, s, o = {}) {
   }
   // 前臂
   const talking = o.talk && Math.floor((o.tw || 0) * 4) % 2 === 0;
-  if (o.map) { limb([sh, [9, -40], [17, -48]], modern ? 5 : 8, robe); kp.shape(C.white, () => poly([[12, -60], [30, -58], [30, -40], [12, -42]]), 1.1);
+  const aw = modern ? 5 : 8;
+  if (o.brush != null) { limb([sh, [12, -56], [22, -66 + o.brush]], aw, robe); kp.shape(C.skin, circ(22, -66 + o.brush, 2.6), .8);   // 提笔写字
+    kp.key(() => { g.moveTo(22, -66 + o.brush); g.lineTo(31, -75 + o.brush); }, 1.8); kp.shape(C.sumi, circ(31.5, -75.5 + o.brush, 1.6), 0); }
+  else if (o.wave) { limb([sh, [10, -64], [13, -82]], aw, robe); kp.shape(C.skin, circ(13, -83, 2.8), .8); }        // 举手招呼
+  else if (o.chin) limb([sh, [9, -46], [7, -57]], aw, robe);                                                    // 托腮发愁
+  else if (o.sniff) limb([sh, [9, -46], [9, -60]], aw, robe);                                                   // 凑近闻香
+  else if (o.map) { limb([sh, [9, -40], [17, -48]], modern ? 5 : 8, robe); kp.shape(C.white, () => poly([[12, -60], [30, -58], [30, -40], [12, -42]]), 1.1);
     kp.blk(C.c2, () => poly([[16, -55], [24, -56], [26, -48], [18, -46]])); kp.key(() => { g.moveTo(21, -59); g.lineTo(21, -41); }, .6); }
   else if (o.horn) limb([sh, [10, -52], [9, -61]], modern ? 5 : 8, robe);
   else if (o.reach) { limb([sh, [10, -48], [20, -54]], modern ? 5 : 8, robe); kp.shape(C.skin, circ(20, -54, 2.6), .8); }
@@ -234,8 +240,15 @@ function figure(x, y, s, o = {}) {
   kp.shape(C.skin, () => g.ellipse(2, -66, 8, 8.6, 0, 0, TAU), 1.2);
   if (o.look === -1) { g.translate(4, 0); g.scale(-1, 1); }       // 回头：脸转向身后
   hairCap(1, -67, 8, o.hair || (kind === 'kimono' ? 'mage' : 'short'));
-  if (face) { kp.key(() => { g.moveTo(5.2, -66.5); g.lineTo(7.2, -66.5); }, 1.3); kp.key(() => { g.moveTo(4.6, -69.4); g.lineTo(7.6, -69.8); }, .9);
-    if (talking) kp.shape(C.c3, () => g.ellipse(7, -61.6, 1.6, 1.3, 0, 0, TAU), .6); else kp.key(() => { g.moveTo(6.2, -61.6); g.lineTo(7.8, -61.8); }, .9, C.c3); }
+  if (face) {
+    if (o.sniff) kp.key(() => { g.moveTo(5, -66.4); g.quadraticCurveTo(6.2, -65.2, 7.4, -66.4); }, 1.1); else kp.key(() => { g.moveTo(5.2, -66.5); g.lineTo(7.2, -66.5); }, 1.3);
+    if (o.mood === 'frown') kp.key(() => { g.moveTo(4.4, -70.6); g.lineTo(7.8, -68.8); }, 1.1); else kp.key(() => { g.moveTo(4.6, -69.4); g.lineTo(7.6, -69.8); }, .9);
+    if (talking) kp.shape(C.c3, () => g.ellipse(7, -61.6, 1.6, 1.3, 0, 0, TAU), .6);
+    else if (o.mood === 'smile') kp.key(() => { g.moveTo(5.8, -62.4); g.quadraticCurveTo(7, -60.8, 8.2, -62.2); }, .9, C.c3);
+    else if (o.mood === 'frown') kp.key(() => { g.moveTo(5.8, -61); g.quadraticCurveTo(7, -62.4, 8.2, -61.2); }, .9, C.c3);
+    else kp.key(() => { g.moveTo(6.2, -61.6); g.lineTo(7.8, -61.8); }, .9, C.c3); }
+  if (o.chin) kp.shape(C.skin, circ(7, -57.5, 2.8), .8);
+  if (o.sniff) kp.shape(C.skin, circ(9, -60.5, 2.8), .8);
   if (o.hat) hat(o.hat, 1.5, -68, 8.5);
   if (o.horn) kp.shape(C.c4, () => poly([[7, -63], [20, -65], [30, -72], [31, -58], [20, -61]]), 1);   // 喇叭（チャルメラ）
   g.restore();
@@ -254,7 +267,7 @@ function chef(x, y, s, o = {}) {
   if (o.eyes === 'down') kp.key(() => { g.moveTo(-8, -84); g.quadraticCurveTo(-5, -82, -2, -84); g.moveTo(2, -84); g.quadraticCurveTo(5, -82, 8, -84); }, 1.4);
   else { kp.blk(C.sumi, circ(-5, -85, 1.6)); kp.blk(C.sumi, circ(5, -85, 1.6)); }
   kp.key(() => { g.moveTo(-9, -89); g.lineTo(-2, -89.6); g.moveTo(2, -89.6); g.lineTo(9, -89); }, 1.2);
-  kp.key(() => { g.moveTo(-3, -76); g.quadraticCurveTo(0, -74.6, 3, -76); }, 1.2, C.c3);
+  if (o.mouth === 'open') kp.shape(C.c3, () => g.ellipse(0, -75.5, 4.2, 3.4, 0, 0, TAU), 1); else kp.key(() => { g.moveTo(-3, -76); g.quadraticCurveTo(0, -74.6, 3, -76); }, 1.2, C.c3);
   (o.arms || [[[-30, -30], [-14, -18]], [[30, -30], [14, -18]]]).forEach(([el, hd], i) => {
     const shd = [i ? 30 : -30, -54]; limb([shd, el, hd], 9, robe); kp.shape(C.skin, circ(hd[0], hd[1], 4.2), 1.2); });
   if (o.tool) o.tool();
@@ -264,7 +277,8 @@ function chef(x, y, s, o = {}) {
 function diner(x, y, s, robe, p, o = {}) {
   const dip = p < .5 ? 5 : 0, lift = p < .5 ? 0 : 7;
   g.save(); g.translate(x, y); g.scale(s * (o.dir || 1), s);
-  if (o.drink) { bowl(0, -90, 15, C.c3, C.c4, false); limb([[-18, -42], [-32, -60], [-12, -86]], 7, robe); limb([[18, -42], [32, -60], [12, -86]], 7, robe); }
+  if (o.raise) { limb([[-18, -42], [-34, -30], [-10, -40]], 7, robe); limb([[18, -44], [36, -66], [32, -96]], 7, robe); kp.shape(C.skin, circ(32, -98, 4.4), 1); }
+  else if (o.drink) { bowl(0, -90, 15, C.c3, C.c4, false); limb([[-18, -42], [-32, -60], [-12, -86]], 7, robe); limb([[18, -42], [32, -60], [12, -86]], 7, robe); }
   else { limb([[-18, -42], [-34, -30 - lift * .4], [-10, -40]], 7, robe);           // 双臂在身前：只露手肘
     limb([[18, -42], [35, -28 - lift], [10, -42]], 7, robe); }
   kp.shape(robe, () => { g.moveTo(-27, 0); g.bezierCurveTo(-29, -24, -24, -46, -12, -51); g.lineTo(12, -51); g.bezierCurveTo(24, -46, 29, -24, 27, 0); g.closePath(); }, 1.4);
@@ -416,7 +430,7 @@ function sapporoScene(u, v) {
     g.save(); g.beginPath(); g.rect(wx, wy, ww, wh); g.clip();
     k.shape(C.c5, rect(wx + 220, wy + 120, 110, 80), 2); steam(wx + 275, wy + 120, .9, u, 2, 30);
     const hand = Math.floor(tw * 2) % 4 < 2 ? 0 : 8;
-    chef(wx + 140, wy + wh + 60, 2.3, {robe: C.white, band: C.white, arms: [[[-34, -30], [-6, -50 - hand]], [[34, -30], [8, -50 - hand]]], tool: () => bowl(0, -58 - hand, 16)});
+    chef(wx + 140, wy + wh + 60, 2.3, {robe: C.white, band: C.white, eyes: 'down', arms: [[[-34, -30], [-6, -50 - hand]], [[34, -30], [8, -50 - hand]]], tool: () => bowl(0, -58 - hand, 16)});
     g.restore();
     k.key(() => { g.moveTo(wx + ww / 2, wy); g.lineTo(wx + ww / 2, wy + 40); }, 0);
     k.shape(C.c4, rect(wx - 20, wy + wh, ww + 40, 22), 2.6);
@@ -432,13 +446,13 @@ function sapporoScene(u, v) {
     // 吧台前吃面的学生和铁路工人
     k.shape(C.c4, rect(bx - 20, 990, 520, 30), 2.4);
     [[bx + 60, C.sumi, 'cap'], [bx + 200, C.c1, 'cap'], [bx + 340, C.sumi, '']].forEach(([x, col, h], i) => { stool(x, 1200, 1.3);
-      diner(x, 1190, 2.3, col, (tw * .7 + i * .33) % 1, {hat: h, turn: i === 2 && v === 1 && u > .4 && u < 2.8 ? 1 : 0, drink: i === 1 && Math.floor(tw / 1.4) % 2 === 1}); });
+      diner(x, 1190, 2.3, col, (tw * .7 + i * .33) % 1, {hat: h, turn: i === 2 && v === 1 && u > .4 && u < 2.8 ? 1 : 0, raise: i === 2 && u > .4 && u < 2.8, drink: i === 1 && Math.floor(tw / 1.4) % 2 === 1}); });
     // 雪地里走来的人
     figure(120 - ((tw * 20) % 60), 1330, 2.6, {kind: 'meiji', robe: C.sumi, hat: 'cap', dir: 1, walk: tw * 2.2});
     const w2 = 220 - ((tw * 16) % 50);
     figure(w2, 1390, 2.9, {kind: 'modern', robe: C.orange, pants: C.sumi, hat: 'cap', dir: 1, walk: tw * 2 + .5, talk: v === 2, tw});
     // 老板娘大久タツ
-    figure(860, 1250, 2.9, {robe: C.purple, obi: C.c4, hair: 'bun', dir: -1, reach: v === 2 && u > 1.6 && u < 3.2});
+    figure(860, 1250, 2.9, {robe: C.purple, obi: C.c4, hair: 'bun', dir: -1, chin: u > 2.3, mood: 'frown'});
     tag(860, 1292, '老板娘 大久タツ', 26);
     if (v === 1) { say(640, 1030, '口口面！', win(u, .5, 2.7), {redact: 2});
       say(860, 1052, '得换个好名字……', win(u, 2.5, 5.2), {think: true, bg: C.sky, dx: -300, dy: 150}); }
@@ -467,8 +481,10 @@ const DRAW_V2 = {
     // 厨房：锅、蒸汽、店主
     k.shape(C.c5, rect(-10, 406, PW + 20, 360), 3); k.blk(C.white, rect(0, 420, PW, 330), .6);
     const give = u > 2.2 ? ss(u, 2.2, 2.6) : 0;                               // 店主把碗端上吧台
-    chef(560, 780, 2.3, {apron: C.c1, eyes: give > 0 ? 'open' : 'down', arms: [[[-34, -26], [-10, -10]], [[38, -30], [64 - give * 30, -44 + give * 30]]],
-      tool: give > 0 ? () => bowl(64 - give * 30, -50 + give * 30, 16) : null});
+    const kae = u > 2.7, talkC = kae && Math.floor(step12(u) * 4) % 2 === 0;           // 递完碗，举起一团面问"要加替玉吗"
+    chef(560, 780, 2.3, {apron: C.c1, eyes: give > 0 ? 'open' : 'down', mouth: talkC ? 'open' : '', arms: [[[-34, -26], [-10, -10]], kae ? [[40, -42], [56, -66]] : [[38, -30], [64 - give * 30, -44 + give * 30]]],
+      tool: kae ? () => { kp.shape(C.c4, circ(56, -76, 10), 1.4); kp.key(() => { g.moveTo(50, -78); g.quadraticCurveTo(56, -84, 62, -76); g.quadraticCurveTo(56, -70, 50, -74); }, 1.2, C.white); }
+        : give > 0 ? () => bowl(64 - give * 30, -50 + give * 30, 16) : null});
     [[700, 3], [830, 2]].forEach(([px, n], j) => { k.shape(C.c5, rect(px - 60, 640, 120, 100), 2.6); k.shape(C.sumi, rect(px - 66, 630, 132, 16), 0); steam(px, 620, 1.1, u + j, n, 30); });
     for (let i = 0; i < 4; i++) bowl(120 + i * 70, 600 - (i % 2) * 6, 28, i % 2 ? C.c1 : C.c3, C.white, false);
     // 吧台
@@ -491,8 +507,8 @@ const DRAW_V2 = {
     if (ph >= 1) { const e = ph === 1 ? ss(u, 1.2, 1.7) : 1; if (ph === 1) k.shape(C.white, rect(70, 1300 + 16 - e * 30, 60, 34), 2); }
     figure(300, 1426, 3.4, {kind: 'modern', robe: C.c2, pants: C.c1, hat: 'cap', bag: C.c3, dir: ph === 2 ? 1 : -1, reach: ph === 0, ticket: ph === 2});
     say(300, 1190, '看图就会点！', win(u, .2, 1.9), {dx: 20});
-    say(560, 570, '要加替玉吗？', win(u, 2.4, 4.6), {dx: -330});
-    if (u > 2.5) tag(395, 548, '替玉＝吃完面再加一份面', 28, C.c4);
+    say(620, 600, '要加替玉吗？', win(u, 2.7, 4.6), {dx: -380});
+    if (u > 2.8) tag(400, 578, '替玉＝吃完面再加一份面', 28, C.c4);
     tag(110, 742, '券売機＝食券机', 26, C.c4);
       const ka = clamp((u - 1.4) / .25);                                    // 速食面一笔带过
     koma(700, 300, 220, 170, ka, (w, h) => { g.fillStyle = C.paper; g.fillRect(0, 0, w, h);
@@ -502,7 +518,45 @@ const DRAW_V2 = {
   },
   /* 札幌 1922（两页）：v=1 客人用歧视性称呼、老板娘想换名字；v=2 王文彩喊"好了"，老板娘写下ラーメン */
   sapporo1: u => sapporoScene(u, 1),
-  sapporo2: u => sapporoScene(u, 2),
+  /* 札幌②（店内近景）：王文彩举碗喊"好了"，老板娘提笔在木牌上写下ラーメン，客人举手点面 */
+  sapporo2: u => {
+    const t = step(u), tw = step12(u);
+    g.fillStyle = C.c4; g.fillRect(0, 0, PW, PH);                                   // 木板墙
+    kp.key(() => { for (let i = 1; i < 12; i++) { g.moveTo(i * 84, 0); g.lineTo(i * 84, 1100); } }, 1.4, rgba(C.sumi, .35));
+    // 窗外的雪
+    const wx = 60, wy = 90, ww = 330, wh = 260;
+    k.shape(C.white, rect(wx, wy, ww, wh), 3);
+    g.save(); g.beginPath(); g.rect(wx, wy, ww, wh); g.clip();
+    k.bokashi(wx, wy, ww, 120, C.c1, .9, 0); k.far(C.c5, () => poly([[wx - 10, wy + wh], [wx + 90, wy + 150], [wx + 180, wy + 190], [wx + 280, wy + 130], [wx + ww + 10, wy + wh]]));
+    k.far(C.white, () => poly([[wx + 60, wy + 176], [wx + 90, wy + 150], [wx + 120, wy + 172]]));
+    for (let i = 0; i < 30; i++) { const x = wx + hash(i + 300) * ww, y = wy + ((hash(i + 330) * wh + t * 50) % wh); kp.shape(C.white, circ(x, y, 3 + hash(i) * 3), 1); }
+    g.restore();
+    k.key(() => { g.moveTo(wx + ww / 2, wy); g.lineTo(wx + ww / 2, wy + wh); g.moveTo(wx, wy + wh / 2); g.lineTo(wx + ww, wy + wh / 2); }, 3);
+    // 碗架
+    k.shape(C.brown, rect(40, 420, 380, 18), 2);
+    for (let i = 0; i < 4; i++) bowl(90 + i * 90, 400, 32, [C.c3, C.c1, C.c3, C.purple][i], C.white, false);
+    // 王文彩：举碗喊"好了"
+    const lift = Math.floor(tw * 2) % 4 < 2 ? 0 : 10;
+    chef(270, 1110, 4.3, {robe: C.white, band: C.white, mouth: Math.floor(tw * 4) % 2 ? 'open' : '', arms: [[[-34, -30], [-16, -40 - lift]], [[34, -30], [16, -40 - lift]]], tool: () => { bowl(0, -44 - lift, 24); steam(0, -54 - lift, .45, u, 2, 16); }});   // 双手把碗往前一递
+    tag(270, 1150, '王文彩（山东）', 30, C.pink);
+    say(270, 650, '好了！（ハオラー）', win(u, .2, 2.4), {bg: C.pink, size: 46, dy: 20});
+    // 木牌菜单（近景，右边切边）：一笔一笔写出ラーメン
+    k.shape(C.white, rect(700, 80, 230, 980), 4); k.key(() => g.rect(716, 96, 198, 948), 1.6, C.c3);
+    k.key(() => { g.moveTo(815, 0); g.lineTo(815, 80); }, 3);
+    const nch = u < 1.6 ? 0 : Math.min(4, 1 + Math.floor((u - 1.6) / .35));
+    for (let i = 0; i < nch; i++) htext('ラーメン'[i], 815, 300 + i * 200, 170, C.c3, 900, SANS, 'center');
+    if (u > 3.4) { const a = clamp((u - 3.4) / .3); g.save(); g.globalAlpha = a; tag(815, 1030, '＝ 拉面', 40, C.c4); g.restore(); }
+    // 老板娘：侧身提笔写
+    const wr = nch < 4 && u > 1.5 ? (Math.floor(tw * 6) % 2) * 6 : 0;
+    figure(560, 1240, 4.2, {robe: C.purple, obi: C.c4, hair: 'bun', dir: 1, brush: wr, mood: 'smile'});
+    tag(560, 1282, '老板娘 大久タツ', 30, C.sky);
+    // 吧台与举手点面的客人（近景，左下切边）
+    k.shape(C.brown, rect(-10, 1300, PW + 20, 160), 3);
+    bowl(760, 1290, 48); steam(760, 1270, .7, u, 2, 24);
+    const ask = u > 3.0;
+    figure(120, 1460, 3.9, {kind: 'meiji', robe: C.sumi, hat: 'cap', dir: 1, wave: ask, talk: ask, tw});
+    say(150, 1170, '老板娘，来碗拉面！', win(u, 3.1, 5.2), {dx: -10});
+  },
   /* 各地：道中图式日本地图，四碗依次落下 */
   regions: u => {
     const t = step(u);
@@ -685,11 +739,12 @@ const DRAW_V1 = {
     k.shape(C.c4, rect(560, 1270, 170, 22), 2.4); k.key(() => { g.moveTo(572, 1292); g.lineTo(572, 1390); g.moveTo(718, 1292); g.lineTo(718, 1390); }, 4);
     bowl(645, 1262, 42, C.c1, C.c4, true); steam(645, 1236, .6, u, 2, 24);
     puller(290, 1400, 3.3, u);
-    say(300, 1130, '现拉的南京面！', win(u, .4, 2.6), {size: 40, bg: C.pink});
+    say(300, 1130, '现拉的南京面！', win(u, .4, 2.6), {size: 40, bg: C.pink, dx: -40});
     let sayX = 0;
     for (let i = 0; i < 2; i++) { const d = i ? -1 : 1, xx = 760 + ((hash(i + 50) * 120 + d * tw * 24) % 120 + 120) % 120;
-      figure(xx, 1404 + i * 8, 2.8, {robe: [C.c2, C.c3][i], dir: d, walk: tw * 2.2 + i * .5, hair: i ? 'bun' : undefined, obi: i ? C.c1 : C.c4});
-      if (i === 1) sayX = xx; }
+      const stop = i === 1 && u > 2.2, fx = stop ? 760 + ((hash(51) * 120 - 2.2 * 24) % 120 + 120) % 120 : xx;
+      figure(fx, 1404 + i * 8, 2.8, {robe: [C.c2, C.c3][i], dir: stop ? -1 : d, walk: stop ? null : tw * 2.2 + i * .5, sniff: stop, hair: i ? 'bun' : undefined, obi: i ? C.c1 : C.c4});
+      if (i === 1) sayX = fx; }
     // 近景：南京町牌楼（左右柱切边，顶上切边）
     k.shape(C.c3, rect(-20, 420, 96, 1040), 3.4); k.shape(C.c3, rect(884, 420, 96, 1040), 3.4);
     k.shape(C.sumi, rect(-30, 1380, 120, 80), 0); k.shape(C.sumi, rect(870, 1380, 120, 80), 0);
@@ -728,12 +783,14 @@ const DRAW_V1 = {
     const q = [{kind: 'meiji', robe: C.sumi, hat: 'bowler'}, {robe: C.pink, parasol: C.c4, hair: 'bun', obi: C.c3}, {kind: 'meiji', robe: C.c1, hat: 'cap'}, {robe: C.c2, obi: C.c3, hair: 'bun'},
       {robe: C.orange, parasol: C.c3, hair: 'bun', obi: C.c1}, {kind: 'meiji', robe: C.c5, hat: 'bowler'}, {robe: C.c1}, {robe: C.sumi, hat: 'kasa'}];
     const moving = (u % 1.5) < .5 && shift <= 120;
-    q[2].talk = 1; q[3].talk = 1; q[3].look = -1;                       // 两人回头聊天
+    q[0].talk = 1; q[0].look = -1; q[2].talk = 1; q[3].talk = 1; q[3].look = -1;   // 回头聊天
     q.forEach((o, i) => { const x = 440 - i * 62 + Math.min(shift, 120) * (i > 0 ? 1 : .3), y = 1290 - i * 6; o.dir = 1; o.tw = step12(u) + i * .13;
       if (moving && i > 0) o.walk = step12(u) * 3 + i * .3; figure(x, y, 2.2, o);
-      if (i === 0) say(x + 6, 1140, '听说请了中国师傅。', win(u, .5, 2.4));
-      if (i === 3) say(x + 6, 1144, '汤是酱油味的！', win(u, 2.4, 4.5), {dx: -40});
+      if (i === 0) say(x + 2, 1140, '听说请了中国师傅。', win(u, .4, 2.5), {dx: -200});
       if (i === 4) figure(x + 30, y + 4, 1.45, {robe: C.c2, hair: 'bun', obi: C.c3, dir: 1, look: Math.floor(step12(u) * 1.5) % 2 ? -1 : 0, walk: o.walk}); });
+    // 吃完从暖帘里出来的客人：边走边夸
+    if (u > 2.1) { const ex = 640 + (step12(u) - 2.1) * 26; figure(ex, 1250, 2.4, {kind: 'meiji', robe: C.c2, hat: 'bowler', dir: 1, walk: step12(u) * 2, talk: true, tw: step12(u)});
+      say(ex + 6, 1086, '汤是酱油味的！', win(u, 2.3, 4.5), {dx: -120}); }
     // 人力车从右往左
     const rx = PW + 160 - ((t * 120) % (PW + 400));
     g.save(); g.translate(rx, 1370);
