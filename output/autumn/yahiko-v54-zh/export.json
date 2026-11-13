@@ -1,0 +1,63 @@
+{
+  "file": "yahiko-v54-zh-1080x1920-30fps.mp4",
+  "bytes": 32209627,
+  "sha256": "a95d1f73cd12a7251c52d8359ea8761d864e8b42b3c78fb0c653203b3217c78d",
+  "inputHashes": {
+    "visual": "87e6ca146fdd8c7c26f6561e39863a9c12c420d660010bed021fa08a1feb1736",
+    "audio": "6d54ecbde0424c29635ff579f3503ca8488bcbf9a9936e362e5aef89d3d64e2d"
+  },
+  "preflight": {
+    "width": 1080,
+    "height": 1920,
+    "duration": 28.1,
+    "fonts": "loaded",
+    "record": true
+  },
+  "fps": 30,
+  "frames": 843,
+  "duration": 28.1,
+  "video": {
+    "codec": "H.264 High",
+    "level": "4.1",
+    "width": 1080,
+    "height": 1920,
+    "pix_fmt": "yuv420p",
+    "color": "BT.709 limited",
+    "crf": 18,
+    "transport": "Native 1080p frames, JPEG quality 0.98 transport for faster export; not enlarged preview"
+  },
+  "audio": {
+    "codec": "AAC-LC",
+    "bitrate": 256000,
+    "sample_rate": 48000,
+    "channels": 2,
+    "source": "V53 released MP4 AAC stream",
+    "processing": "Stream copy; encoded audio packet hash identical to approved V53"
+  },
+  "checks": [
+    "input hashes unchanged",
+    "843 deterministic frames",
+    "fonts loaded",
+    "full audio/video decode without errors",
+    "both streams start at zero",
+    "duration and codecs checked"
+  ],
+  "textCheck": {
+    "top": "有的旅馆 已经开了 300 多年",
+    "subtitle": "不赶时间的话，住一晚再走吧。",
+    "width": 584
+  },
+  "colorCheck": [
+    {
+      "text": "一之鸟居",
+      "color": "#ed8b2f"
+    },
+    {
+      "text": "弥彦神社",
+      "color": "#ed8b2f"
+    }
+  ],
+  "audioPacketsUnchanged": true,
+  "pageErrors": [],
+  "render_seconds": 112
+}

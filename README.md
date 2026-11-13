@@ -14,10 +14,16 @@ GitHub 文件页显示源码，不会直接播放 HTML。克隆或下载本仓�
 |---|---|---|
 | 春 | [高田夜樱 v2](viz/spring/takada-yozakura-v2.html) · [台湾繁体](viz/spring/takada-yozakura-v2-tw.html) | 当前 v2 页面与新稿 |
 | 夏 | [长冈花火 A](viz/summer/nagaoka-hanabi-a.html) · [台湾繁体](viz/summer/nagaoka-hanabi-a-tw.html) | 保留原已发布版本，不改画面或文案 |
-| 秋 | [弥彦 V53 中文版](viz/autumn/yahiko-v53-zh.html) · [中文 MP4](output/autumn/yahiko-v53-zh/yahiko-v53-zh-1080x1920-30fps.mp4) | 28.1秒，已认可B式音效与Reverie配乐；风铃-2dB，温泉街两句文字位置互换 |
+| 秋 | [弥彦 V54 中文版](viz/autumn/yahiko-v54-zh.html) · [中文 MP4](output/autumn/yahiko-v54-zh/yahiko-v54-zh-1080x1920-30fps.mp4) | 28.1秒，强调字与鸟居文字改为橙色；沿用V53已认可音轨 |
 | 冬 | [越后汤泽](viz/winter/yuzawa-yukiguni.html) · [台湾繁体](viz/winter/yuzawa-yukiguni-tw.html) | 三维滑雪、SNS 运镜与新稿；保留原 20 秒循环 |
 
-### 弥彦 V53：当前中文发布版
+### 弥彦 V54：当前橙色字版
+
+- **[中文MP4](output/autumn/yahiko-v54-zh/yahiko-v54-zh-1080x1920-30fps.mp4)** · [轻量播放页](output/autumn/yahiko-v54-zh/index.html) · [动画源码](viz/autumn/yahiko-v54-zh.html)。
+- 只将中下方强调字加深为橙色 `#ed8b2f`，「一之鸟居」和「弥彦神社」两行同用橙色。左上旁白、字号、镜头、字幕位置不变。
+- 直接复制V53的AAC音轨，没有再次混音或音频编码；[发布署名](output/autumn/yahiko-v54-zh/PUBLISH-CREDITS.txt)仍须保留。
+
+### 弥彦 V53：此前中文发布版
 
 - **[打开当前中文动画](viz/autumn/yahiko-v53-zh.html)** · **[下载1080×1920／30fps中文MP4](output/autumn/yahiko-v53-zh/yahiko-v53-zh-1080x1920-30fps.mp4)** · [轻量播放页](output/autumn/yahiko-v53-zh/index.html)。
 - 采用已认可的B式音效、修正脚步、替换后的索道/猫叫，以及Reverie配乐融合版。本轮只将风铃降低2dB，其他音频PCM底层冻结。
