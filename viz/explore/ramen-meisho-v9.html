@@ -6,7 +6,7 @@
 <title>拉面小史 · 江户名所绘</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@500;700;900&family=Ma+Shan+Zheng&family=Sora:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@500;700;900&family=Ma+Shan+Zheng&family=Sora:wght@400;500;600;800&display=swap" rel="stylesheet">
 <style>
   html,body{margin:0;height:100%;background:#2a241d;overflow:hidden}
   body{display:flex;align-items:center;justify-content:center}
@@ -71,12 +71,12 @@ function makeKit(g, S) {
 </script>
 <script>
 'use strict';
-/* 拉面小史：江户名所绘风格的八张册页（给中国观众）。v9：好了开场、六页、每页一句话，画心加大。v3 放宽了人物、动法和两个辅色，见 stories/explore-ramen.md。
+/* 拉面小史：江户名所绘风格的八张册页（给中国观众）。v10：提问开场、六页、每页一句话加一栏注。v3 放宽了人物、动法和两个辅色，见 stories/explore-ramen.md。
    印刷工具来自上方 print-kit（STYLES.meisho）。render(t) 确定性：同一 t 同一画面。 */
 const W = 1080, H = 1920, TURN = 0.5;
-const PLAN = [['snow', 0, 5.2], ['yokohama', 5.2, 10.4], ['asakusa', 10.4, 15.4], ['shop', 15.4, 21.2], ['name', 21.2, 27.6], ['map', 27.6, 34.6]];
+const PLAN = [['question', 0, 4.6], ['yokohama', 4.6, 9.6], ['asakusa', 9.6, 14.6], ['shop', 14.6, 21.6], ['name', 21.6, 28], ['map', 28, 35]];
 const N = PLAN.length, T = PLAN[N - 1][2];
-const PX = 44, PY = 252, PW = 992, PH = 1626, DY = 0;     // v9：画心加大，上面只留一句话
+const SC = .9, PW = 992, PH = 1626, PX = (W - PW * SC) / 2, PY = 262, DY = 0;     // v10：画心按 992×1626 画，缩到 0.9 居中，下方留一栏注
 const cv = document.getElementById('c'), g = cv.getContext('2d');
 const S = STYLES.meisho, k = makeKit(g, S), C = k.C, TAU = Math.PI * 2;
 const BRUSH = S.titleFont;
@@ -85,14 +85,21 @@ C.orange = '#e07b39'; C.pink = '#e9a3a0'; C.sky = '#7fb2d9'; C.brown = '#8a5a3c'
 const SERIF = '"Noto Serif SC","Source Han Serif SC","Noto Serif CJK SC","Songti SC","STSong","SimSun",serif';
 const SANS = '"Noto Sans SC","Source Han Sans SC","Noto Sans CJK SC","PingFang SC","Microsoft YaHei",sans-serif';
 const LATIN = 'Sora,"Helvetica Neue",Arial,sans-serif';
+const HEADF = 'Sora,' + SERIF, SUBF = 'Sora,' + SANS;       // 大字、小字、注里的数字和英文走 Sora
 const NUM = ['一', '二', '三', '四', '五', '六', '七', '八'];
 const COPY = [
-  {name: '札幌', year: '1922', l1: '「拉面」这个名字，来自一句中国话。', l2: '1922 年冬，札幌，竹家食堂。'},
-  {name: '横滨', year: '1859', l1: '拉面的老家，在中国。', l2: '横滨开港，中国厨师的汤面被叫作「南京面」。'},
-  {name: '浅草', year: '1910', l1: '1910 年，浅草开了来来轩。', l2: '请来横滨的中国厨师，汤里加一勺酱油，门口排起长队。'},
-  {name: '札幌', year: '1922', l1: '山东厨师王文彩，出面时总喊一声「好了！」', l2: '可那时，有客人用轻蔑的叫法点这碗面。'},
-  {name: '命名', l1: '老板娘借这声「好了」，起了个新名字。', l2: 'ラー（la）＋ メン（面）＝ ラーメン · 名字由来另有他说'},
-  {name: '今天', l1: '一百年后，日本各地都有了自己的那一碗。', l2: '札幌味噌、喜多方酱油、博多豚骨……', l2b: '光是新潟一个县，就有五种。', swap: 3.6}
+  {name: '北海道', l1: '拉面，为什么叫「拉面」？', l2: '也许，和北海道的一家小店有关。',
+    note: '日语里拉面写作「ラーメン」。这个名字的由来有好几种说法，这里讲流传最广的一种'},
+  {name: '横滨', year: '1859', l1: '拉面的老家，在中国。', l2: '横滨开港，中国厨师的汤面被叫作「南京面」。',
+    note: '1859 年横滨开港 ·「南京面」是对「南京そば」的意译'},
+  {name: '浅草', year: '1910', l1: '1910 年，浅草开了来来轩。', l2: '请来横滨的中国厨师，汤里加一勺酱油，门口排起长队。',
+    note: '浅草来来轩，被视为日本第一波拉面热的起点'},
+  {name: '札幌', year: '1922', l1: '山东厨师王文彩，来到札幌的竹家食堂。', l2: '每出一碗面，他都喊一声「好了！」', l2b: '可那时，有的客人这样点面。', swap: 3.5,
+    note: '对白据《竹家食堂ものがたり》：「チャンコロの蕎麦くれ」。「チャンコロ」是当时对中国人的蔑称'},
+  {name: '命名', l1: '老板娘听着难受，要给它起个好名字。', l2: '她借「好了」的尾音：ラー（la）＋ メン（面）＝ ラーメン',
+    note: '老板娘大久タツ · 竹家食堂开业有 1921、1922 年两说 · 名字由来另有他说'},
+  {name: '今天', l1: '一百年后，日本各地都有自己的那一碗。', l2: '札幌味噌、喜多方酱油、博多豚骨……', l2b: '光是新潟一个县，就有五种。', swap: 3.6,
+    note: '「三大拉面」是通行说法，并非官方认定 · 新潟五大拉面：新潟县观光协会'}
 ];
 
 /* ---------- 小工具 ---------- */
@@ -389,12 +396,11 @@ function pSnow(u) {
     for (let i = 0; i < 12; i++) g.quadraticCurveTo(sx + 704 - i * 64 - 32, sy + 150 + 18 + (i % 3) * 5, sx + 704 - (i + 1) * 64, sy + 150); g.closePath(); }, 3);
   k.shape(C.white, rect(sx + 70, sy + 200, 320, 72), 2.6); htext('竹家食堂', sx + 230, sy + 256, 54, C.sumi, 400, BRUSH, 'center', 0, 8);
   // 窗：里面是王文彩
-  const sh = Math.max(win(u, 1.3, 2.5), win(u, 3.2, 4.4));
+  const sh = 0;
   k.shape(C.c4, rect(sx + 50, sy + 300, 360, 210), 3);
   g.save(); g.beginPath(); g.rect(sx + 50, sy + 300, 360, 210); g.clip();
   k.shape(C.brown, rect(sx + 250, sy + 360, 170, 12), 1.6); for (let i = 0; i < 3; i++) bowl(sx + 290 + i * 50, sy + 344, 17, i % 2 ? C.c1 : C.c3, C.white, false);
   chef(sx + 190, sy + 520, 2.0, {apron: C.c1, mouth: sh > .3 ? 'open' : '', eyes: sh > .3 ? 'open' : 'down', arms: [[[-34, -30], [-16, -22 - sh * 10]], [[34, -30], [16, -22 - sh * 10]]], tool: () => bowl(0, -34 - sh * 10, 17)});
-  steam(sx + 190, sy + 430 - sh * 20, .8, u, 2, 20);
   g.restore();
   k.key(() => { g.moveTo(sx + 230, sy + 300); g.lineTo(sx + 230, sy + 510); }, 3.4); k.shape(C.white, () => g.ellipse(sx + 230, sy + 516, 196, 11, 0, 0, TAU), 2);
   // 门、暖帘、灯
@@ -419,7 +425,6 @@ function pSnow(u) {
   k.key(() => { for (let i = 1; i < 12; i++) { const a = Math.PI + i * Math.PI / 12; g.moveTo(ux, uy); g.lineTo(ux + Math.cos(a) * ur, uy + Math.sin(a) * ur); } }, 1.6);
   k.shape(C.white, () => { g.moveTo(ux - ur * .8, uy - ur * .6); g.quadraticCurveTo(ux, uy - ur * 1.34, ux + ur * .8, uy - ur * .6); g.quadraticCurveTo(ux, uy - ur * 1.0, ux - ur * .8, uy - ur * .6); g.closePath(); }, 2.4);
   snowfall(u, 60, 31);
-  [[1.3, 2.5], [3.2, 4.4]].forEach(([a, b], i) => say(366, 908, '好了！', win(u, a, b), {bg: C.pink, size: 68, dy: 236, dx: i ? -60 : -170}));
 }
 function pYoko(u) {
   const t = step(u);
@@ -506,9 +511,10 @@ function pShop(u) {
   k.shape(C.brown, rect(500, 440, 340, 18), 2.6);
   for (let i = 0; i < 4; i++) { bowl(552 + i * 80, 400, 30, [C.c3, C.c1, C.c3, C.purple][i], C.white, false); if (i % 2) bowl(552 + i * 80, 372, 30, C.c1, C.white, false); }
   // 老板娘：在后面听着，托腮发愁
-  figure(856, 1190, 5.4, {robe: C.purple, obi: C.c4, hair: 'bun', chin: 1, mood: 'frown', dir: -1, still: 1});
+  const hurt = u > 3.7;
+  figure(856, 1190, 5.4, {robe: C.purple, obi: C.c4, hair: 'bun', chin: hurt ? 1 : 0, mood: hurt ? 'frown' : 'smile', dir: -1, still: 1});
   // 王文彩
-  const beats = [1.2, 3.5], sh = Math.max(win(u, 1.1, 2.4), win(u, 3.4, 4.7)), lift = sh * 12;
+  const beats = [1.1], sh = win(u, 1.0, 2.7), lift = sh * 12;
   const cx = 430, cy = 1190, cs = 7.2;
   chef(cx, cy, cs, {apron: C.c1, mouth: sh > .3 ? 'open' : '', eyes: sh > .3 ? 'open' : 'down',
     arms: [[[-36, -30 - lift * .3], [-19, -26 - lift]], [[36, -30 - lift * .3], [19, -26 - lift]]], tool: () => bowl(0, -40 - lift, 20)});
@@ -517,13 +523,14 @@ function pShop(u) {
   k.shape(C.brown, rect(-10, 1180, PW + 20, 84), 3); k.key(() => { g.moveTo(-10, 1196); g.lineTo(PW + 10, 1196); }, 1.4, C.c4);
   k.shape(C.brown, rect(-10, 1264, PW + 20, PH), 3); k.blk(C.sumi, rect(0, 1264, PW, PH), .28);
   k.key(() => { for (let x = 110; x < PW; x += 170) { g.moveTo(x, 1264); g.lineTo(x, PH); } }, 1.2, rgba(C.sumi, .5));
-  beats.forEach((b, i) => { const a = ss(u, b + .5, b + .8); if (a <= 0) return; const x = i ? 660 : 170; g.save(); g.globalAlpha = a; bowl(x, 1150, 56, i ? C.c1 : C.c3); g.restore(); if (a >= 1) steam(x, 1128, 1.3, u + i, 2, 28); });
+  beats.forEach((b, i) => { const a = ss(u, b + .5, b + .8); if (a <= 0) return; const x = 690; g.save(); g.globalAlpha = a; bowl(x, 1150, 56, C.c1); g.restore(); if (a >= 1) steam(x, 1128, 1.3, u + i, 2, 28); });
   tag(170, 760, '王文彩（山东）', 32, C.pink); tag(856, 1230, '老板娘 大久タツ', 28, C.sky);
   // 近景切边的客人
-  diner(150, 1870, 6.6, C.c1, ((u * .5) % 1), {hat: 'cap'});
-  diner(520, 1900, 6.6, C.c5, ((u * .5 + .4) % 1), {raise: u > 3.9 && u < 5.3});
+  diner(150, 1870, 6.6, C.c1, hurt ? .7 : ((u * .5) % 1), {hat: 'cap', raise: u > 3.4 && u < 6.2});
+  diner(520, 1900, 6.6, C.c5, ((u * .5 + .4) % 1));
   diner(860, 1870, 6.6, C.c2, ((u * .5 + .7) % 1), {hair: 'bun'});
-  beats.forEach((b, i) => say(cx + 30, cy - 75.5 * cs, '好了！', win(u, b - .1, b + 1.3), {bg: C.pink, size: 72, dy: 20, dx: 90}));
+  say(cx + 30, cy - 75.5 * cs, '好了！', win(u, 1.0, 2.9), {bg: C.pink, size: 72, dy: 20, dx: 90});
+  say(210, 1330, '来碗「中国佬的荞麦面」。', win(u, 3.5, 6.2), {size: 42, dy: 26, dx: -150});
 }
 /* 「ラーメン」四个字的笔画（字框 -1~1），竖着写 */
 const KANA = [
@@ -643,22 +650,24 @@ function seal(x, y, size, a) {
   g.restore();
 }
 function sheet(i, u, dx, dim) {
-  const c = COPY[i];
+  const c = COPY[i], CW = W - PX * 2;
   g.save(); g.translate(dx, 0);
   if (dx > 0) { const sh = g.createLinearGradient(-70, 0, 0, 0); sh.addColorStop(0, 'rgba(20,14,10,0)'); sh.addColorStop(1, 'rgba(20,14,10,.38)'); g.fillStyle = sh; g.fillRect(-70, 0, 70, H); }
   g.fillStyle = C.paper; g.fillRect(0, 0, W, H);
-  htext('RAMEN · A SHORT HISTORY', PX + 2, 70, 22, rgba(C.sumi, .62), 600, LATIN, 'left', 0, 5);
-  htext('拉面小史 · 其' + NUM[i], W - PX, 72, 32, rgba(C.sumi, .82), 400, BRUSH, 'right', 0, 4);
-  g.fillStyle = C.sumi; g.fillRect(PX, 88, W - PX * 2, 3); g.fillStyle = C.c3; g.fillRect(PX, 88, 120, 3);
-  for (let j = 0; j < N; j++) { g.fillStyle = j === i ? C.c3 : rgba(C.sumi, .25); g.fillRect(W - PX - N * 28 + 6 + j * 28, 98, 20, 8); }
-  const a1 = ss(u, .05, .45);
-  g.font = '900 100px ' + SERIF; const s1 = Math.min(66, Math.floor(100 * (W - PX * 2) / g.measureText(c.l1).width));
-  g.globalAlpha = a1; htext(c.l1, PX - 2 + (1 - a1) * 18, 172, s1, C.sumi, 900, SERIF, 'left');
+  // 上边：眉题、一句大字、一行小字
+  htext('RAMEN · A SHORT HISTORY', PX + 2, 82, 21, rgba(C.sumi, .62), 600, LATIN, 'left', 0, 5);
+  htext('拉面小史 · 其' + NUM[i], W - PX, 84, 32, rgba(C.sumi, .82), 400, BRUSH, 'right', 0, 4);
+  g.fillStyle = C.sumi; g.fillRect(PX, 100, CW, 3); g.fillStyle = C.c3; g.fillRect(PX, 100, 110, 3);
+  for (let j = 0; j < N; j++) { g.fillStyle = j === i ? C.c3 : rgba(C.sumi, .25); g.fillRect(W - PX - N * 28 + 8 + j * 28, 110, 20, 7); }
+  const a1 = ss(u, .05, .45), a3 = ss(u, 1.0, 1.5);
+  g.font = '900 100px ' + HEADF; const s1 = Math.min(56, Math.floor(100 * CW / g.measureText(c.l1).width));
+  g.globalAlpha = a1; htext(c.l1, PX - 2 + (1 - a1) * 18, 176, s1, C.sumi, 900, HEADF, 'left');
   const L2 = c.l2b ? [[c.l2, .6, c.swap], [c.l2b, c.swap, 99]] : [[c.l2, .6, 99]];
   L2.forEach(([txt, t0, t1]) => { const ai = ss(u, t0, t0 + .5), a = ai * (1 - ss(u, t1 - .35, t1));
-    if (a > 0) { g.globalAlpha = a; htext(txt, PX + (1 - ai) * 18, 228, 36, rgba(C.sumi, .88), 700, SANS, 'left', W - PX * 2); } });
+    if (a > 0) { g.globalAlpha = a; htext(txt, PX + (1 - ai) * 18, 230, 33, rgba(C.sumi, .86), 500, SUBF, 'left', CW, 1); } });
   g.globalAlpha = 1;
-  g.save(); g.beginPath(); g.rect(PX, PY, PW, PH); g.clip(); g.translate(PX, PY);
+  // 画心（按 992×1626 画，整体缩到 SC）
+  g.save(); g.beginPath(); g.rect(PX, PY, PW * SC, PH * SC); g.clip(); g.translate(PX, PY); g.scale(SC, SC);
   DRAW[i](u);
   g.globalAlpha = 1; g.drawImage(texP.wear, 0, 0);
   const n = c.name.length, ch = n * 84 + 50, tx = PW - 120, ty = 40;
@@ -666,10 +675,18 @@ function sheet(i, u, dx, dim) {
   vt(c.name, tx + 46, ty + 25 + 42, 72, C.sumi, BRUSH, 400, 84 / 72);
   k.shape(C.c4, rect(tx - 112, ty, 104, 104), 3);
   vt('拉面', tx - 34, ty + 30, 34, C.sumi, BRUSH, 400, 1.12); vt('小史', tx - 78, ty + 30, 34, C.sumi, BRUSH, 400, 1.12);
-  if (c.year) { k.shape(C.white, rect(tx - 112, ty + 112, 104, 50), 2.4); htext(c.year, tx - 60, ty + 149, 32, C.sumi, 600, LATIN, 'center'); }
+  if (c.year) { k.shape(C.white, rect(tx - 112, ty + 112, 104, 50), 2.4); htext(c.year, tx - 60, ty + 149, 31, C.sumi, 600, LATIN, 'center', 0, 1); }
   g.restore();
-  g.strokeStyle = C.sumi; g.lineWidth = 5; g.strokeRect(PX, PY, PW, PH);
-  g.lineWidth = 1.6; g.strokeRect(PX - 10, PY - 10, PW + 20, PH + 20);
+  g.strokeStyle = C.sumi; g.lineWidth = 4.5; g.strokeRect(PX, PY, PW * SC, PH * SC);
+  g.lineWidth = 1.5; g.strokeRect(PX - 9, PY - 9, PW * SC + 18, PH * SC + 18);
+  // 下边：注
+  const ny = PY + PH * SC + 26;
+  g.globalAlpha = a3;
+  kp.shape(rgba(C.white, .94), () => g.roundRect(PX, ny, CW, 88, 8), 1.8);
+  kp.blk(C.c3, rect(PX + 14, ny + 21, 46, 46)); htext('注', PX + 37, ny + 55, 29, C.white, 900, SANS, 'center');
+  g.font = '500 26px ' + SUBF; const one = g.measureText(c.note).width <= (CW - 92) * 1.05;
+  wrapText(c.note, PX + 76, one ? ny + 54 : ny + 37, 26, rgba(C.sumi, .92), 500, SUBF, CW - 92, 35);
+  g.globalAlpha = 1;
   if (dim > 0) { g.fillStyle = 'rgba(30,22,16,' + (.3 * dim) + ')'; g.fillRect(0, 0, W, H); }
   g.restore();
 }
@@ -689,10 +706,10 @@ window.render = render; window.LOOP_SECONDS = T; window.START_SECONDS = 0; windo
 /* ---------- 启动 ---------- */
 texP = k.texture(PW, PH); texF = k.texture(W, H);
 const RECORD = new URLSearchParams(location.search).has('record');
-const allText = COPY.map(c => c.name + c.l1 + c.l2 + (c.l2b || '')).join('') + N5.map(n => n[0] + n[1]).join('') +
+const allText = COPY.map(c => c.name + c.l1 + c.l2 + (c.l2b || '') + c.note).join('') + '来碗「中国佬的荞麦面」。注' + N5.map(n => n[0] + n[1]).join('') +
   '拉面小史其一二三四五六考竹家食堂好了！面南京町现拉的南京面來々軒来軒麺処雷门听说请了中国师傅。王文彩（山东）老板娘大久タツうどんそばめし的尾音自中国→横滨札幌喜多方博多味噌酱油豚骨新潟五碗';
 const fontsReady = (document.fonts && document.fonts.load ? Promise.race([
-  Promise.all([document.fonts.load('400 60px "Ma Shan Zheng"', allText), document.fonts.load('900 66px "Noto Serif SC"', allText), document.fonts.load('700 36px "Noto Sans SC"', allText), document.fonts.load('900 31px "Noto Sans SC"', allText),
+  Promise.all([document.fonts.load('400 60px "Ma Shan Zheng"', allText), document.fonts.load('900 56px "Noto Serif SC"', allText), document.fonts.load('700 36px "Noto Sans SC"', allText), document.fonts.load('500 33px "Noto Sans SC"', allText), document.fonts.load('800 56px Sora', '0123456789'), document.fonts.load('500 33px Sora', '0123456789 la men'), document.fonts.load('900 31px "Noto Sans SC"', allText),
     document.fonts.load('700 32px "Noto Serif SC"', allText), document.fonts.load('600 22px Sora', 'RAMEN A SHORT HISTORY la men 1859 1910 1922')]).catch(() => 0),
   new Promise(r => setTimeout(r, 4000))]) : Promise.resolve()).then(() => document.fonts ? document.fonts.ready : 0, () => 0);
 render(0);
