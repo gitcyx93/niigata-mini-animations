@@ -71,10 +71,10 @@ function makeKit(g, S) {
 </script>
 <script>
 'use strict';
-/* 拉面小史：江户名所绘风格的八张册页（给中国观众）。v8：札幌两页分为店外远景、店内近景；人物动作跟台词走。v3 放宽了人物、动法和两个辅色，见 stories/explore-ramen.md。
+/* 拉面小史：江户名所绘风格的八张册页（给中国观众）。v9：收紧中国厨师→友善命名→地域流变→新潟主线；改进命名牌的前后写法。v3 放宽了人物、动法和两个辅色，见 stories/explore-ramen.md。
    印刷工具来自上方 print-kit（STYLES.meisho）。render(t) 确定性：同一 t 同一画面。 */
 const W = 1080, H = 1920, TURN = 0.5;
-const PLAN = [['yokohama', 0, 4.6], ['asakusa', 4.6, 9.2], ['sapporo1', 9.2, 14.4], ['sapporo2', 14.4, 19.6], ['daily', 19.6, 24.2], ['today', 24.2, 28.8], ['regions', 28.8, 33.4], ['niigata', 33.4, 40]];
+const PLAN = [['yokohama', 0, 4.8], ['asakusa', 4.8, 9.6], ['sapporo1', 9.6, 15], ['sapporo2', 15, 20.4], ['regions', 20.4, 25.2], ['daily', 25.2, 30.4], ['niigata', 30.4, 38.4]];
 const N = PLAN.length, T = PLAN[N - 1][2];
 const PX = 60, PY = 368, PW = 960, PH = 1420, DY = 10;     // 画内坐标仍按 1440 高设计，上移 DY
 const cv = document.getElementById('c'), g = cv.getContext('2d');
@@ -85,24 +85,22 @@ C.orange = '#e07b39'; C.pink = '#e9a3a0'; C.sky = '#7fb2d9'; C.brown = '#8a5a3c'
 const SERIF = '"Noto Serif SC","Source Han Serif SC","Noto Serif CJK SC","Songti SC","STSong","SimSun",serif';
 const SANS = '"Noto Sans SC","Source Han Sans SC","Noto Sans CJK SC","PingFang SC","Microsoft YaHei",sans-serif';
 const LATIN = 'Sora,"Helvetica Neue",Arial,sans-serif';
-const NUM = ['一', '二', '三', '四', '五', '六', '七', '八'];
+const NUM = ['一', '二', '三', '四', '五', '六', '七'];
 const COPY = [
-  {name: '横滨', l1: '拉面的老家，在中国。', l2: '横滨开港后，中国厨师的汤面被叫作「南京面」。',
-    note: '1859 年横滨开港 · 一说江户时代朱舜水曾为德川光圀煮汤面'},
-  {name: '浅草', l1: '1910 年，浅草开了来来轩。', l2: '请来横滨的中国厨师，汤里加一勺酱油。',
-    note: '浅草来来轩 · 被视为日本第一波拉面热的起点'},
-  {name: '札幌', l1: '1922 年，札幌竹家食堂来了一位山东厨师。', l2: '可有些客人点面时，用了带歧视的称呼。',
-    note: '据北海道国际交流·合作综合中心《北海道与中国的交流故事》，引《竹家食堂的故事》'},
-  {name: '札幌', l1: '老板娘从一声「好了」里，取了新名字。', l2: '「好了（ハオラー）」的「ラー」＋「面（メン）」＝ ラーメン',
-    note: '老板娘大久タツ想给这碗面一个友善、好记的名字 · 名字由来另有他说'},
-  {name: '日常', l1: '今天，拉面是日本人的日常。', l2: '门口买券，看图按键，不会日语也能点一碗。',
-    note: '1958 年，速食面也在日本诞生 · 替玉＝加一份面'},
-  {name: '今天', l1: '如今，拉面又回到了它的老家。', l2: '海外的日本料理店，开得最多的是中国，比美国多一倍多。',
-    note: '海外日本料理店约 18.1 万家（2025 年 · 日本农林水产省）'},
-  {name: '三大', l1: '日本三大拉面：札幌、喜多方、博多。', l2: '其中两地拉面的起点，都有一位中国厨师。',
-    note: '喜多方：浙江人潘钦星推着面摊卖了两年，1926 年开了源来轩'},
-  {name: '新潟', l1: '到新潟，一个县就能吃到五种拉面。', l2: '新潟市的拉面外食支出，全国第二。',
-    note: '新潟五大拉面（新潟县观光协会）· 拉面外食支出：总务省家计调查 2024'}
+  {name: '横滨', l1: '中国面条，漂洋过海。', l2: '横滨开港后，中国厨师带来了汤面。',
+    note: '1859 年横滨开港 · 中国厨师和食堂为拉面传播留下了足迹'},
+  {name: '浅草', l1: '1910 年，浅草开了来来轩。', l2: '中国厨师掌勺，酱油汤面渐渐走红。',
+    note: '来来轩曾从横滨聘请中国厨师 · 日本早期拉面文化的代表'},
+  {name: '札幌', l1: '她不愿再听见那个称呼。', l2: '1922 年竹家食堂，老板娘想换个友善的名字。',
+    note: '北海道与中国交流故事：老板娘大久タツ与山东厨师王文彩'},
+  {name: '札幌', l1: '一声「好了」，变成新的名字。', l2: '王文彩喊「好了」，先写「拉麺」，后来改成「ラーメン」。',
+    note: '竹家食堂的命名故事是多种名字由来说法之一 · 据北海道交流机构'},
+  {name: '各地', l1: '一碗面，长出了地方风味。', l2: '札幌味噌、喜多方酱油、博多豚骨。',
+    note: '「日本三大拉面」为通行称呼，并非官方评选'},
+  {name: '日常', l1: '从街头小店，走进日常。', l2: '买张食券，坐到吧台，热面端上来。',
+    note: '1958 年，速食面在日本诞生 · 替玉：再加一份面'},
+  {name: '新潟', l1: '来到新潟，一县五种拉面。', l2: '新潟市的拉面外食支出，全国第二。',
+    note: '2025 年家计调查：新潟市每户年均 19,073 日元 · 全国第 2'}
 ];
 const NIIGATA5 = ['生姜酱油', '燕背脂', '浓厚味噌', '清淡酱油', '三条咖喱'];
 const NIIGATA5_PLACE = ['长冈', '燕', '新潟', '新潟', '三条'];
@@ -508,7 +506,7 @@ const DRAW_V2 = {
     figure(300, 1426, 3.4, {kind: 'modern', robe: C.c2, pants: C.c1, hat: 'cap', bag: C.c3, dir: ph === 2 ? 1 : -1, reach: ph === 0, ticket: ph === 2});
     say(300, 1190, '看图就会点！', win(u, .2, 1.9), {dx: 20});
     say(620, 600, '要加替玉吗？', win(u, 2.7, 4.6), {dx: -380});
-    if (u > 2.8) tag(400, 578, '替玉＝吃完面再加一份面', 28, C.c4);
+    if (u > 2.8) tag(400, 578, '替玉＝加一份面', 28, C.c4);
     tag(110, 742, '券売機＝食券机', 26, C.c4);
       const ka = clamp((u - 1.4) / .25);                                    // 速食面一笔带过
     koma(700, 300, 220, 170, ka, (w, h) => { g.fillStyle = C.paper; g.fillRect(0, 0, w, h);
@@ -543,9 +541,12 @@ const DRAW_V2 = {
     // 木牌菜单（近景，右边切边）：一笔一笔写出ラーメン
     k.shape(C.white, rect(700, 80, 230, 980), 4); k.key(() => g.rect(716, 96, 198, 948), 1.6, C.c3);
     k.key(() => { g.moveTo(815, 0); g.lineTo(815, 80); }, 3);
-    const nch = u < 1.6 ? 0 : Math.min(4, 1 + Math.floor((u - 1.6) / .35));
-    for (let i = 0; i < nch; i++) htext('ラーメン'[i], 815, 300 + i * 200, 170, C.c3, 900, SANS, 'center');
-    if (u > 3.4) { const a = clamp((u - 3.4) / .3); g.save(); g.globalAlpha = a; tag(815, 1030, '＝ 拉面', 40, C.c4); g.restore(); }
+    // 先写汉字「拉麺」，随后换成片假名「ラーメン」：对应北海道交流机构所载说法
+    const katakana = u >= 2.9, label = katakana ? 'ラーメン' : '拉麺';
+    const nch = u < 1.5 ? 0 : Math.min(label.length, 1 + Math.floor((u - (katakana ? 2.9 : 1.5)) / .32));
+    for (let i = 0; i < Math.max(0, nch); i++) htext(label[i], 815, katakana ? 300 + i * 200 : 405 + i * 260,
+      katakana ? 170 : 184, C.c3, 900, SANS, 'center');
+    if (u > 3.95) { const a = clamp((u - 3.95) / .3); g.save(); g.globalAlpha = a; tag(815, 1030, '＝ 拉面', 40, C.c4); g.restore(); }
     // 老板娘：侧身提笔写
     const wr = nch < 4 && u > 1.5 ? (Math.floor(tw * 6) % 2) * 6 : 0;
     figure(560, 1240, 4.2, {robe: C.purple, obi: C.c4, hair: 'bun', dir: 1, brush: wr, mood: 'smile'});
@@ -553,9 +554,9 @@ const DRAW_V2 = {
     // 吧台与举手点面的客人（近景，左下切边）
     k.shape(C.brown, rect(-10, 1300, PW + 20, 160), 3);
     bowl(760, 1290, 48); steam(760, 1270, .7, u, 2, 24);
-    const ask = u > 3.0;
+    const ask = u > 3.9;
     figure(120, 1460, 3.9, {kind: 'meiji', robe: C.sumi, hat: 'cap', dir: 1, wave: ask, talk: ask, tw});
-    say(150, 1170, '老板娘，来碗拉面！', win(u, 3.1, 5.2), {dx: -10});
+    say(150, 1170, '老板娘，来碗拉面！', win(u, 3.95, 5.4), {dx: -10});
   },
   /* 各地：道中图式日本地图，四碗依次落下 */
   regions: u => {
@@ -669,7 +670,9 @@ const DRAW_V2 = {
       [320, 1080, '新潟', '清淡酱油', '小鱼干熬的清汤', '#c98a2e', C.purple],
       [640, 1080, '三条', '咖喱', '咖喱汤，配拉面', '#d9a21b', C.c3]];
     B5.forEach(([x, y, place, name, desc, soup, body], i) => {
-      const a = clamp((u - .4 - i * .42) / .22); if (a <= 0) return;
+      // 两碗特色先登场，稍作停留；最后三碗依次汇成一桌
+      const arrival = [.35, 1.15, 3.35, 3.85, 4.35][i];
+      const a = clamp((u - arrival) / .38); if (a <= 0) return;
       g.save(); g.globalAlpha = a; g.translate(x, y); g.scale(1 + (1 - a) * .4, 1 + (1 - a) * .4); g.translate(-x, -y);
       bowl(x, y, 112, body, soup, false);
       const ry = 112 * .3;
@@ -685,7 +688,7 @@ const DRAW_V2 = {
       kp.shape(C.white, () => g.roundRect(x - 128, y - 136, 256, 56, 10), 2.2);
       htext(place, x - 110, y - 96, 30, C.c3, 700, SANS, 'left'); htext(name, x + 112, y - 96, 34, C.sumi, 900, SANS, 'right');
       g.restore(); });
-    seal(840, 1290, 170, clamp((u - 5.4) / .3));
+    seal(840, 1290, 170, clamp((u - 5.75) / .38));
   },
 };
 
