@@ -215,7 +215,7 @@ const relief = () => titleLayer('relief', x => {
 });
 const sheen = document.createElement('canvas'); sheen.width = 96; sheen.height = 24;
 // 标题区：NIIGATA + 地名 / 金属大标题 / 讲故事的小字
-// header = {title, place, story, sheen: [x, y, w, h]（字面映出的那块画面，只取天空，不要深色的山）,
+// header = {title, place, story, 可选 eyebrow（地名前的英文小字，默认 NIIGATA）, sheen: [x, y, w, h]（字面映出的那块画面，只取天空，不要深色的山）,
 //           可选 storyColor / accent：小字和 NIIGATA、竖线的颜色（固定值或 t => 颜色）；
 //           storyShadow: 旁白小字的字影颜色（背景亮时用）；
 //           reflect: false 关掉字面的反射和高光（如冬季标题上已经有落雪，再反光就太花）}
@@ -224,7 +224,7 @@ function drawHeader(t, L, header) {
   titleText = header.title;
   const pick = v => typeof v === 'function' ? v(t) : v;      // 颜色可以是固定值，也可以随时间变（如跟着故事由冷变暖）
   const narr = pick(header.storyColor) || NARRATION, accent = pick(header.accent) || TYPE.accent;
-  const ew = text('NIIGATA', 80, 262, 26, accent, 500, 'left', 8);
+  const ew = text(header.eyebrow || 'NIIGATA', 80, 262, 26, accent, 500, 'left', 8);
   text(header.place, 80 + ew + 22, 262, 26, narr, 400, 'left', 4);
   const X = 74 - TX, Y = 404 - TB;
   g.drawImage(titleShadow(), X, Y);
