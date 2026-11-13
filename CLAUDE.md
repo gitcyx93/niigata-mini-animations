@@ -17,3 +17,5 @@
 
 - `viz/tools/inspect-animation.cjs`：无需依赖截图，通过渲染采样、像素哈希、运行状态和错误检测检查动画。
 - 使用说明：`docs/AI_INSPECTION.md`。
+- `viz/tools/record.js`：把动画整片录成 MP4（需要 `window.render(t)`、`LOOP_SECONDS`、`?record`）。
+- `viz/tools/export-pages.cjs`：按 `PLAN` 逐页导出循环 GIF + 静帧 PNG，适合发图集让人左右切。用法：`node viz/tools/export-pages.cjs <页面.html> <输出目录> [宽度=720] [fps=12]`。

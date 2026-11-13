@@ -71,15 +71,16 @@ function makeKit(g, S) {
 </script>
 <script>
 'use strict';
-/* 拉面小史：江户名所绘风格的六张册页（给中国观众）。
+/* 拉面小史：江户名所绘风格的八张册页（给中国观众）。v3 放宽了人物、动法和两个辅色，见 stories/explore-ramen.md。
    印刷工具来自上方 print-kit（STYLES.meisho）。render(t) 确定性：同一 t 同一画面。 */
 const W = 1080, H = 1920, TURN = 0.7;
 const PLAN = [['yokohama', 0, 5.4], ['asakusa', 5.4, 10.8], ['yatai', 10.8, 16.2], ['daily', 16.2, 21.6], ['craft', 21.6, 27], ['world', 27, 32.4], ['china', 32.4, 37.8], ['niigata', 37.8, 45.8]];
 const N = PLAN.length, T = PLAN[N - 1][2];
-const PX = 60, PY = 350, PW = 960, PH = 1440;
+const PX = 60, PY = 368, PW = 960, PH = 1420, DY = 10;     // 画内坐标仍按 1440 高设计，上移 DY
 const cv = document.getElementById('c'), g = cv.getContext('2d');
 const S = STYLES.meisho, k = makeKit(g, S), C = k.C, TAU = Math.PI * 2;
 const BRUSH = S.titleFont;
+C.skin = '#f2d9b8'; C.soup = '#9a5a2c';                    // v3 放宽：肤色、酱油汤两个辅色
 const SERIF = '"Noto Serif SC","Source Han Serif SC","Noto Serif CJK SC","Songti SC","STSong","SimSun",serif';
 const LATIN = 'Sora,"Helvetica Neue",Arial,sans-serif';
 const NUM = ['一', '二', '三', '四', '五', '六', '七', '八'];
@@ -101,7 +102,7 @@ const COPY = [
   {name: '新潟', l1: '最爱吃拉面的城市之一，在新潟。', l2: '燕市的刀叉工匠叫外卖，背脂拉面就此诞生。',
     l2b: '据说，做出它的杭州饭店，店主也来自中国。', swap: 3.1,
     l2c: '从中国来的一碗面，在这里最热乎。', swap2: 5.1,
-    note: '新潟市外食拉面支出全国第 2（2024 家计调查）· 燕背脂元祖：杭州饭店'}
+    note: '新潟市拉面外食支出全国第 2（2024）· 燕背脂元祖：杭州饭店'}
 ];
 const NIIGATA5 = ['生姜酱油', '燕背脂', '浓厚味噌', '清淡酱油', '三条咖喱'];
 const NIIGATA5_PLACE = ['长冈', '燕', '新潟', '新潟', '三条'];
@@ -112,6 +113,18 @@ const ss = (x, a, b) => { const t = clamp((x - a) / (b - a)); return t * t * (3 
 const ease = x => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
 const step = u => Math.floor(u * 6) / 6;                   // 名所绘：每秒 6 格的顿挫
 const hash = k.hash, rgba = k.rgba, poly = k.poly;
+function wrapText(str, x, y, size, color, weight, font, maxW, lh) {   // 略超宽就轻压成一行；否则在标点处折成均衡的两行
+  g.font = weight + ' ' + size + 'px ' + font;
+  const m = t => g.measureText(t).width;
+  if (m(str) <= maxW * 1.07) { htext(str, x, y, size, color, weight, font, 'left', maxW); return 1; }
+  let best = -1, bs = 1e9;
+  for (let j = 2; j < str.length - 2; j++) if ('，、。…·）」：'.includes(str[j - 1])) {
+    const a = m(str.slice(0, j).trim()), b = m(str.slice(j).trim()); if (a <= maxW * 1.07 && b <= maxW * 1.07 && Math.abs(a - b) < bs) { bs = Math.abs(a - b); best = j; } }
+  if (best < 0) best = Math.ceil(str.length / 2);
+  htext(str.slice(0, best).trim().replace(/\s*·$/, ''), x, y, size, color, weight, font, 'left', maxW);        // 折行处的分隔点去掉
+  htext(str.slice(best).trim().replace(/^·\s*/, ''), x, y + lh, size, color, weight, font, 'left', maxW);
+  return 2;
+}
 function htext(str, x, y, size, color, weight, font, align = 'left', maxW = 0, ls = 0) {
   g.font = weight + ' ' + size + 'px ' + font; g.fillStyle = color; g.textAlign = align; g.textBaseline = 'alphabetic';
   if ('letterSpacing' in g) g.letterSpacing = ls + 'px';
@@ -149,37 +162,125 @@ function bowl(x, y, r, body = C.c3, soup = C.c4, noodles = true) {    // 侧看�
   if (noodles) k.key(() => { for (let j = 0; j < 4; j++) { const yy = y - ry * .3 + j * ry * .2; g.moveTo(x - r * .62, yy);
     for (let i = 0; i < 6; i++) g.quadraticCurveTo(x - r * .62 + (i + .5) * r * .2, yy + (i % 2 ? 1 : -1) * ry * .14, x - r * .62 + (i + 1) * r * .2, yy); } }, Math.max(1.2, r * .03), C.white);
 }
-function figure(x, y, s, o = {}) {                         // 站立的小人：o.robe 衣色, o.hat, o.walk 步相, o.dir
-  const d = o.dir || 1, ph = o.walk || 0, lw = 1.8;
-  g.save(); g.translate(x, y); g.scale(s * d, s);
-  const lg = ph % 2 ? 6 : -6;
-  k.key(() => { g.moveTo(-3, -16); g.lineTo(-3 - lg, 0); g.moveTo(3, -16); g.lineTo(3 + lg, 0); }, 3.2 / s * s);
-  k.shape(o.robe || C.c1, () => poly([[-11, -16], [-8, -46], [8, -46], [12, -16]]), lw);
-  if (o.band) k.blk(o.band, rect(-9, -32, 19, 4));
-  k.shape(C.white, circ(0, -54, 7.5), lw);
-  if (o.hat === 'kasa') k.shape(C.c4, () => poly([[-15, -56], [0, -68], [15, -56]]), lw);
-  else if (o.hat === 'bowler') { k.shape(C.sumi, () => { g.ellipse(0, -59, 12, 3, 0, 0, TAU); }, 0); k.shape(C.sumi, () => g.arc(0, -59, 7.5, Math.PI, 0), 0); }
-  else if (o.hat === 'ming') k.shape(C.sumi, rect(-7, -69, 14, 10), 0);
-  else if (o.hat === 'cap') k.shape(C.c1, () => g.arc(0, -57, 8, Math.PI, 0), lw);
-  else k.blk(C.sumi, () => g.arc(0, -56, 7.5, Math.PI * 1.05, Math.PI * 1.95));
-  if (o.parasol) { k.key(() => { g.moveTo(5, -40); g.lineTo(9, -82); }, 1.6); k.shape(o.parasol, () => { g.moveTo(-13, -76); g.quadraticCurveTo(9, -100, 31, -76); g.closePath(); }, lw); }
-  if (o.pole) {                                             // 挑担：扁担两头的面箱
-    k.key(() => { g.moveTo(-34, -46); g.lineTo(34, -46); }, 3);
-    [-30, 30].forEach(px => { k.key(() => { g.moveTo(px - 6, -46); g.lineTo(px - 8, -26); g.moveTo(px + 6, -46); g.lineTo(px + 8, -26); }, 1.4);
-      k.shape(C.c3, rect(px - 11, -26, 22, 20), lw); k.key(() => { g.moveTo(px - 11, -16); g.lineTo(px + 11, -16); }, 1.2); });
+/* ---------- 人物（v3：头身约 1:5，肤色脸、简笔五官，12 格/秒） ---------- */
+const step12 = u => Math.floor(u * 12) / 12;
+const kp = makeKit(g, Object.assign({}, S, {reg: [0, 0], line: 1}));   // 人物：不错版、细墨线
+function limb(pts, w, col) {                               // 带墨线的四肢：先压一道墨，再上色
+  const p = () => { g.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]); };
+  kp.key(p, w + 2.4); kp.key(p, w, col);
+}
+function hairCap(cx, cy, r, style) {                        // 头发（朝 +x 的 3/4 侧面）：只盖头顶和后脑
+  kp.blk(C.sumi, () => { g.moveTo(cx - r * .9, cy + r * .45); g.arc(cx, cy, r + .7, Math.PI * .86, Math.PI * 1.82);
+    g.quadraticCurveTo(cx + r * .2, cy - r * .5, cx - r * .25, cy - r * .1); g.quadraticCurveTo(cx - r * .45, cy + r * .2, cx - r * .9, cy + r * .45); g.closePath(); });
+  if (style === 'mage') kp.shape(C.sumi, () => g.ellipse(cx - 1, cy - r - 2.4, 4.6, 2.4, -.3, 0, TAU), 0);
+  if (style === 'bun') kp.shape(C.sumi, circ(cx - r * .85, cy - r * .55, r * .48), 0);
+  if (style === 'long') kp.blk(C.sumi, () => poly([[cx - r * .95, cy - 2], [cx - r - 1, cy + r * 1.7], [cx - r * .2, cy + r * 1.4], [cx - r * .35, cy + r * .2]]));
+}
+function hat(kind, cx, cy, r) {
+  if (kind === 'kasa') kp.shape(C.c4, () => poly([[cx - r * 2, cy - r * .3], [cx, cy - r * 1.7], [cx + r * 2, cy - r * .3]]), 1.6);
+  else if (kind === 'bowler') { kp.shape(C.sumi, () => g.ellipse(cx, cy - r * .5, r * 1.6, r * .35, 0, 0, TAU), 0); kp.shape(C.sumi, () => g.arc(cx, cy - r * .5, r * 1.02, Math.PI, 0), 0); }
+  else if (kind === 'tang') { kp.shape(C.sumi, () => g.arc(cx, cy - r * .3, r * 1.05, Math.PI, 0), 0); kp.shape(C.c3, circ(cx, cy - r * 1.35, r * .25), 0); }
+  else if (kind === 'ming') kp.shape(C.sumi, rect(cx - r, cy - r * 1.9, r * 2, r * 1.5), 0);
+  else if (kind === 'cap') { kp.shape(C.c1, () => g.arc(cx, cy - r * .25, r * 1.05, Math.PI, 0), 1.4); kp.shape(C.c1, () => g.ellipse(cx + r * .9, cy - r * .3, r * .9, r * .25, 0, 0, TAU), 1.2); }
+  else if (kind === 'towel') { kp.shape(C.white, rect(cx - r, cy - r * .55, r * 2, r * .5), 1.4); }
+}
+/* 站立 / 行走的人。o: kind('kimono'|'tang'|'meiji'|'modern'), robe, pants, obi, hair, hat, dir, walk(相位，单位：步), still,
+   parasol, pole, bag, phone */
+function figure(x, y, s, o = {}) {
+  const d = o.dir || 1, kind = o.kind || 'kimono', modern = kind === 'modern', moving = o.walk != null && !o.still;
+  const ph = (o.walk || 0) * Math.PI, sw = moving ? Math.sin(ph) : 0, bob = moving ? Math.abs(Math.cos(ph)) * 1.6 : 0;
+  const robe = o.robe || C.c1, face = s >= 1.4;
+  g.save(); g.translate(x, y - bob * s); g.scale(s * d, s);
+  const leg = (a, col) => { g.save(); g.translate(0, -27); g.rotate(a);
+    if (modern) limb([[0, 0], [0, 25]], 6, col); else limb([[0, 0], [0, 25]], 3, C.skin);
+    kp.shape(C.sumi, () => g.ellipse(2.5, 27, 5.5, 2.4, 0, 0, TAU), 0); g.restore(); };
+  leg(-sw * .42, modern ? (o.pants || C.sumi) : C.skin); leg(sw * .42, modern ? (o.pants || C.sumi) : C.skin);
+  const sh = [1, -50];                                       // 肩
+  const backArm = () => { if (modern) limb([sh, [sh[0] + sw * 8, -36], [sh[0] + sw * 12, -26]], 5, robe);
+    else limb([sh, [sh[0] + sw * 6, -34]], 9, robe); };
+  if (!o.pole) backArm();
+  if (o.bag) kp.shape(o.bag, () => g.roundRect(-15, -52, 9, 20, 3), 1.6);
+  if (modern) {
+    kp.shape(robe, () => { g.moveTo(-9, -24); g.lineTo(-10, -48); g.quadraticCurveTo(-9, -54, -3, -55); g.lineTo(5, -55); g.quadraticCurveTo(11, -54, 11, -48); g.lineTo(10, -24); g.closePath(); }, 1.3);
+    kp.key(() => { g.moveTo(1, -54); g.lineTo(1, -26); }, 1, rgba(C.sumi, .6));
+  } else {
+    const hem = kind === 'tang' ? -14 : -8;
+    kp.shape(robe, () => { g.moveTo(-9, hem); g.lineTo(-10, -48); g.quadraticCurveTo(-9, -54, -3, -55); g.lineTo(5, -55); g.quadraticCurveTo(11, -54, 11, -48); g.lineTo(11, hem); g.closePath(); }, 1.3);
+    if (kind === 'tang') kp.key(() => { g.moveTo(4, -53); g.lineTo(4, -16); g.moveTo(-1, -53); g.lineTo(9, -53); }, 1.2, C.white);
+    else { kp.key(() => { g.moveTo(-3, -55); g.lineTo(5, -42); g.moveTo(5, -55); g.lineTo(1, -48); }, 1.4, C.white); kp.blk(o.obi || C.c4, rect(-9.5, -38, 20.5, 6)); }
   }
+  // 前臂
+  if (o.phone) { limb([sh, [8, -40], [10, -56]], modern ? 5 : 8, robe); kp.shape(C.sumi, () => g.roundRect(8, -66, 6, 10, 1.5), 0); kp.shape(C.skin, circ(10, -56, 2.6), .8); }
+  else if (o.parasol) { limb([sh, [7, -42], [10, -48]], modern ? 5 : 8, robe); kp.key(() => { g.moveTo(10, -48); g.lineTo(12, -92); }, 1.6);
+    kp.shape(o.parasol, () => { g.moveTo(-14, -86); g.quadraticCurveTo(12, -112, 38, -86); g.closePath(); }, 1.6); kp.key(() => { g.moveTo(12, -104); g.lineTo(-6, -88); g.moveTo(12, -104); g.lineTo(30, -88); }, 1); }
+  else if (o.pole) { limb([sh, [4, -50], [6, -58]], 8, robe);
+    kp.key(() => { g.moveTo(-38, -58); g.lineTo(40, -58); }, 3);
+    [-34, 36].forEach(px => { kp.key(() => { g.moveTo(px - 6, -58); g.lineTo(px - 8, -34); g.moveTo(px + 6, -58); g.lineTo(px + 8, -34); }, 1.2);
+      kp.shape(C.c3, rect(px - 11, -34, 22, 20), 1.6); kp.key(() => { g.moveTo(px - 11, -24); g.lineTo(px + 11, -24); }, 1.2); }); }
+  else { if (modern) { limb([sh, [sh[0] - sw * 8, -36], [sh[0] - sw * 12, -26]], 5, robe); kp.shape(C.skin, circ(sh[0] - sw * 12, -25, 2.6), .8); }
+    else limb([sh, [sh[0] - sw * 6, -34]], 9, robe); }
+  // 头
+  kp.shape(C.skin, rect(-1, -60, 5, 6), 0);
+  kp.shape(C.skin, () => g.ellipse(2, -66, 8, 8.6, 0, 0, TAU), 1.2);
+  hairCap(1, -67, 8, o.hair || (kind === 'kimono' ? 'mage' : 'short'));
+  if (face) { kp.key(() => { g.moveTo(5.2, -66.5); g.lineTo(7.2, -66.5); }, 1.3); kp.key(() => { g.moveTo(4.6, -69.4); g.lineTo(7.6, -69.8); }, .9); kp.key(() => { g.moveTo(6.2, -61.6); g.lineTo(7.8, -61.8); }, .9, C.c3); }
+  if (o.hat) hat(o.hat, 1.5, -68, 8.5);
   g.restore();
 }
-function seated(x, y, s, robe, head, o = {}) {             // 坐着的人（大一点）
+/* 正面的半身（店主、厨师）。o: robe, apron, band, eyes('open'|'down'), arms: [[肘], [手]] x2 */
+function chef(x, y, s, o = {}) {
+  const robe = o.robe || C.white;
+  g.save(); g.translate(x, y); g.scale(s, s);
+  kp.shape(robe, () => { g.moveTo(-40, 0); g.bezierCurveTo(-42, -38, -32, -60, -14, -63); g.lineTo(14, -63); g.bezierCurveTo(32, -60, 42, -38, 40, 0); g.closePath(); }, 2);
+  if (o.apron) { kp.shape(o.apron, () => poly([[-20, -44], [20, -44], [24, 0], [-24, 0]]), 1.6); kp.key(() => { g.moveTo(-14, -44); g.lineTo(-8, -62); g.moveTo(14, -44); g.lineTo(8, -62); }, 1.4); }
+  kp.key(() => { g.moveTo(-8, -62); g.lineTo(0, -48); g.lineTo(8, -62); }, 1.4);
+  kp.shape(C.skin, rect(-5, -72, 10, 10), 0);
+  kp.shape(C.skin, () => g.ellipse(0, -86, 14, 16, 0, 0, TAU), 2);
+  kp.blk(C.sumi, () => { g.ellipse(0, -90, 14.6, 13, 0, Math.PI * 1.02, Math.PI * 1.98); g.closePath(); });
+  if (o.band !== false) { kp.shape(o.band || C.white, rect(-15, -96, 30, 6), 1.4); kp.shape(o.band || C.white, () => poly([[12, -96], [20, -101], [21, -92], [13, -90]]), 1.2); }
+  if (o.eyes === 'down') kp.key(() => { g.moveTo(-8, -84); g.quadraticCurveTo(-5, -82, -2, -84); g.moveTo(2, -84); g.quadraticCurveTo(5, -82, 8, -84); }, 1.4);
+  else { kp.blk(C.sumi, circ(-5, -85, 1.6)); kp.blk(C.sumi, circ(5, -85, 1.6)); }
+  kp.key(() => { g.moveTo(-9, -89); g.lineTo(-2, -89.6); g.moveTo(2, -89.6); g.lineTo(9, -89); }, 1.2);
+  kp.key(() => { g.moveTo(-3, -76); g.quadraticCurveTo(0, -74.6, 3, -76); }, 1.2, C.c3);
+  (o.arms || [[[-30, -30], [-14, -18]], [[30, -30], [14, -18]]]).forEach(([el, hd], i) => {
+    const shd = [i ? 30 : -30, -54]; limb([shd, el, hd], 9, robe); kp.shape(C.skin, circ(hd[0], hd[1], 4.2), 1.2); });
+  if (o.tool) o.tool();
+  g.restore();
+}
+/* 吧台 / 面摊前的客人背影：低头吸面、抬头的循环。p 0–1 */
+function diner(x, y, s, robe, p, o = {}) {
+  const dip = p < .5 ? 5 : 0, lift = p < .5 ? 0 : 7;
   g.save(); g.translate(x, y); g.scale(s * (o.dir || 1), s);
-  k.shape(robe, () => { g.moveTo(-34, 0); g.bezierCurveTo(-36, -30, -24, -58, -12, -62); g.lineTo(12, -62); g.bezierCurveTo(24, -58, 36, -30, 34, 0); g.closePath(); }, 2);
-  if (o.collar) k.key(() => { g.moveTo(-10, -60); g.lineTo(2, -34); g.lineTo(12, -60); }, 1.6, o.collar);
-  k.shape(C.white, circ(0, -76, 13), 2);
-  if (head === 'ming') { k.shape(C.sumi, () => { g.rect(-12, -100, 24, 16); }, 0); k.blk(C.sumi, () => poly([[-6, -66], [6, -66], [2, -50], [-2, -50]])); }
-  else if (head === 'edo') { k.blk(C.sumi, () => g.arc(0, -79, 13, Math.PI * 1.1, Math.PI * 1.9)); k.shape(C.sumi, rect(-3, -98, 6, 9), 0); k.blk(C.c5, () => g.arc(0, -84, 7, Math.PI * 1.1, Math.PI * 1.9)); }
-  else if (head === 'band') { k.blk(C.sumi, () => g.arc(0, -79, 13, Math.PI, 0)); k.shape(C.white, rect(-14, -84, 28, 5), 1.2); }
-  else k.blk(C.sumi, () => g.arc(0, -79, 13, Math.PI * 1.05, Math.PI * 1.95));
-  if (o.arm) o.arm();
+  limb([[-18, -42], [-34, -30 - lift * .4], [-10, -40]], 7, robe);           // 双臂在身前：只露手肘
+  limb([[18, -42], [35, -28 - lift], [10, -42]], 7, robe);
+  kp.shape(robe, () => { g.moveTo(-27, 0); g.bezierCurveTo(-29, -24, -24, -46, -12, -51); g.lineTo(12, -51); g.bezierCurveTo(24, -46, 29, -24, 27, 0); g.closePath(); }, 1.4);
+  kp.key(() => { g.moveTo(0, -50); g.lineTo(0, -6); }, .8, rgba(C.sumi, .5));
+  kp.shape(C.skin, rect(-4, -58 + dip, 8, 8), 0);
+  kp.shape(C.sumi, () => g.ellipse(0, -66 + dip, 11.5, 12, 0, 0, TAU), 1.2);                // 后脑勺
+  kp.shape(C.skin, () => g.ellipse(-11, -64 + dip, 2.4, 3.6, 0, 0, TAU), .8); kp.shape(C.skin, () => g.ellipse(11, -64 + dip, 2.4, 3.6, 0, 0, TAU), .8);
+  if (o.hair === 'bun') kp.shape(C.sumi, circ(0, -79 + dip, 5), 0);
+  if (o.hat) hat(o.hat, 0, -68 + dip, 11.5);
+  if (p < .5) steam(16, -84, .3, p * 3, 1, 0);
+  g.restore();
+}
+function puller(x, y, s, u) {                              // 当街抻面的中国厨师
+  const q = step12(u), ph = (q * 0.7) % 1, open = ph < .5 ? ss(ph, 0, .5) : 1 - ss(ph, .5, 1);
+  const hw = 18 + open * 46;
+  g.save(); g.translate(x, y); g.scale(s, s);
+  limb([[-8, -30], [-14, -2]], 6, C.sumi); limb([[8, -30], [14, -2]], 6, C.sumi);
+  kp.shape(C.sumi, () => g.ellipse(-15, 0, 6, 2.4, 0, 0, TAU), 0); kp.shape(C.sumi, () => g.ellipse(16, 0, 6, 2.4, 0, 0, TAU), 0);
+  kp.shape(C.white, () => { g.moveTo(-14, -26); g.lineTo(-13, -56); g.quadraticCurveTo(-11, -64, -4, -65); g.lineTo(4, -65); g.quadraticCurveTo(11, -64, 13, -56); g.lineTo(14, -26); g.closePath(); }, 2);
+  kp.shape(C.c1, () => poly([[-9, -50], [9, -50], [12, -24], [-12, -24]]), 1.4);
+  const hy = -48 - open * 4;
+  limb([[-11, -58], [-hw * .6 - 8, -46], [-hw - 6, hy]], 6, C.white); limb([[11, -58], [hw * .6 + 8, -46], [hw + 6, hy]], 6, C.white);
+  const sag = 34 - open * 26;
+  for (let i = 0; i < 6; i++) { const p = () => { g.moveTo(-hw - 6, hy + 1); g.quadraticCurveTo(0, hy + sag + i * 2.6, hw + 6, hy + 1); }; kp.key(p, 2.6); kp.key(p, 1.6, C.c4); }
+  kp.shape(C.skin, circ(-hw - 6, hy, 3.4), 1); kp.shape(C.skin, circ(hw + 6, hy, 3.4), 1);
+  kp.shape(C.skin, rect(-3, -70, 6, 6), 0);
+  kp.shape(C.skin, () => g.ellipse(0, -78, 8.4, 9, 0, 0, TAU), 1.6);
+  kp.blk(C.sumi, circ(-3, -78, 1)); kp.blk(C.sumi, circ(3, -78, 1));
+  kp.key(() => { g.moveTo(-2, -73); g.quadraticCurveTo(0, -72, 2, -73); }, .9, C.c3);
+  hat('tang', 0, -80, 8.6);
   g.restore();
 }
 function roofRow(y, h, seed, col, x0 = -40, x1 = PW + 40, wall = C.white) {      // 一排屋顶（远处也勾线）
@@ -231,7 +332,7 @@ function bike(x, y, s, t) {                                // 出前的自行车
   [[-34, 0], [34, 0]].forEach(([wx]) => { k.key(() => g.arc(wx, 0, 22, 0, TAU), 3);
     k.key(() => { for (let i = 0; i < 3; i++) { const a = i * Math.PI / 3 + t * 4; g.moveTo(wx + Math.cos(a) * 20, Math.sin(a) * 20); g.lineTo(wx - Math.cos(a) * 20, -Math.sin(a) * 20); } }, 1); });
   k.key(() => { g.moveTo(-34, 0); g.lineTo(-6, -30); g.lineTo(26, -30); g.lineTo(34, 0); g.moveTo(-6, -30); g.lineTo(0, 0); g.moveTo(26, -30); g.lineTo(30, -44); }, 3);
-  figure(-2, -26, 1.2, {robe: C.white, hat: 'cap', walk: Math.floor(t * 6)});
+  figure(-2, -22, 1.25, {kind: 'modern', robe: C.white, pants: C.c1, hat: 'cap'});
   k.shape(C.c3, rect(-58, -64, 30, 38), 2); k.key(() => { g.moveTo(-43, -64); g.lineTo(-43, -76); }, 2);
   g.restore();
 }
@@ -243,10 +344,11 @@ function cityScene(w, h, t, landmark, seed) {             // 小窗里的城市�
   roofRow(hz + 4, 26, seed, C.c5, -20, w + 20);
   g.fillStyle = C.paper; g.fillRect(0, hz + 4, w, h); k.blk(C.c4, rect(0, hz + 4, w, h), .3);
   k.shape(C.c5, rect(w - 150, hz - 60, 170, 160), 2.4);
-  k.shape(C.sumi, rect(w - 150, hz - 60, 170, 30), 0); htext('RAMEN', w - 72, hz - 38, 20, C.paper, 600, LATIN, 'center', 0, 3);
+  k.shape(C.sumi, rect(w - 150, hz - 60, 170, 30), 0); htext('RAMEN', w - 72, hz - 36, 24, C.paper, 600, LATIN, 'center', 0, 3);
   for (let i = 0; i < 3; i++) k.shape(C.c3, rect(w - 140 + i * 44, hz - 26, 40, 50), 1.6);
-  for (let i = 0; i < 5; i++) figure(w - 180 - i * 46 + (Math.floor(t * 1.2) % 2) * 4, hz + 92 + (i % 2) * 6, 1.2,
-    {robe: [C.c1, C.c3, C.c2, C.sumi, C.c4][(i + seed) % 5], hat: i % 3 === 1 ? 'cap' : '', dir: 1, walk: (Math.floor(t * 6) + i) % 4 < 1 ? 1 : 0});
+  for (let i = 0; i < 6; i++) figure(w - 190 - i * 52, hz + 112 + (i % 2) * 6, 1.6,
+    {kind: 'modern', robe: [C.c1, C.c3, C.c2, C.sumi, C.c4, C.c5][(i + seed) % 6], pants: i % 2 ? C.c1 : C.sumi, hat: i % 3 === 1 ? 'cap' : '',
+      hair: i % 3 === 2 ? 'long' : '', bag: i === 2 ? C.c3 : 0, phone: i === 4, dir: 1});
 }
 
 /* ---------- v2 新页 ---------- */
@@ -262,7 +364,7 @@ const DRAW_V2 = {
       vt(m, x, y + 40, 40, C.sumi, BRUSH, 400, 1.12); });
     // 厨房：锅、蒸汽、店主
     k.shape(C.c5, rect(-10, 406, PW + 20, 360), 3); k.blk(C.white, rect(0, 420, PW, 330), .6);
-    seated(560, 780, 2.3, C.white, 'band', {});
+    chef(560, 780, 2.3, {apron: C.c1, eyes: 'down', arms: [[[-34, -26], [-10, -10]], [[38, -30], [64, -44 + (Math.floor(step12(u) * 3) % 2) * 8]]]});
     [[700, 3], [830, 2]].forEach(([px, n], j) => { k.shape(C.c5, rect(px - 60, 640, 120, 100), 2.6); k.shape(C.sumi, rect(px - 66, 630, 132, 16), 0); steam(px, 620, 1.1, u + j, n, 30); });
     for (let i = 0; i < 4; i++) bowl(120 + i * 70, 600 - (i % 2) * 6, 28, i % 2 ? C.c1 : C.c3, C.white, false);
     // 吧台
@@ -272,14 +374,15 @@ const DRAW_V2 = {
     for (let i = 0; i < 4; i++) k.shape(C.c5, rect(395 + i * 130, 650, 10, 126), 1.6);       // 一人座的隔板
     g.fillStyle = C.paper; g.fillRect(0, 966, PW, 500); k.blk(C.c4, rect(0, 966, PW, 500), .25);
     const R = [C.c1, C.sumi, C.c2, C.c3, C.c1];
-    for (let i = 0; i < 5; i++) { const x = 330 + i * 130, dip = (Math.floor(t * 3) + i) % 3 === 0 ? 6 : 0; stool(x, 1110, 1.2); seated(x, 1100 + dip, 2.1, R[i], i === 3 ? 'cap' : '', {}); }
+    for (let i = 0; i < 5; i++) { const x = 330 + i * 130, got = t > .5 + i * .45; stool(x, 1110, 1.2);
+      diner(x, 1100, 2.2, R[i], got ? (step12(u) * .7 + i * .29) % 1 : .9, {hat: i === 3 ? 'cap' : '', hair: i === 1 ? 'bun' : ''}); }
     // 近景：券売機（左边、下边切边）
     k.shape(C.c5, rect(-60, 760, 300, 720), 4);
     k.shape(C.sumi, rect(-40, 790, 260, 60), 0); htext('食券', 90, 836, 40, C.c4, 400, BRUSH, 'center', 0, 8);
     const lit = Math.floor(t * 2) % 12;
     for (let r = 0; r < 6; r++) for (let c = 0; c < 3; c++) { const id = r * 3 + c; k.shape(id === lit ? C.c3 : (id % 4 === 0 ? C.c4 : C.white), rect(-30 + c * 86, 880 + r * 66, 76, 52), 2); }
     k.shape(C.sumi, rect(40, 1300, 120, 18), 0); k.shape(C.white, rect(-30, 1350, 250, 60), 2);
-    figure(300, 1420, 3, {robe: C.c2, hat: 'cap', dir: -1});
+    figure(340, 1426, 3.4, {kind: 'modern', robe: C.c2, pants: C.c1, hat: 'cap', bag: C.c3, dir: -1});
   },
   /* 匠心：浇汤、一颗星 */
   craft: u => {
@@ -297,8 +400,8 @@ const DRAW_V2 = {
     // 墙上一颗星
     const sa = clamp((u - 2.2) / .3);
     if (sa > 0) { g.save(); g.globalAlpha = sa; g.translate(120, 760); g.scale(1 + (1 - sa) * .4, 1 + (1 - sa) * .4);
-      k.shape(C.c4, rect(-70, 10, 140, 170), 2.6); k.shape(C.c3, star(0, 80, 52), 2.4); htext('一星', 0, 166, 30, C.sumi, 400, BRUSH, 'center'); g.restore(); }
-    seated(330, 1060, 3.1, C.white, 'band', {});                         // 店主
+      k.shape(C.c4, rect(-80, 10, 160, 196), 2.6); k.shape(C.c3, star(0, 86, 58), 2.4); htext('一星', 0, 190, 42, C.sumi, 400, BRUSH, 'center'); g.restore(); }
+    chef(330, 1060, 3.1, {apron: C.c1, eyes: 'down', arms: [[[-34, -24], [-12, -6]], [[36, -34], [70, -52]]]});   // 店主：低头看碗
     k.shape(C.c4, rect(-10, 1040, PW + 20, 60), 3); k.shape(C.c4, rect(-10, 1100, PW + 20, 400), 3);
     k.key(() => { for (let i = 1; i < 6; i++) { g.moveTo(-10, 1100 + i * 70); g.lineTo(PW + 10, 1100 + i * 70); } }, 1.2);
     bowl(470, 1150, 150, C.c1, C.c4, false);
@@ -333,10 +436,9 @@ const DRAW_V2 = {
       k.key(() => { g.moveTo(x - 30, hz2 - 60); g.lineTo(x + 30, hz2 - 60); g.moveTo(x - 16, hz2 - 110); g.lineTo(x + 16, hz2 - 110); }, 2); };
     const gate = (w, hz2) => { [w * .1, w * .45].forEach(x => { k.far(C.c3, rect(x - 7, hz2 - 150, 14, 150)); k.key(() => { g.moveTo(x - 7, hz2 - 120); g.lineTo(x + 7, hz2 - 120); g.moveTo(x - 7, hz2 - 80); g.lineTo(x + 7, hz2 - 80); }, 2); });
       k.key(() => { g.moveTo(-10, hz2 - 40); g.quadraticCurveTo(w * .1 - 30, hz2 - 120, w * .1, hz2 - 150); g.quadraticCurveTo(w * .275, hz2 - 20, w * .45, hz2 - 150); g.quadraticCurveTo(w * .5, hz2 - 100, w * .6, hz2 - 60); g.moveTo(-10, hz2 - 30); g.lineTo(w * .6, hz2 - 30); }, 2.4, C.c3); };
-    const W1 = [[50, 420, '纽约', liberty, .5], [470, 760, '巴黎', eiffel, 1.4], [70, 1060, '旧金山', gate, 2.3]];
+    const W1 = [[40, 330, '纽约', liberty, .5], [320, 700, '巴黎', eiffel, 1.4], [40, 1070, '旧金山', gate, 2.3]];
     W1.forEach(([x, y, nm, lm, t0], j) => { const a = clamp((u - t0) / .3);
-      koma(x, y, 430, 320, a, (w, h) => cityScene(w, h, t, lm, j * 7 + 3));
-      if (a > 0) { g.save(); g.globalAlpha = a; cartouche(x + 446, y - 4, nm, 30, C.c4); g.restore(); } });
+      koma(x, y, 600, 330, a, (w, h) => { cityScene(w, h, t, lm, j * 7 + 3); cartouche(w * .64, 14, nm, 38, C.c4); }); });
   },
   /* 中国：街景 + 熊本→中国的小地图 */
   china: u => {
@@ -358,19 +460,20 @@ const DRAW_V2 = {
     htext('拉', 606, 920, 50, C.white, 400, BRUSH, 'center'); htext('面', 806, 920, 50, C.white, 400, BRUSH, 'center');
     [560, 950].forEach((lx, i) => lantern(lx, 870, 66, 92, C.c3, '', Math.sin(t * 2 + i) * .05));
     steam(900, 1000, 1, u, 2, 30);
-    for (let i = 0; i < 9; i++) { const x = 500 - i * 56 + (Math.floor(t / 1.5) % 2) * 10, y = 1250 + (i % 2) * 10;
-      figure(x, y, 1.9, {robe: [C.c1, C.c3, C.c2, C.sumi, C.c4, C.c5][i % 6], hat: i % 4 === 2 ? 'cap' : '', parasol: i === 5 ? C.c4 : 0, dir: 1, walk: (Math.floor(t * 6) + i) % 5 < 1 ? 1 : 0}); }
+    for (let i = 0; i < 8; i++) { const x = 486 - i * 60, y = 1270 + (i % 2) * 10;
+      figure(x, y, 2.3, {kind: 'modern', robe: [C.c1, C.c3, C.c2, C.sumi, C.c4, C.c5][i % 6], pants: i % 3 ? C.c1 : C.sumi, hat: i % 4 === 2 ? 'cap' : '',
+        hair: i % 3 === 1 ? 'long' : '', bag: i % 3 === 0 ? C.c3 : 0, phone: i % 3 === 2, dir: 1}); }
     // 小地图色纸：熊本 → 中国
     const a = clamp((u - 1.9) / .3);
-    koma(50, 690, 300, 260, a, (w, h) => {
+    koma(40, 680, 340, 290, a, (w, h) => {
       g.fillStyle = C.c1; g.fillRect(0, 0, w, h);
-      const P = (lon, lat) => [(lon - 118.5) * 20, (36.5 - lat) * 26];
+      const P = (lon, lat) => [(lon - 118.5) * 22.6, (36.5 - lat) * 29];
       k.shape(C.c2, () => poly([[-10, -10], ...[[120, 36], [119.5, 35], [120.8, 34], [120.5, 32.5], [121.2, 31.8], [121.9, 31], [122, 30], [121.5, 28.5], [120, 27.5], [119, 26]].map(p => P(p[0], p[1])), [-10, h + 10]]), 2.4);
       k.shape(C.c2, () => poly([[130.2, 33.9], [131.0, 33.95], [131.9, 33.3], [131.6, 32.5], [131.3, 31.4], [130.7, 31.0], [130.2, 31.3], [130.3, 32.1], [129.7, 32.7], [129.6, 33.3]].map(p => P(p[0], p[1]))), 2.4);
       const [kx, ky] = P(130.7, 32.8), [sx, sy] = P(121.5, 31.2), la = ss(u, 2.2, 3.2);
       g.save(); g.setLineDash([2, 12]); g.lineCap = 'round'; k.key(() => { g.moveTo(kx, ky); g.quadraticCurveTo((kx + sx) / 2, ky - 70, kx + (sx - kx) * la, ky + (sy - ky) * la - Math.sin(la * Math.PI) * 30); }, 7, C.c3); g.restore();
-      k.shape(C.c3, circ(kx, ky, 6), 1.6); htext('熊本', kx - 4, ky + 34, 22, C.white, 700, SERIF, 'center');
-      htext('中国', 40, 60, 26, C.white, 700, SERIF, 'left');
+      k.shape(C.c3, circ(kx, ky, 6), 1.6); htext('熊本', kx - 6, ky + 44, 32, C.white, 700, SERIF, 'center');
+      htext('中国', 34, 64, 36, C.white, 700, SERIF, 'left');
     });
   },
   /* 新潟：燕的刀叉、出前、背脂、五大拉面 */
@@ -389,15 +492,15 @@ const DRAW_V2 = {
     if (u < 4.2) bike(((t * 200) % 1300) - 150, hz + 186, 1.6, t);       // 出前：骑车送面
     k.band(-80, hz + 230, 640, 56, C.white, 1); k.band(420, hz + 270, 640, 50, C.white, 1);
     // 五块色纸（换句之后挂出）
-    NIIGATA5.forEach((nm, i) => { const a = clamp((u - 5.2 - i * .25) / .2); if (a <= 0) return; const x = 80 + i * 118, y = 140 + (i % 2) * 34;
+    NIIGATA5.forEach((nm, i) => { const a = clamp((u - 5.2 - i * .25) / .2); if (a <= 0) return; const x = 84 + i * 120, y = 110 + (i % 2) * 30;
       g.save(); g.globalAlpha = a; g.translate(0, (1 - a) * -30); k.key(() => { g.moveTo(x, y - 30); g.lineTo(x, y); }, 2);
-      const h = cartouche(x, y, nm, 32, i % 2 ? C.c4 : C.white); htext(NIIGATA5_PLACE[i], x, y + h + 34, 26, C.sumi, 700, SERIF, 'center'); g.restore(); });
+      const h = cartouche(x, y, nm, 40, i % 2 ? C.c4 : C.white); htext(NIIGATA5_PLACE[i], x, y + h + 38, 34, C.sumi, 700, SERIF, 'center'); g.restore(); });
     // 近景：大碗 + 背脂
     const bx = 480, by = 1220, r = 560;
     k.shape(C.c3, () => { g.moveTo(bx - r, by); g.bezierCurveTo(bx - r, by + 400, bx - 200, by + 460, bx, by + 460); g.bezierCurveTo(bx + 200, by + 460, bx + r, by + 400, bx + r, by); g.closePath(); }, 5);
     k.key(() => { for (let i = 0; i < 10; i++) { const a = -40 + i * 110; g.moveTo(a, by + 110); g.lineTo(a + 50, by + 110); g.lineTo(a + 50, by + 160); g.lineTo(a + 10, by + 160); g.lineTo(a + 10, by + 130); g.lineTo(a + 30, by + 130); } }, 4, C.white);
     k.shape(C.white, ell(bx, by, r, 150), 5);
-    k.blk(C.c5, ell(bx, by + 6, r - 50, 118));
+    k.blk(C.soup, ell(bx, by + 6, r - 50, 118));
     k.key(() => { for (let j = 0; j < 5; j++) { const yy = by - 50 + j * 24; g.moveTo(bx - 420, yy); for (let i = 0; i < 9; i++) g.quadraticCurveTo(bx - 420 + (i + .5) * 93, yy + (i % 2 ? 12 : -12), bx - 420 + (i + 1) * 93, yy); } }, 6, C.c4);
     for (let i = 0; i < 70; i++) { const a = hash(i + 300) * TAU, d = Math.sqrt(hash(i + 400)), x = bx + Math.cos(a) * d * 470, y = by + 6 + Math.sin(a) * d * 108;
       k.shape(C.white, circ(x, y, 4 + hash(i + 500) * 6), 1); }                                   // 背脂
@@ -455,14 +558,18 @@ const DRAW_V1 = {
     g.fillStyle = C.paper; g.fillRect(0, 930, PW, 520);
     k.blk(C.c4, rect(0, 930, PW, 520), .35);
     roofRow(1000, 70, 41, C.c3, 140, 830, C.white);
-    // 人群：挑担卖面的、戴笠的、唐装的
-    const R = [C.c1, C.c5, C.c3, C.c2, C.c4, C.sumi], HAT = ['ming', 'kasa', '', 'cap', 'ming', 'bowler', '', 'kasa'];
-    [[1150, 2.1, 9, 18], [1390, 2.9, 6, 30]].forEach(([y, s, n, sp], row) => { for (let i = 0; i < n; i++) {
-      const d = (i + row) % 2 ? -1 : 1, x0 = hash(i * 7 + row * 13) * 1100, xx = ((x0 + d * t * sp) % 1100 + 1100) % 1100 - 70;
-      const o = {robe: R[(i + row * 2) % 6], hat: HAT[(i * 3 + row) % 8], dir: d, walk: Math.floor(t * 6) + i};
-      if (i % 4 === 1) o.parasol = C.c3; if (row === 1 && i === 2) { o.pole = true; o.hat = 'ming'; o.parasol = 0; }
-      figure(xx, y + (i % 3) * 14, s, o);
-      if (o.pole) steam(xx - 30 * s * d, y - 26 * s - 10, .6, u + i, 2, 20); } });
+    // 人群：唐装、和服、挑担卖面的
+    const R = [C.c1, C.c5, C.c3, C.c2, C.c4, C.sumi], HAT = ['tang', 'kasa', '', 'tang', 'bowler', '', 'kasa', ''], tw = step12(u);
+    for (let i = 0; i < 9; i++) { const d = i % 2 ? -1 : 1, x0 = hash(i * 7) * 1100, xx = ((x0 + d * tw * 22) % 1100 + 1100) % 1100 - 70;
+      const o = {kind: i % 3 === 0 ? 'tang' : 'kimono', robe: R[i % 6], hat: HAT[i % 8], dir: d, walk: tw * 2.4 + i * .37, hair: i % 4 === 1 ? 'bun' : undefined};
+      if (i % 4 === 1) { o.parasol = C.c3; o.hat = ''; } if (i === 4) { o.pole = true; o.hat = 'tang'; o.kind = 'tang'; }
+      figure(xx, 1150 + (i % 3) * 14, 2.2, o); if (o.pole) steam(xx + 36 * 2.2 * d, 1150 - 80, .5, u + i, 2, 16); }
+    // 主角：当街抻面的中国厨师，旁边一张面板
+    k.shape(C.c4, rect(560, 1270, 170, 22), 2.4); k.key(() => { g.moveTo(572, 1292); g.lineTo(572, 1390); g.moveTo(718, 1292); g.lineTo(718, 1390); }, 4);
+    bowl(645, 1262, 42, C.c1, C.c4, true); steam(645, 1236, .6, u, 2, 24);
+    puller(290, 1400, 3.3, u);
+    for (let i = 0; i < 2; i++) { const d = i ? -1 : 1, xx = 760 + ((hash(i + 50) * 120 + d * tw * 24) % 120 + 120) % 120;
+      figure(xx, 1404 + i * 8, 2.8, {robe: [C.c2, C.c3][i], dir: d, walk: tw * 2.2 + i * .5, hair: i ? 'bun' : undefined, obi: i ? C.c1 : C.c4}); }
     // 近景：南京町牌楼（左右柱切边，顶上切边）
     k.shape(C.c3, rect(-20, 420, 96, 1040), 3.4); k.shape(C.c3, rect(884, 420, 96, 1040), 3.4);
     k.shape(C.sumi, rect(-30, 1380, 120, 80), 0); k.shape(C.sumi, rect(870, 1380, 120, 80), 0);
@@ -496,8 +603,10 @@ const DRAW_V1 = {
     steam(bx + 420, by + 280, 1, u, 3, 26);
     // 排队的人：一格一格往前挪
     const shift = Math.floor(t / 1.5) * 34;
-    const q = [{robe: C.sumi, hat: 'bowler'}, {robe: C.c3, parasol: C.c4}, {robe: C.c1, hat: 'cap'}, {robe: C.c2, band: C.c4}, {robe: C.c4, parasol: C.c3}, {robe: C.c5, hat: 'bowler'}, {robe: C.c1}, {robe: C.sumi, hat: 'kasa'}];
-    q.forEach((o, i) => { const x = 430 - i * 64 + Math.min(shift, 120) * (i > 0 ? 1 : .3), y = 1270 - i * 6; o.dir = 1; o.walk = (Math.floor(t * 6) + i) % 4 < 2 && i > 0 ? 1 : 0; figure(x, y, 1.9, o); });
+    const q = [{kind: 'meiji', robe: C.sumi, hat: 'bowler'}, {robe: C.c3, parasol: C.c4, hair: 'bun', obi: C.c4}, {kind: 'meiji', robe: C.c1, hat: 'cap'}, {robe: C.c2, obi: C.c3, hair: 'bun'},
+      {robe: C.c4, parasol: C.c3, hair: 'bun', obi: C.c1}, {kind: 'meiji', robe: C.c5, hat: 'bowler'}, {robe: C.c1}, {robe: C.sumi, hat: 'kasa'}];
+    const moving = (u % 1.5) < .5 && shift <= 120;
+    q.forEach((o, i) => { const x = 440 - i * 62 + Math.min(shift, 120) * (i > 0 ? 1 : .3), y = 1290 - i * 6; o.dir = 1; if (moving && i > 0) o.walk = step12(u) * 3 + i * .3; figure(x, y, 2.2, o); });
     // 人力车从右往左
     const rx = PW + 160 - ((t * 120) % (PW + 400));
     g.save(); g.translate(rx, 1370);
@@ -505,8 +614,8 @@ const DRAW_V1 = {
     k.shape(C.c3, () => poly([[0, -120], [70, -120], [80, -40], [10, -40]]), 2.4);
     k.shape(C.sumi, () => { g.moveTo(-4, -120); g.quadraticCurveTo(36, -170, 84, -126); g.closePath(); }, 0);
     k.shape(C.c4, circ(50, -30, 34), 2.4); k.key(() => { for (let i = 0; i < 6; i++) { const a = i * Math.PI / 6 + t; g.moveTo(50 + Math.cos(a) * 32, -30 + Math.sin(a) * 32); g.lineTo(50 - Math.cos(a) * 32, -30 - Math.sin(a) * 32); } }, 1.2);
-    figure(-100, 0, 1.6, {robe: C.c1, hat: 'kasa', walk: Math.floor(t * 6), dir: -1});
-    figure(40, -60, 1.3, {robe: C.c2, hat: 'bowler'});
+    figure(-100, 0, 2, {robe: C.c1, hat: 'kasa', walk: step12(u) * 4, dir: -1, obi: C.white});
+    figure(40, -46, 1.5, {kind: 'meiji', robe: C.c2, hat: 'bowler', dir: -1});
     g.restore();
     // 近景：雷门大灯笼（被画框上缘切掉）
     g.save(); g.translate(250, -20); g.rotate(Math.sin(t * 1.4) * .012);
@@ -537,7 +646,8 @@ const DRAW_V1 = {
     const flap = Math.floor(t * 3) % 2;
     for (let i = 0; i < 5; i++) { const x0 = cx - 232 + i * 93; k.shape(C.c3, () => poly([[x0, cy - 410], [x0 + 90, cy - 410], [x0 + 90 + (flap && i % 2 ? 5 : 0), cy - 320], [x0 + (flap && i % 2 ? 5 : 0), cy - 320]]), 2); }
     htext('拉', cx - 95, cy - 350, 44, C.white, 400, BRUSH, 'center'); htext('面', cx + 95, cy - 350, 44, C.white, 400, BRUSH, 'center');
-    seated(cx + 20, cy - 190, 1.5, C.white, 'band', {});                 // 老板
+    const stir = Math.floor(step12(u) * 4) % 2 * 8;
+    chef(cx + 10, cy - 190, 1.5, {apron: C.c1, eyes: 'down', arms: [[[-34, -26], [-12, -14]], [[38, -34 - stir], [62, -58 - stir]]], tool: () => k.key(() => { g.moveTo(62, -58 - stir); g.lineTo(70, -100 - stir); }, 2.4)});   // 老板
     k.shape(C.c5, rect(cx + 90, cy - 250, 80, 70), 2.4);               // 汤锅
     steam(cx + 130, cy - 260, 1.3, u, 3, 22);
     k.shape(C.c4, rect(cx - 280, cy - 190, 560, 34), 2.4);
@@ -547,9 +657,7 @@ const DRAW_V1 = {
     k.key(() => { [cx - 200, cx + 200].forEach(wx => { for (let i = 0; i < 4; i++) { const a = i * Math.PI / 4; g.moveTo(wx + Math.cos(a) * 48, cy + 10 + Math.sin(a) * 48); g.lineTo(wx - Math.cos(a) * 48, cy + 10 - Math.sin(a) * 48); } }); }, 1.2);
     lantern(cx + 300, cy - 360, 70, 100, C.c3, '中华', Math.sin(t * 2) * .06);
     // 客人背影
-    const lift = Math.floor(t * 2) % 2;
-    seated(cx - 160, cy + 60, 2, C.c1, 'cap', {}); seated(cx + 10, cy + 60, 2, C.sumi, '', {});
-    seated(cx + 170, cy + 60 - lift * 6, 2, C.c2, '', {});
+    [[cx - 170, C.c1, 'cap', ''], [cx + 10, C.sumi, '', ''], [cx + 180, C.c2, '', 'bun']].forEach(([x, col, h, hair], i) => diner(x, cy + 60, 2.2, col, (step12(u) * .6 + i * .37) % 1, {hat: h, hair}));
     k.key(() => { g.moveTo(cx - 20, cy + 60); g.lineTo(cx + 260, cy + 60); }, 0);
     // 插画小窗（コマ絵）：1958 速食面
     const a = clamp((u - 2.2) / .35), sc = 1 + (1 - a) * .35;
@@ -559,7 +667,7 @@ const DRAW_V1 = {
       k.shape(C.c4, () => { g.roundRect(-110, -30, 220, 110, 18); }, 3);
       k.key(() => { for (let r = 0; r < 4; r++) { const y = -10 + r * 24; g.moveTo(-96, y); for (let i = 0; i < 9; i++) g.quadraticCurveTo(-96 + (i + .5) * 21, y + (i % 2 ? 8 : -8), -96 + (i + 1) * 21, y); } }, 2);
       htext('1958', 0, -76, 64, C.c3, 600, LATIN, 'center', 0, 4);
-      htext('大阪 · 池田', 0, 130, 30, C.sumi, 400, BRUSH, 'center', 0, 4);
+      htext('大阪 · 池田', 0, 132, 38, C.sumi, 400, BRUSH, 'center', 0, 4);
       steam(70, -40, .5, u, 2, 30);
       g.restore();
     }
@@ -584,20 +692,20 @@ function sheet(i, u, dx, dim) {
   if (dx > 0) { const sh = g.createLinearGradient(-70, 0, 0, 0); sh.addColorStop(0, 'rgba(20,14,10,0)'); sh.addColorStop(1, 'rgba(20,14,10,.38)'); g.fillStyle = sh; g.fillRect(-70, 0, 70, H); }
   g.fillStyle = C.paper; g.fillRect(0, 0, W, H);
   // 上边：文案
-  htext('RAMEN · A SHORT HISTORY', PX + 2, 122, 22, rgba(C.sumi, .62), 600, LATIN, 'left', 0, 5);
-  htext('拉面小史 · 其' + NUM[i], W - PX, 124, 30, rgba(C.sumi, .78), 400, BRUSH, 'right', 0, 4);
-  g.fillStyle = C.sumi; g.fillRect(PX, 144, W - PX * 2, 3);
-  g.fillStyle = C.c3; g.fillRect(PX, 144, 120, 3);
+  htext('RAMEN · A SHORT HISTORY', PX + 2, 92, 26, rgba(C.sumi, .66), 600, LATIN, 'left', 0, 5);
+  htext('拉面小史 · 其' + NUM[i], W - PX, 94, 36, rgba(C.sumi, .82), 400, BRUSH, 'right', 0, 4);
+  g.fillStyle = C.sumi; g.fillRect(PX, 114, W - PX * 2, 3);
+  g.fillStyle = C.c3; g.fillRect(PX, 114, 120, 3);
   const a1 = ss(u, .15, .7), a2 = ss(u, 1.3, 1.9), a3 = ss(u, 2.3, 2.9);
-  g.globalAlpha = a1; htext(c.l1, PX - 2 + (1 - a1) * 18, 236, 62, C.sumi, 400, BRUSH, 'left', W - PX * 2);
-  if (c.l2b) { const L = [[c.l2, 1.3, c.swap, C.sumi], [c.l2b, c.swap, c.swap2, C.sumi], [c.l2c, c.swap2, 99, C.c3]];
-    L.forEach(([txt, t0, t1, col]) => { const a = ss(u, t0 + .05, t0 + .6) * (1 - ss(u, t1 - .35, t1));
-      if (a > 0) { g.globalAlpha = a; htext(txt, PX + (1 - ss(u, t0 + .05, t0 + .6)) * 18, 306, 38, col, 700, SERIF, 'left', W - PX * 2); } });
-  } else { g.globalAlpha = a2; htext(c.l2, PX + (1 - a2) * 18, 306, 38, C.sumi, 700, SERIF, 'left', W - PX * 2); }
+  g.font = '400 100px ' + BRUSH; const s1 = Math.min(80, Math.floor(100 * (W - PX * 2) / g.measureText(c.l1).width));
+  g.globalAlpha = a1; htext(c.l1, PX - 2 + (1 - a1) * 18, 204, s1, C.sumi, 400, BRUSH, 'left');
+  const L2 = c.l2b ? [[c.l2, 1.3, c.swap, C.sumi], [c.l2b, c.swap, c.swap2, C.sumi], [c.l2c, c.swap2, 99, C.c3]] : [[c.l2, 1.3, 99, C.sumi]];
+  L2.forEach(([txt, t0, t1, col]) => { const ai = ss(u, t0, t0 + .6), a = ai * (1 - ss(u, t1 - .35, t1));
+    if (a > 0) { g.globalAlpha = a; wrapText(txt, PX + (1 - ai) * 18, 274, 46, col, 700, SERIF, W - PX * 2, 58); } });
   g.globalAlpha = 1;
   // 版心
   g.save(); g.beginPath(); g.rect(PX, PY, PW, PH); g.clip(); g.translate(PX, PY);
-  DRAW[i](u);
+  g.save(); g.translate(0, -DY); DRAW[i](u); g.restore();
   g.drawImage(texP.wear, 0, 0);
   // 题签：红长条（墨字）+ 藤黄方色纸
   const n = c.name.length, ch = n * 84 + 50, tx = PW - 120, ty = 40;
@@ -611,9 +719,9 @@ function sheet(i, u, dx, dim) {
   g.restore();
   g.strokeStyle = C.sumi; g.lineWidth = 5; g.strokeRect(PX, PY, PW, PH);
   // 下边：小注 + 页码格
-  g.globalAlpha = a3; htext(c.note, PX, 1856, 27, rgba(C.sumi, .85), 500, SERIF, 'left', W - PX * 2 - 260, 1);
+  g.globalAlpha = a3; wrapText(c.note, PX, 1838, 32, rgba(C.sumi, .88), 500, SERIF, W - PX * 2 - 270, 42);
   g.globalAlpha = 1;
-  for (let j = 0; j < N; j++) { g.fillStyle = j === i ? C.c3 : rgba(C.sumi, .25); g.fillRect(W - PX - 236 + j * 30, 1838, 22, 12); }
+  for (let j = 0; j < N; j++) { g.fillStyle = j === i ? C.c3 : rgba(C.sumi, .25); g.fillRect(W - PX - 236 + j * 30, 1818, 22, 12); }
   if (dim > 0) { g.fillStyle = 'rgba(30,22,16,' + (.3 * dim) + ')'; g.fillRect(0, 0, W, H); }
   g.restore();
 }
@@ -639,8 +747,8 @@ const RECORD = new URLSearchParams(location.search).has('record');
 const allText = COPY.map(c => c.name + c.l1 + c.l2 + (c.l2b || '') + (c.l2c || '') + c.note).join('') + NIIGATA5.join('') + NIIGATA5_PLACE.join('') +
   '拉面小史其一二三四五六七八考南京町来轩雷门中华大阪池田食券酱油味噌盐豚骨替玉煎饺一星纽约巴黎旧金山日式拉面熊本中国燕';
 const fontsReady = (document.fonts && document.fonts.load ? Promise.race([
-  Promise.all([document.fonts.load('400 62px "Ma Shan Zheng"', allText), document.fonts.load('700 38px "Noto Serif SC"', allText),
-    document.fonts.load('500 27px "Noto Serif SC"', allText), document.fonts.load('600 22px Sora', 'RAMEN A SHORT HISTORY 1958')]).catch(() => 0),
+  Promise.all([document.fonts.load('400 80px "Ma Shan Zheng"', allText), document.fonts.load('700 46px "Noto Serif SC"', allText),
+    document.fonts.load('500 32px "Noto Serif SC"', allText), document.fonts.load('600 22px Sora', 'RAMEN A SHORT HISTORY 1958')]).catch(() => 0),
   new Promise(r => setTimeout(r, 4000))]) : Promise.resolve()).then(() => document.fonts ? document.fonts.ready : 0, () => 0);
 render(0);                                                  // 字体到位前先用回退字体出画面
 fontsReady.then(() => {
