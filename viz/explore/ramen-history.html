@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>拉面小史 · 名所绘册页</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&family=Ma+Shan+Zheng&family=Sora:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;height:100%;background:#26221f;overflow:hidden}
+  body{display:flex;align-items:center;justify-content:center}
+  canvas{display:block;width:min(100vw,calc(100vh*9/16));height:min(100vh,calc(100vw*16/9));cursor:pointer}
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script id="print-kit">
+/* ===== 版画印刷工具（从 viz/explore/sado.html 提取）=====
+   用法：const k = makeKit(ctx, STYLES.shinhanga 或 STYLES.meisho);
+   k.blk 色版平涂（带套色错位） k.key 墨线 k.shape 色+线 k.bokashi 拓印渐变
+   k.waveRow 浪排 k.humpRow 圆弧排 k.band 霞 k.vtext 竖排字 k.texture 纸纹/木纹/颗粒 */
+const STYLES = {
+  shinhanga: {
+    id: 'shinhanga', name: '新版画',
+    C: {paper: '#f1e8d4', white: '#f6efdf', sumi: '#211e23', c1: '#1f3d63', c2: '#7fb0a8', c3: '#d4502c', c4: '#dba646', c5: '#eeb0a0'},
+    names: {paper: '纸', sumi: '墨', c1: '藏青', c2: '青瓷', c3: '朱', c4: '赭金', c5: '朱鹮粉'},
+    reg: [4, 3], line: 1, lineFar: false, speckle: 1, woodgrain: .35, grainDark: 30,
+    titleFont: '"Noto Serif SC","Source Han Serif SC","Noto Serif CJK SC","Songti SC",SimSun,serif', titleWeight: 900
+  },
+  meisho: {
+    id: 'meisho', name: '江户名所绘',
+    C: {paper: '#ecdcb6', white: '#f3e8cc', sumi: '#1a1718', c1: '#1c4f8f', c2: '#5d8f5a', c3: '#c8372d', c4: '#e2b33c', c5: '#9a958c'},
+    names: {paper: '黄纸', sumi: '墨', c1: '普鲁士蓝', c2: '草绿', c3: '红', c4: '藤黄', c5: '薄墨'},
+    reg: [2, 2], line: 1.8, lineFar: true, speckle: 0, woodgrain: 1, grainDark: 22,
+    titleFont: '"Ma Shan Zheng","Kaiti SC",STKaiti,KaiTi,"Noto Serif SC","Source Han Serif SC","Noto Serif CJK SC","Songti SC",SimSun,serif', titleWeight: 400
+  }
+};
+function makeKit(g, S) {
+  const C = S.C, TAU = Math.PI * 2;
+  const rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+  const hash = n => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+  function blk(color, path, alpha = 1) { g.save(); g.translate(S.reg[0], S.reg[1]); g.globalAlpha *= alpha; g.beginPath(); path(); g.fillStyle = color; g.fill(); g.restore(); }
+  function key(path, lw = 3, color = C.sumi) { g.beginPath(); path(); g.lineWidth = lw * (color === C.sumi ? S.line : 1); g.strokeStyle = color; g.lineJoin = 'round'; g.lineCap = 'round'; g.stroke(); }
+  function shape(color, path, lw = 3, alpha = 1) { blk(color, path, alpha); if (lw) key(path, lw); }
+  function far(color, path, alpha = 1) { blk(color, path, alpha); if (S.lineFar) key(path, 2); }      // 远景：名所绘也勾线
+  function bokashi(x, y, w, h, color, a0, a1) { const gr = g.createLinearGradient(0, y, 0, y + h); gr.addColorStop(0, rgba(color, a0)); gr.addColorStop(1, rgba(color, a1)); g.fillStyle = gr; g.fillRect(x, y, w, h); }
+  function poly(pts) { g.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]); g.closePath(); }
+  function waveRow(y, w, h, off, W) { let x = -w * 2 + (((off % w) + w) % w); g.moveTo(x, y);
+    for (; x < W + w; x += w) { g.bezierCurveTo(x + w * .35, y + h * .15, x + w * .55, y - h * 1.15, x + w * .78, y - h); g.quadraticCurveTo(x + w * .88, y - h * .25, x + w, y); } }
+  function humpRow(y, w, h, off, W) { let x = -w * 2 + (((off % w) + w) % w); g.moveTo(x, y); for (; x < W + w; x += w) g.quadraticCurveTo(x + w / 2, y - h * 2, x + w, y); }
+  function band(x, y, w, h, color, alpha) { const p = () => { g.moveTo(x + h / 2, y); g.arc(x + w - h / 2, y + h / 2, h / 2, -Math.PI / 2, Math.PI / 2); g.arc(x + h / 2, y + h / 2, h / 2, Math.PI / 2, Math.PI * 1.5); g.closePath(); };
+    blk(color, p, alpha); if (S.lineFar) key(p, 1.6); }
+  function vtext(str, x, y, size, color, font, weight, step = 1.1) { g.font = weight + ' ' + size + 'px ' + font; g.fillStyle = color; g.textAlign = 'center'; g.textBaseline = 'middle'; for (let i = 0; i < str.length; i++) g.fillText(str[i], x, y + i * size * step); }
+  function texture(W, H) {                                  // 一次生成，之后每帧 drawImage：grain 用 multiply，wear 用普通叠加
+    let s = 20240727; const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+    const grain = document.createElement('canvas'); grain.width = W >> 1; grain.height = H >> 1;
+    const gg = grain.getContext('2d'), im = gg.createImageData(W >> 1, H >> 1), d = im.data;
+    for (let y = 0, p = 0; y < H >> 1; y++) { const row = rnd() * 10; for (let x = 0; x < W >> 1; x++, p += 4) { const v = 255 - rnd() * S.grainDark - row; d[p] = v; d[p + 1] = v - 2; d[p + 2] = v - 7; d[p + 3] = 255; } }
+    gg.putImageData(im, 0, 0);
+    const wear = document.createElement('canvas'); wear.width = W; wear.height = H; const wg = wear.getContext('2d');
+    wg.fillStyle = C.paper; for (let i = 0; i < W * H / 53 * S.speckle; i++) { wg.globalAlpha = .25 + rnd() * .5; const r = rnd() < .92 ? 1.6 : 3.4; wg.fillRect(rnd() * W, rnd() * H, r, r); }
+    wg.strokeStyle = C.paper; wg.lineCap = 'round';
+    for (let i = 0; i < W * H / 9000 * (.5 + S.woodgrain * 1.5); i++) { const y = rnd() * H, x = rnd() * W - 200, len = 200 + rnd() * 700;
+      wg.globalAlpha = (.05 + rnd() * .09) * (.6 + S.woodgrain * 1.2); wg.lineWidth = 1 + rnd() * 3; wg.beginPath(); wg.moveTo(x, y);
+      wg.bezierCurveTo(x + len * .3, y + rnd() * 16 - 8, x + len * .7, y + rnd() * 16 - 8, x + len, y + rnd() * 10 - 5); wg.stroke(); }
+    return {grain, wear};
+  }
+  return {C, TAU, rgba, hash, blk, key, shape, far, bokashi, poly, waveRow, humpRow, band, vtext, texture};
+}
+</script>
+<script>
+'use strict';
+/* 拉面小史：江户名所绘风格（docs/STYLES.md 的 B）。render(t) 确定性；动作量化到每秒 8 格。 */
+const W = 1080, H = 1920, SCENE = 5, TURN = 0.7, N = 5, T = SCENE * N;
+const PLAN = [['port', 0, 5], ['asakusa', 5, 10], ['yatai', 10, 15], ['instant', 15, 20], ['bowl', 20, 25]];
+const PX = 60, PY = 350, PW = 960, PH = 1440;
+const S = STYLES.meisho, cv = document.getElementById('c'), g = cv.getContext('2d'), k = makeKit(g, S);
+const C = k.C, TAU = k.TAU, PI = Math.PI, BR = S.titleFont;
+const SERIF = '"Noto Serif SC","Source Han Serif SC","Noto Serif CJK SC","Songti SC","STSong","SimSun",serif';
+const LATIN = 'Sora,"Helvetica Neue",Arial,sans-serif';
+const NUM = ['一', '二', '三', '四', '五'];
+const COPY = [
+  {name: '开港', year: '1859', l1: '拉面的故事，从港口开始。', l2: '1859 年横滨开港，华人带来汤面，人称“南京荞麦”。', note: '南京そば · 日本早年对中国汤面的叫法'},
+  {name: '浅草', year: '1910', l1: '1910 年，东京浅草开了家来来轩。', l2: '汤里加了酱油，配叉烧、笋干、葱花，一下子火了。', note: '来々軒 · 常被称作日本第一家拉面店'},
+  {name: '夜摊', year: '战后', l1: '战后的夜里，面摊推着车来了。', l2: '一声唢呐响，街坊就知道：卖面的到了。', note: 'チャルメラ · 面摊招呼客人的小唢呐'},
+  {name: '泡面', year: '1958', l1: '1958 年，大阪的一间后院小屋。', l2: '安藤百福把面油炸、晾干：开水一冲就能吃。', note: 'チキンラーメン（鸡汤拉面）· 1958 年 8 月上市'},
+  {name: '一碗', year: '如今', l1: '中国来的一碗汤面，长成了拉面。', l2: '札幌味噌、博多豚骨、东京酱油——各地各有一碗。', note: 'ラーメン · 从横滨开港算起，一百六十多年'}
+];
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const ss = (v, a, b) => { const x = clamp((v - a) / (b - a)); return x * x * (3 - 2 * x); };
+const lerp = (a, b, x) => a + (b - a) * x;
+const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const fr = x => x - Math.floor(x), pm = (x, m) => x - Math.floor(x / m) * m;
+const step = u => Math.floor(u * 8) / 8;
+const {blk, key, shape, far, bokashi, poly, band, hash} = k;
+const waveRow = (y, w, h, off) => k.waveRow(y, w, h, off, PW), humpRow = (y, w, h, off) => k.humpRow(y, w, h, off, PW);
+function open(pts) { g.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]); }
+function tube(path, w, color) { key(path, (w + 5) / S.line); key(path, w, color); }
+function vtext(str, x, y, size, color, font = BR, weight = 400, st = 1.1) { k.vtext(str, x, y, size, color, font, weight, st); }
+function htext(str, x, y, size, color, weight, family, align = 'left', maxW = 0, spacing = 0) {
+  g.font = weight + ' ' + size + 'px ' + family; g.textAlign = align; g.textBaseline = 'alphabetic';
+  if ('letterSpacing' in g) g.letterSpacing = spacing + 'px';
+  if (maxW) { const m = g.measureText(str).width; if (m > maxW) g.font = weight + ' ' + Math.floor(size * maxW / m) + 'px ' + family; }
+  g.fillStyle = color; g.fillText(str, x, y);
+  if ('letterSpacing' in g) g.letterSpacing = '0px';
+}
+/* ---------- 通用零件 ---------- */
+function sky(hz, night) {
+  g.fillStyle = night ? C.c1 : C.paper; g.fillRect(0, 0, PW, PH);
+  if (night) { bokashi(0, 0, PW, 380, C.sumi, .9, 0); return; }
+  bokashi(0, 0, PW, 170, C.c1, 1, 0);                       // 天顶一文字
+  bokashi(0, hz - 130, PW, 130, C.c3, 0, .9);               // 地平线一抹红
+}
+function clouds(q, y0, n, seed, col = C.white) {
+  for (let i = 0; i < n; i++) { const x = pm(hash(i + seed) * 1300 + q * (10 + i * 6), 1500) - 380; band(x, y0 + i * 74, 300 + hash(i + seed + 5) * 260, 30 + (i % 2) * 12, col, 1); }
+}
+function waves(q, y0, y1, rows, insert) {
+  for (let i = 0; i < rows; i++) {
+    const p = i / (rows - 1), y = lerp(y0, y1, Math.pow(p, 1.4)) + Math.sin(q * 1.5 + i * 1.3) * (3 + 6 * p), w = lerp(70, 250, p), h = lerp(8, 44, p), off = q * lerp(12, 60, p) * (i % 2 ? 1 : -.7) + hash(i) * w;
+    if (insert) insert(i, y);
+    blk(i % 2 ? C.c1 : '#2f67a8', () => { waveRow(y, w, h, off); g.lineTo(PW + w * 2, PH + 80); g.lineTo(-w * 2, PH + 80); });
+    key(() => waveRow(y, w, h, off), lerp(3, 6, p), C.white); key(() => waveRow(y + lerp(4, 8, p), w, h, off), 1.2);
+  }
+}
+function steam(x, y, q, h = 240, n = 3, sc = 1) {
+  for (let i = 0; i < n; i++) {
+    const ph = q * 1.6 + i * 1.7, xx = x + (i - (n - 1) / 2) * 50 * sc, hh = h * (.75 + .25 * hash(i + 7));
+    tube(() => { g.moveTo(xx, y); for (let j = 1; j <= 4; j++) { const yy = y - j * hh / 4; g.quadraticCurveTo(xx + (j % 2 ? 1 : -1) * 30 * sc + Math.sin(ph + j) * 8, yy + hh / 8, xx + Math.sin(ph + j * .9) * 12, yy); } }, 11 * sc, C.white);
+  }
+}
+function person(x, y, s, col, o = {}) {                     // 脚在原点，高约 100
+  g.save(); g.translate(x, y); g.scale(s * (o.flip ? -1 : 1), s);
+  shape(col, () => poly([[-17, 0], [-13, -60], [-9, -70], [9, -70], [13, -60], [17, 0]]), 1.6);
+  blk(o.obi || C.sumi, () => g.rect(-14, -46, 28, 8));
+  if (o.arm) tube(() => { g.moveTo(8, -62); g.quadraticCurveTo(o.arm[0] * .5 + 6, o.arm[1] * .5 - 26, o.arm[0], o.arm[1]); }, 7, col);
+  if (o.arm2) tube(() => { g.moveTo(-8, -62); g.quadraticCurveTo(o.arm2[0] * .5 - 6, o.arm2[1] * .5 - 26, o.arm2[0], o.arm2[1]); }, 7, col);
+  shape(C.white, () => g.arc(0, -82, 11, 0, TAU), 1.4);
+  if (o.hat === 'bowler') { blk(C.sumi, () => { g.arc(0, -88, 11, PI, TAU); g.rect(-16, -89, 32, 4); }); }
+  else if (o.hat === 'band') { blk(C.sumi, () => g.arc(0, -84, 11.5, PI * 1.05, PI * 1.95)); key(() => { g.moveTo(-11, -86); g.lineTo(11, -86); }, 2.4, C.white); }
+  else if (o.hat === 'cap') { blk(C.white, () => { g.arc(0, -90, 10, PI, TAU); g.rect(-10, -91, 20, 5); }); key(() => { g.arc(0, -90, 10, PI, TAU); }, 1.2); }
+  else if (o.hat === 'queue') { blk(C.sumi, () => g.arc(0, -86, 11.5, PI, TAU)); key(() => { g.moveTo(-8, -84); g.quadraticCurveTo(-18, -60, -12, -34); }, 2.2); }
+  else blk(C.sumi, () => { g.arc(0, -85, 11.5, PI, TAU); g.arc(0, -96, 5, 0, TAU); });
+  g.restore();
+}
+function bowlSmall(x, y, s) { shape(C.white, () => { g.moveTo(x - 16 * s, y); g.quadraticCurveTo(x, y + 22 * s, x + 16 * s, y); g.closePath(); }, 1.4); key(() => { g.moveTo(x - 12 * s, y + 6 * s); g.lineTo(x + 12 * s, y + 6 * s); }, 1.4, C.c1); }
+function fuji(x, hz, s) {
+  far(C.c5, () => poly([[x - 250 * s, hz], [x - 90 * s, hz - 150 * s], [x - 34 * s, hz - 214 * s], [x - 12 * s, hz - 222 * s], [x + 14 * s, hz - 222 * s], [x + 36 * s, hz - 212 * s], [x + 100 * s, hz - 146 * s], [x + 270 * s, hz]]));
+  shape(C.white, () => poly([[x - 60 * s, hz - 184 * s], [x - 34 * s, hz - 214 * s], [x - 12 * s, hz - 222 * s], [x + 14 * s, hz - 222 * s], [x + 36 * s, hz - 212 * s], [x + 66 * s, hz - 180 * s], [x + 40 * s, hz - 164 * s], [x + 18 * s, hz - 182 * s], [x - 4 * s, hz - 160 * s], [x - 28 * s, hz - 180 * s], [x - 44 * s, hz - 166 * s]]), 1.4);
+}
+/* ---------- 一 开港：横滨 1859 ---------- */
+function scenePort(u) {
+  const q = step(u), hz = 500;
+  sky(hz); fuji(300, hz, 1.1);
+  far(C.c2, () => { humpRow(hz + 4, 300, 46, 60); g.lineTo(PW + 400, hz + 40); g.lineTo(-400, hz + 40); });
+  clouds(q, 210, 2, 3);
+  g.fillStyle = C.c1; g.fillRect(0, hz, PW, 560); bokashi(0, hz, PW, 150, C.white, .8, 0);
+  waves(q, hz + 30, 1010, 7, (i, y) => {
+    if (i === 2) {                                           // 远处的帆船
+      g.save(); g.translate(190 + q * 8, y - 4);
+      key(() => { g.moveTo(0, 0); g.lineTo(0, -110); }, 2.4); shape(C.white, () => poly([[5, -106], [52, -88], [56, -30], [5, -18]]), 1.6);
+      shape(C.c4, () => poly([[-50, -10], [-36, 10], [52, 10], [68, -14], [30, -6], [-20, -6]]), 1.6); g.restore();
+    }
+    if (i === 4) {                                           // 蒸汽船
+      g.save(); g.translate(640 - q * 10, y - 6 + Math.sin(q * 1.7) * 5); g.rotate(Math.sin(q * 1.7 + .8) * .015);
+      for (let j = 0; j < 5; j++) { const a = fr(q * .4 + j / 5); shape(C.white, () => g.arc(20 + a * 240, -210 - a * 90, 16 + a * 34, 0, TAU), 1.2); }
+      key(() => { g.moveTo(-120, -20); g.lineTo(-120, -230); g.moveTo(130, -20); g.lineTo(130, -210); g.moveTo(-170, -160); g.lineTo(-70, -160); g.moveTo(90, -150); g.lineTo(170, -150); }, 3);
+      key(() => { g.moveTo(-120, -230); g.lineTo(-230, -40); g.moveTo(-120, -230); g.lineTo(-10, -60); g.moveTo(130, -210); g.lineTo(214, -40); }, 1);
+      shape(C.c3, () => poly([[-120, -230], [-70, -218], [-120, -206]]), 1.2);
+      shape(C.sumi, () => poly([[-8, -60], [-2, -190], [38, -190], [44, -60]]), 1.6); blk(C.c3, () => g.rect(-4, -170, 44, 16));
+      shape(C.sumi, () => poly([[-250, -52], [-196, 14], [196, 14], [232, -46], [150, -38], [-150, -38]]), 2);
+      key(() => { g.moveTo(-236, -30); g.lineTo(220, -24); }, 3, C.white);
+      shape(C.c4, () => { g.arc(10, 0, 62, PI, TAU); g.closePath(); }, 2);
+      key(() => { for (let j = 1; j < 6; j++) { const a = PI + j * PI / 6 + q * .6 % (PI / 6); g.moveTo(10, 0); g.lineTo(10 + Math.cos(a) * 58, Math.sin(a) * 58); } }, 1.2);
+      g.restore();
+    }
+  });
+  shape(C.c5, () => poly([[-20, 1010], [980, 980], [980, 1070], [-20, 1100]]), 2.4);          // 石码头
+  key(() => { for (let j = 0; j < 14; j++) { const x = j * 74 + (j % 2) * 20; g.moveTo(x, 1008 - x * .03); g.lineTo(x - 6, 1098 - x * .03); } open([[-20, 1056], [980, 1026]]); }, 1.2);
+  blk(C.white, () => poly([[-20, 1100], [980, 1070], [980, 1500], [-20, 1500]])); bokashi(0, 1260, PW, 180, C.c4, 0, .7);
+  key(() => open([[-20, 1100], [980, 1070]]), 2);
+  // 面摊：锅、师傅抻面、等面的人
+  shape(C.c4, () => poly([[600, 1250], [900, 1236], [900, 1300], [600, 1316]]), 2); shape(C.c4, () => g.rect(620, 1312, 22, 110), 1.6); shape(C.c4, () => g.rect(866, 1298, 22, 110), 1.6);
+  steam(820, 1200, q, 250, 3, 1);
+  shape(C.sumi, () => { g.moveTo(770, 1206); g.quadraticCurveTo(820, 1290, 870, 1206); g.closePath(); }, 1.6); key(() => { g.moveTo(764, 1206); g.lineTo(876, 1206); }, 3);
+  const sp = 80 + 56 * (.5 + .5 * Math.sin(q * 2.6));        // 抻面
+  person(560, 1400, 2.5, C.c1, {hat: 'queue', obi: C.c3, arm: [sp * .4 + 6, -122], arm2: [-sp * .4 - 6, -122]});
+  for (let j = 0; j < 6; j++) key(() => { g.moveTo(560 - sp - 14, 1096); g.quadraticCurveTo(560, 1096 + 22 + j * 9 + Math.sin(q * 2.6 + j) * 8, 560 + sp + 14, 1096); }, 3.4, j % 2 ? C.white : C.c4);
+  for (let j = 0; j < 6; j++) key(() => { g.moveTo(560 - sp - 14, 1096); g.quadraticCurveTo(560, 1096 + 27 + j * 9 + Math.sin(q * 2.6 + j) * 8, 560 + sp + 14, 1096); }, .7);
+  person(330, 1380, 1.9, C.c2, {obi: C.c4, arm: [22, -40]}); bowlSmall(374, 1300, 1.7);
+  person(236, 1330, 1.7, C.c3, {hat: 'bowler', flip: true});
+  // 近景：一面招子切过画面
+  const sw = Math.sin(q * 1.3) * 16;
+  shape(C.c4, () => g.rect(64, 560, 20, 900), 2);
+  shape(C.white, () => { g.moveTo(84, 600); g.lineTo(214, 600); g.quadraticCurveTo(214 + sw, 860, 214 + sw * .4, 1130); g.lineTo(84 + sw * .4, 1130); g.quadraticCurveTo(84 + sw, 860, 84, 600); }, 2.4);
+  blk(C.c3, () => g.rect(84, 600, 130, 34));
+  g.save(); g.translate(sw * .55, 0); vtext('南京そば', 150, 712, 86, C.sumi, BR, 400, 1.14); g.restore();
+}
+/* ---------- 二 浅草：来来轩 1910 ---------- */
+function sceneAsakusa(u) {
+  const q = step(u), hz = 600;
+  sky(hz);
+  // 十二阶（凌云阁）与五重塔
+  shape(C.c3, () => poly([[640, hz], [652, 250], [748, 250], [760, hz]]), 2.2);
+  key(() => { for (let j = 1; j < 10; j++) { const y = 250 + j * 35; g.moveTo(652 - j * 1.2, y); g.lineTo(748 + j * 1.2, y); } }, 1.6, C.white);
+  for (let j = 0; j < 9; j++) for (let x = 0; x < 3; x++) blk(C.sumi, () => g.rect(668 + x * 28, 262 + j * 35, 9, 15));
+  shape(C.white, () => poly([[656, 250], [662, 176], [738, 176], [744, 250]]), 2); shape(C.c5, () => poly([[650, 176], [700, 126], [750, 176]]), 2); key(() => { g.moveTo(700, 126); g.lineTo(700, 84); }, 2.4);
+  for (let j = 0; j < 5; j++) { const y = hz - 60 - j * 62, w = 96 - j * 12; shape(C.c3, () => g.rect(170 - w * .32, y - 34, w * .64, 40), 1.6); shape(C.c5, () => poly([[170 - w, y + 8], [170 - w * .5, y - 12], [170 + w * .5, y - 12], [170 + w, y + 8]]), 1.8); }
+  key(() => { g.moveTo(170, hz - 340); g.lineTo(170, hz - 420); }, 2.4);
+  clouds(q, 330, 2, 30);
+  for (let j = 0; j < 9; j++) { const x = -60 + j * 124; shape(j % 2 ? C.c5 : '#b3ada2', () => poly([[x - 14, hz + 40], [x + 62, hz - 30 - (j % 3) * 14], [x + 138, hz + 40]]), 2); }
+  blk(C.white, () => g.rect(0, hz + 36, PW, PH)); bokashi(0, 1100, PW, 340, C.c4, 0, .75);
+  // 店：瓦顶、招牌、暖帘
+  shape(C.c5, () => poly([[150, 780], [210, 660], [870, 660], [930, 780]]), 2.4);
+  key(() => { for (let j = 0; j < 22; j++) { const x = 228 + j * 30; g.moveTo(x, 664); g.lineTo(x + (x - 540) * .09, 776); } }, 1);
+  shape(C.c4, () => g.rect(190, 780, 700, 300), 2.4); blk(C.sumi, () => g.rect(240, 830, 600, 250));
+  shape(C.white, () => g.rect(390, 690, 300, 80), 2.2); g.font = '400 64px ' + BR; g.fillStyle = C.sumi; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('来々軒', 540, 734);
+  steam(540, 1000, q, 150, 4, 1.1);
+  person(430, 1076, 1.5, C.white, {hat: 'cap', arm: [26, -52]}); person(660, 1076, 1.5, C.white, {hat: 'cap', flip: true, arm: [24, -44]});
+  shape(C.c4, () => g.rect(240, 1010, 600, 70), 2); key(() => { for (let j = 1; j < 12; j++) { g.moveTo(240 + j * 50, 1012); g.lineTo(240 + j * 50, 1078); } }, .8);
+  for (let j = 0; j < 4; j++) bowlSmall(330 + j * 140, 1000, 1.5);
+  const txt = '广东料理';
+  for (let j = 0; j < 4; j++) { const x = 246 + j * 150, f = Math.sin(q * 1.8 + j * 1.3) * 8;
+    shape(C.c1, () => { g.moveTo(x, 830); g.lineTo(x + 138, 830); g.lineTo(x + 138 + f, 968); g.lineTo(x + f, 968); g.closePath(); }, 2);
+    g.font = '400 82px ' + BR; g.fillStyle = C.white; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt[j], x + 69 + f * .5, 900); }
+  // 街上的人
+  const walkers = [[C.c1, 'bowler', 1], [C.c3, '', -1], [C.c2, '', 1], [C.c5, 'bowler', -1], [C.c1, '', -1], [C.c3, 'band', 1]];
+  walkers.forEach(([col, hat, d], i) => { const x = pm(hash(i + 50) * 1100 + d * q * (34 + i * 7), 1160) - 100, y = 1230 + (i % 3) * 86 + (Math.floor(q * 4 + i) % 2) * -5;
+    person(x, y, 2.0 + (i % 3) * .34, col, {hat, flip: d < 0, obi: i % 2 ? C.c4 : C.sumi}); });
+  // 近景：一盏大灯笼切过左上角
+  g.save(); g.translate(150, -40); g.rotate(Math.sin(q * 1.2) * .035);
+  key(() => { g.moveTo(0, 0); g.lineTo(0, 70); }, 4);
+  shape(C.c3, () => g.ellipse(0, 300, 190, 240, 0, 0, TAU), 3);
+  key(() => { for (let j = -3; j <= 3; j++) g.ellipse(0, 300, 190, 240 * Math.abs(j) / 3.6 + 2, 0, j < 0 ? PI : 0, j < 0 ? TAU : PI); }, .8);
+  shape(C.sumi, () => g.rect(-112, 54, 224, 34), 0); shape(C.sumi, () => g.rect(-112, 512, 224, 34), 0);
+  g.font = '400 210px ' + BR; g.fillStyle = C.sumi; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('面', 0, 306);
+  g.restore();
+}
+/* ---------- 三 夜摊：战后 ---------- */
+function sceneYatai(u) {
+  const q = step(u), hz = 640;
+  sky(hz, true);
+  for (let i = 0; i < 40; i++) { const tw = Math.sin(q * 2 + i * 2.3) > -.3 ? 1 : 0; blk(C.white, () => g.rect(hash(i + 70) * PW, hash(i + 90) * 520, 5, 5), tw); }
+  shape(C.white, () => g.arc(640, 250, 92, 0, TAU), 1.6);
+  band(pm(360 + q * 12, 1400) - 300, 262, 420, 30, C.c5, 1);
+  for (let j = 0; j < 8; j++) { const x = -40 + j * 132, h = 90 + (j % 3) * 34;                 // 屋影
+    shape(C.sumi, () => poly([[x, hz + 40], [x, hz - h + 30], [x + 62, hz - h - 16], [x + 124, hz - h + 30], [x + 124, hz + 40]]), 0);
+    if (j % 2 === 0 || j === 5) blk(C.c4, () => g.rect(x + 44, hz - h + 56, 30, 28), Math.sin(q * .9 + j) > -.6 ? 1 : .25); }
+  key(() => { g.moveTo(870, hz + 40); g.lineTo(870, 330); g.moveTo(820, 372); g.lineTo(920, 372); g.moveTo(-20, 420); g.quadraticCurveTo(430, 480, 870, 372); }, 2.4);
+  g.fillStyle = C.c5; g.fillRect(0, hz + 36, PW, PH); bokashi(0, 1150, PW, 300, C.sumi, 0, .75);
+  key(() => open([[0, hz + 36], [PW, hz + 36]]), 2);
+  blk(C.c4, () => g.ellipse(520, 1180, 330, 60, 0, 0, TAU), .9);                               // 灯下一块亮地
+  // 推车
+  const cx = 500, cy = 1180;
+  shape(C.sumi, () => poly([[cx - 250, cy - 420], [cx - 210, cy - 480], [cx + 230, cy - 480], [cx + 270, cy - 420]]), 2);
+  key(() => { for (let j = 0; j < 9; j++) { g.moveTo(cx - 190 + j * 50, cy - 476); g.lineTo(cx - 222 + j * 58, cy - 424); } }, 1, C.c5);
+  shape(C.c4, () => g.rect(cx - 214, cy - 420, 16, 300), 1.6); shape(C.c4, () => g.rect(cx + 218, cy - 420, 16, 300), 1.6);
+  blk(C.sumi, () => g.rect(cx - 198, cy - 420, 416, 190));
+  steam(cx + 90, cy - 250, q, 200, 3, 1.1);
+  person(cx - 20, cy - 190, 1.7, C.white, {hat: 'band', arm: [30, -50]});
+  const nt = '中華そば';
+  for (let j = 0; j < 4; j++) { const x = cx - 196 + j * 104, f = Math.sin(q * 1.7 + j * 1.4) * 7;
+    shape(C.c3, () => { g.moveTo(x, cy - 420); g.lineTo(x + 98, cy - 420); g.lineTo(x + 98 + f, cy - 310); g.lineTo(x + f, cy - 310); g.closePath(); }, 1.8);
+    g.font = '400 ' + (j < 2 ? 70 : 62) + 'px ' + BR; g.fillStyle = C.white; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(nt[j], x + 49 + f * .5, cy - 364); }
+  shape(C.c4, () => poly([[cx - 250, cy - 230], [cx + 270, cy - 230], [cx + 250, cy - 196], [cx - 230, cy - 196]]), 2);
+  shape(C.c4, () => g.rect(cx - 214, cy - 196, 448, 130), 2.2);
+  key(() => { for (let j = 1; j < 9; j++) { g.moveTo(cx - 214 + j * 50, cy - 194); g.lineTo(cx - 214 + j * 50, cy - 68); } }, .9);
+  for (const wx of [cx - 150, cx + 170]) { shape(C.white, () => g.arc(wx, cy - 40, 74, 0, TAU), 2.4); shape(C.c4, () => g.arc(wx, cy - 40, 14, 0, TAU), 1.6);
+    key(() => { for (let j = 0; j < 8; j++) { const a = j * PI / 4; g.moveTo(wx + Math.cos(a) * 14, cy - 40 + Math.sin(a) * 14); g.lineTo(wx + Math.cos(a) * 72, cy - 40 + Math.sin(a) * 72); } g.arc(wx, cy - 40, 60, 0, TAU); }, 1.4); }
+  key(() => { g.moveTo(cx - 214, cy - 130); g.lineTo(cx - 330, cy - 150); }, 5, C.c4); key(() => { g.moveTo(cx - 214, cy - 130); g.lineTo(cx - 330, cy - 150); }, 1);
+  g.save(); g.translate(cx + 300, cy - 440); g.rotate(Math.sin(q * 1.5) * .07);                  // 红灯笼
+  key(() => { g.moveTo(-34, 0); g.lineTo(0, 0); g.lineTo(0, 30); }, 2.4);
+  shape(C.c3, () => g.ellipse(0, 100, 56, 72, 0, 0, TAU), 2.2); blk(C.sumi, () => { g.rect(-30, 26, 60, 12); g.rect(-30, 164, 60, 12); });
+  g.font = '400 70px ' + BR; g.fillStyle = C.white; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('面', 0, 102); g.restore();
+  // 吹唢呐的摊主、吃面的客人
+  person(170, cy + 40, 2.5, C.c1, {hat: 'band', obi: C.white, flip: true, arm: [34, -86]});
+  shape(C.c4, () => poly([[150 - 36, cy - 176], [150 - 124, cy - 208], [150 - 132, cy - 150]]), 1.6); key(() => { g.moveTo(150 - 10, cy - 168); g.lineTo(150 - 40, cy - 176); }, 3);
+  for (let j = 0; j < 3; j++) { const a = fr(q * .45 + j / 3), nx = 10 - a * 60 + Math.sin(a * 9 + j) * 14, ny = cy - 220 - a * 260;
+    g.globalAlpha = 1 - a * a; shape(C.white, () => g.ellipse(nx, ny, 15, 11, -.4, 0, TAU), 1.4); key(() => { g.moveTo(nx + 13, ny - 4); g.lineTo(nx + 13, ny - 52); g.lineTo(nx + 34, ny - 42); }, 2.4, C.white); g.globalAlpha = 1; }
+  shape(C.c4, () => g.rect(720, cy - 30, 80, 14), 1.4); key(() => { g.moveTo(732, cy - 16); g.lineTo(726, cy + 44); g.moveTo(788, cy - 16); g.lineTo(794, cy + 44); }, 2.4);
+  const lift = Math.floor(q * 4) % 2 ? -16 : 0;
+  person(760, cy - 28, 2.1, C.c2, {flip: true, obi: C.c4, arm: [30, -66 + lift * .6]});
+  bowlSmall(690, cy - 160, 1.9); key(() => { g.moveTo(694, cy - 176 + lift); g.lineTo(700, cy - 226 + lift); g.moveTo(686, cy - 176 + lift); g.lineTo(690, cy - 226 + lift); }, 1.4);
+  key(() => { for (let j = 0; j < 3; j++) { g.moveTo(684 + j * 5, cy - 176 + lift); g.quadraticCurveTo(680 + j * 5, cy - 168 + lift * .5, 684 + j * 5, cy - 158); } }, 2, C.white);
+  // 近景：柳条垂下来
+  for (let i = 0; i < 9; i++) { const x0 = -30 + i * 62, len = 420 + hash(i + 120) * 380, sw = Math.sin(q * 1.2 + i * .7) * (16 + len * .03);
+    const pth = () => { g.moveTo(x0, -10); g.quadraticCurveTo(x0 + 60 + sw * .4, len * .5, x0 + 26 + sw, len); };
+    key(pth, 1.6, C.sumi);
+    for (let j = 2; j < 13; j++) { const a = j / 13, px = (1 - a) * (1 - a) * x0 + 2 * a * (1 - a) * (x0 + 60 + sw * .4) + a * a * (x0 + 26 + sw), py = (1 - a) * (1 - a) * -10 + 2 * a * (1 - a) * len * .5 + a * a * len;
+      shape(C.c2, () => g.ellipse(px + (j % 2 ? 9 : -9), py + 6, 5, 15, j % 2 ? -.5 : .5, 0, TAU), .8); } }
+}
+/* ---------- 四 泡面：大阪池田 1958 ---------- */
+function hen(x, y, s, q, i) {
+  const peck = Math.floor(q * 3 + i) % 3 === 0 ? 1 : 0;
+  g.save(); g.translate(x, y); g.scale(s, s);
+  key(() => { g.moveTo(-4, 0); g.lineTo(-4, 20); g.moveTo(8, 0); g.lineTo(8, 20); }, 2, C.c4);
+  shape(C.white, () => { g.moveTo(-36, -30); g.quadraticCurveTo(-30, 6, 6, 4); g.quadraticCurveTo(30, 0, 30, -22); g.quadraticCurveTo(0, -30, -20, -44); g.closePath(); }, 1.4);
+  const hx = 34 + peck * 8, hy = -34 + peck * 44;
+  tube(() => { g.moveTo(22, -14); g.lineTo(hx, hy); }, 12, C.white);
+  shape(C.white, () => g.arc(hx, hy, 10, 0, TAU), 1.2); blk(C.c3, () => g.arc(hx - 2, hy - 11, 6, 0, TAU)); blk(C.c4, () => poly([[hx + 8, hy - 3], [hx + 20, hy + 2 + peck * 4], [hx + 8, hy + 5]])); blk(C.sumi, () => g.arc(hx + 3, hy - 2, 1.8, 0, TAU));
+  g.restore();
+}
+function sceneInstant(u) {
+  const q = step(u), hz = 470;
+  sky(hz);
+  far(C.c5, () => poly([[-20, hz], [140, hz - 90], [300, hz - 40], [470, hz - 120], [640, hz - 50], [800, hz - 100], [980, hz - 30], [980, hz]]));
+  far(C.c2, () => { humpRow(hz + 10, 260, 40, 110); g.lineTo(PW + 300, hz + 60); g.lineTo(-300, hz + 60); });
+  clouds(q, 230, 2, 200);
+  blk(C.white, () => g.rect(0, hz + 30, PW, PH)); bokashi(0, hz + 30, PW, 300, C.c2, .55, 0); bokashi(0, 980, PW, 300, C.c4, 0, .7);
+  // 树、篱笆、小屋
+  for (const [tx, ty, r] of [[820, 560, 100], [900, 640, 80], [746, 650, 70]]) { shape(C.c2, () => { g.moveTo(tx - r, ty); g.arc(tx, ty, r, PI, 0); g.closePath(); }, 2); }
+  shape(C.c4, () => g.rect(808, 640, 26, 190), 1.8);
+  key(() => { for (let j = 0; j < 16; j++) { g.moveTo(-10 + j * 34, 690); g.lineTo(-10 + j * 34, 790); } g.moveTo(-10, 716); g.lineTo(520, 716); g.moveTo(-10, 764); g.lineTo(520, 764); }, 2.2);
+  for (let j = 0; j < 4; j++) { const a = fr(q * .3 + j / 4); shape(C.white, () => g.arc(600 + a * 150, 500 - a * 150, 18 + a * 36, 0, TAU), 1.2); }
+  shape(C.sumi, () => g.rect(584, 500, 30, 80), 0);
+  shape(C.c5, () => poly([[180, 640], [250, 540], [690, 540], [760, 640]]), 2.4);
+  key(() => { for (let j = 0; j < 15; j++) { const x = 262 + j * 30; g.moveTo(x, 544); g.lineTo(x + (x - 470) * .16, 636); } }, 1);
+  shape(C.c4, () => g.rect(220, 640, 500, 300), 2.4); key(() => { for (let j = 1; j < 17; j++) { g.moveTo(220 + j * 30, 642); g.lineTo(220 + j * 30, 938); } }, .8);
+  blk(C.sumi, () => g.rect(300, 690, 340, 250));
+  // 屋里：安藤在油锅前
+  const fl = Math.floor(q * 8) % 2;
+  for (let j = 0; j < 5; j++) shape(j % 2 ? C.c4 : C.c3, () => poly([[476 + j * 26, 930], [488 + j * 26, 882 - ((j + fl) % 2) * 22], [500 + j * 26, 930]]), 1);
+  shape(C.c5, () => { g.moveTo(450, 850); g.quadraticCurveTo(540, 930, 630, 850); g.closePath(); }, 1.6); key(() => { g.moveTo(444, 850); g.lineTo(636, 850); }, 2.4, C.white);
+  steam(540, 838, q, 120, 3, .8);
+  const dip = Math.floor(q * 2) % 2 ? 0 : -26;
+  person(380, 936, 2.1, C.white, {hat: 'band', obi: C.c1, arm: [50, -56 + dip * .5]});
+  key(() => { g.moveTo(482, 818 + dip); g.lineTo(560, 800 + dip); }, 2.4);
+  shape(C.c4, () => g.ellipse(560, 812 + dip, 34, 16, 0, 0, TAU), 1.4); key(() => { for (let j = 0; j < 4; j++) { g.moveTo(534, 806 + dip + j * 5); g.quadraticCurveTo(560, 800 + dip + j * 5, 586, 806 + dip + j * 5); } }, .8);
+  hen(150, 900, 1.5, q, 0); hen(740, 1000, 1.3, q, 1); hen(60, 1010, 1.2, q, 2);
+  // 近景：大碗、面饼、铁壶浇水
+  const bx = 420, by = 1300;
+  shape(C.white, () => { g.moveTo(bx - 400, by); g.quadraticCurveTo(bx - 380, by + 300, bx - 180, by + 360); g.lineTo(bx + 180, by + 360); g.quadraticCurveTo(bx + 380, by + 300, bx + 400, by); g.closePath(); }, 3);
+  key(() => { g.moveTo(bx - 390, by + 70); g.quadraticCurveTo(bx, by + 190, bx + 390, by + 70); }, 9, C.c1);
+  shape(C.c4, () => g.ellipse(bx, by, 400, 120, 0, 0, TAU), 3);
+  blk(C.white, () => g.ellipse(bx, by + 6, 360, 96, 0, 0, TAU), .55);
+  shape(C.c4, () => g.ellipse(bx - 20, by + 4, 250, 74, 0, 0, TAU), 2);
+  key(() => { for (let j = 0; j < 9; j++) { const yy = by - 52 + j * 14, hw = 240 * Math.sqrt(Math.max(0, 1 - Math.pow((yy - by - 4) / 74, 2))); g.moveTo(bx - 20 - hw, yy); for (let x = -hw; x < hw; x += 40) g.quadraticCurveTo(bx - 20 + x + 20, yy + (j % 2 ? 12 : -12), bx - 20 + x + 40, yy); } }, 1.1);
+  shape(C.sumi, () => { g.moveTo(760, 1080); g.quadraticCurveTo(740, 940, 860, 930); g.lineTo(1000, 930); g.lineTo(1000, 1150); g.quadraticCurveTo(820, 1170, 760, 1080); }, 0);   // 铁壶
+  key(() => { g.moveTo(830, 930); g.quadraticCurveTo(900, 800, 1000, 840); }, 5); 
+  shape(C.sumi, () => poly([[770, 1010], [640, 960], [632, 986], [766, 1060]]), 0);
+  const wv = Math.sin(q * 5) * 6;
+  tube(() => { g.moveTo(636, 974); g.quadraticCurveTo(540 + wv, 990, 500 + wv, 1280); }, 15, C.white);
+  for (let j = 0; j < 3; j++) { const a = fr(q * 1.1 + j / 3); key(() => g.ellipse(500, 1290, 30 + a * 90, 8 + a * 24, 0, 0, TAU), 2.4, k.rgba(C.white, 1 - a)); }
+  steam(300, 1250, q, 330, 3, 1.5);
+}
+/* ---------- 五 一碗：如今 ---------- */
+function sceneBowl(u) {
+  const q = step(u), hz = 560;
+  sky(hz); fuji(300, hz, .8); clouds(q, 250, 2, 300);
+  g.fillStyle = C.c1; g.fillRect(0, hz, PW, 500); bokashi(0, hz, PW, 130, C.white, .8, 0);
+  waves(q, hz + 30, 900, 5);
+  shape(C.c3, () => poly([[-20, 1190], [980, 1190], [980, 1500], [-20, 1500]]), 2.4); bokashi(0, 1300, PW, 150, C.sumi, 0, .45);
+  const bx = 480, by = 900;
+  blk(C.sumi, () => g.ellipse(bx, 1352, 250, 34, 0, 0, TAU), .5);
+  shape(C.c1, () => { g.moveTo(bx - 410, by); g.bezierCurveTo(bx - 400, by + 250, bx - 260, by + 380, bx - 170, by + 400); g.lineTo(bx - 180, by + 446); g.lineTo(bx + 180, by + 446); g.lineTo(bx + 170, by + 400); g.bezierCurveTo(bx + 260, by + 380, bx + 400, by + 250, bx + 410, by); g.closePath(); }, 3.4);
+  key(() => { g.moveTo(bx - 396, by + 110); g.quadraticCurveTo(bx, by + 260, bx + 396, by + 110); g.moveTo(bx - 372, by + 170); g.quadraticCurveTo(bx, by + 320, bx + 372, by + 170); }, 3, C.white);
+  key(() => { for (let j = 0; j < 13; j++) { const a = (j + .5) / 13, x = bx - 380 + a * 760, y = by + 138 + Math.sin(a * PI) * 148 - 8; g.moveTo(x - 20, y + 18); g.lineTo(x - 20, y - 14); g.lineTo(x + 14, y - 14); g.lineTo(x + 14, y + 8); g.lineTo(x - 6, y + 8); g.lineTo(x - 6, y - 2); } }, 2.6, C.white);   // 雷纹
+  shape(C.white, () => g.ellipse(bx, by, 410, 150, 0, 0, TAU), 3.4);
+  shape(C.c4, () => g.ellipse(bx, by + 8, 376, 124, 0, 0, TAU), 2);
+  g.save(); g.beginPath(); g.ellipse(bx, by + 8, 376, 124, 0, 0, TAU); g.clip();
+  blk(C.white, () => g.ellipse(bx - 40, by + 30, 260, 80, 0, 0, TAU), .6);                       // 面
+  key(() => { for (let j = 0; j < 9; j++) { const yy = by - 34 + j * 15; g.moveTo(bx - 300, yy); for (let x = -300; x < 220; x += 44) g.quadraticCurveTo(bx + x + 22, yy + (j % 2 ? 13 : -13), bx + x + 44, yy); } }, 1.1);
+  g.restore();
+  shape(C.sumi, () => poly([[bx + 190, by - 150], [bx + 330, by - 130], [bx + 310, by + 30], [bx + 180, by + 4]]), 0);        // 海苔
+  for (const [dx, dy] of [[-250, -30], [-150, -62]]) { shape(C.c5, () => g.ellipse(bx + dx, by + dy, 78, 44, -.1, 0, TAU), 2); blk(C.white, () => g.ellipse(bx + dx, by + dy, 52, 26, -.1, 0, TAU), .8); key(() => g.ellipse(bx + dx, by + dy, 30, 13, -.1, 0, TAU), 1, C.c3); }  // 叉烧
+  shape(C.white, () => g.ellipse(bx + 60, by - 60, 62, 40, 0, 0, TAU), 2); shape(C.c4, () => g.ellipse(bx + 60, by - 58, 32, 20, 0, 0, TAU), 1.2);     // 蛋
+  shape(C.white, () => g.arc(bx - 20, by + 70, 40, 0, TAU), 2);                                                                              // 鸣门卷
+  key(() => { for (let a = 0; a < 11; a += .3) { const r = 3 + a * 2.6; a ? g.lineTo(bx - 20 + Math.cos(a) * r, by + 70 + Math.sin(a) * r) : g.moveTo(bx - 17, by + 70); } }, 3.4, C.c3);
+  for (let j = 0; j < 4; j++) shape(C.c4, () => poly([[bx + 110 + j * 22, by + 30], [bx + 126 + j * 22, by + 26], [bx + 150 + j * 22, by + 90], [bx + 134 + j * 22, by + 94]]), 1.2);   // 笋干
+  for (let j = 0; j < 12; j++) shape(C.c2, () => g.arc(bx - 190 + hash(j + 400) * 240, by + 40 + hash(j + 410) * 60, 8, 0, TAU), .9);                     // 葱花
+  // 筷子挑面
+  const lift = [0, 40, 90, 130, 130, 90, 40, 0][Math.floor(q * 4) % 8], tx = bx + 150, ty = by - 150 - lift;
+  for (let j = 0; j < 7; j++) tube(() => { g.moveTo(tx - 24 + j * 8, ty + 6); g.bezierCurveTo(tx - 40 + j * 9 + Math.sin(q * 3 + j) * 10, ty + 80, tx - 6 + j * 6 - Math.sin(q * 3 + j) * 10, by - 80, tx - 30 + j * 10, by + 6); }, 5, j % 2 ? C.white : C.c4);
+  for (const d of [0, 24]) tube(() => { g.moveTo(tx - 30 + d * .3, ty + 4 + d * .5); g.lineTo(tx + 330 + d, ty - 420 + d * 1.6); }, 9, C.c3);
+  steam(bx - 190, by - 150, q, 330, 3, 1.5);
+}
+/* ---------- 册页 ---------- */
+const DRAW = [scenePort, sceneAsakusa, sceneYatai, sceneInstant, sceneBowl];
+const tex = k.texture(PW, PH), page = k.texture(W, H).grain;
+function seal(x, y, size, a) {
+  if (a <= 0) return;
+  const z = 1 + (1 - ss(a, 0, 1)) * .5;
+  g.save(); g.translate(x, y); g.rotate(-.05); g.scale(z, z); g.globalAlpha = clamp(a * 1.6);
+  g.fillStyle = C.c3; g.beginPath(); g.roundRect(-size / 2, -size / 2, size, size, 8); g.fill();
+  g.strokeStyle = C.sumi; g.lineWidth = 4; g.stroke(); g.strokeStyle = C.white; g.lineWidth = 3; g.strokeRect(-size / 2 + 11, -size / 2 + 11, size - 22, size - 22);
+  vtext('拉面', 0, -size * .2, size * .38, C.white, BR, 400, 1.08); g.restore();
+}
+function sheet(i, u, dx, dim) {
+  const c = COPY[i];
+  g.save(); g.translate(dx, 0);
+  if (dx > 0) { const sh = g.createLinearGradient(-70, 0, 0, 0); sh.addColorStop(0, 'rgba(20,14,10,0)'); sh.addColorStop(1, 'rgba(20,14,10,.4)'); g.fillStyle = sh; g.fillRect(-70, 0, 70, H); }
+  g.fillStyle = C.paper; g.fillRect(0, 0, W, H);
+  htext('RAMEN · A SHORT HISTORY', PX + 2, 122, 22, k.rgba(C.sumi, .62), 600, LATIN, 'left', 0, 5);
+  htext('拉面小史 · 其' + NUM[i], W - PX, 124, 28, k.rgba(C.sumi, .75), 700, SERIF, 'right', 0, 4);
+  g.fillStyle = C.sumi; g.fillRect(PX, 144, W - PX * 2, 4); g.fillStyle = C.c3; g.fillRect(PX, 144, 120, 4);
+  const a1 = ss(u, .15, .75), a2 = ss(u, 1.4, 2.1), a3 = ss(u, 2.4, 3);
+  g.globalAlpha = a1; htext(c.l1, PX - 2 + (1 - a1) * 18, 236, 70, C.sumi, 400, BR, 'left', W - PX * 2);
+  g.globalAlpha = a2; htext(c.l2, PX + (1 - a2) * 18, 306, 38, C.sumi, 700, SERIF, 'left', W - PX * 2);
+  g.globalAlpha = 1;
+  g.save(); g.beginPath(); g.rect(PX, PY, PW, PH); g.clip(); g.translate(PX, PY);
+  DRAW[i](u);
+  g.drawImage(tex.wear, 0, 0);
+  // 题签：红长条 + 藤黄色纸
+  const ch = 260, cx = PW - 124, cy = 40;
+  g.fillStyle = C.c3; g.fillRect(cx, cy, 92, ch); g.strokeStyle = C.sumi; g.lineWidth = 4; g.strokeRect(cx, cy, 92, ch);
+  vtext(c.name, cx + 46, cy + 76, 82, C.sumi, BR, 400, 1.36);
+  g.fillStyle = C.c4; g.fillRect(cx - 118, cy, 108, 108); g.strokeRect(cx - 118, cy, 108, 108);
+  vtext('拉面', cx - 38, cy + 34, 38, C.sumi, BR, 400, 1.12); vtext('小史', cx - 86, cy + 34, 38, C.sumi, BR, 400, 1.12);
+  g.fillStyle = C.white; g.fillRect(cx - 118, cy + 118, 108, 50); g.strokeRect(cx - 118, cy + 118, 108, 50);
+  htext(c.year, cx - 64, cy + 156, /\d/.test(c.year) ? 32 : 34, C.sumi, /\d/.test(c.year) ? 600 : 400, /\d/.test(c.year) ? LATIN : BR, 'center');
+  if (i === N - 1) seal(140, PH - 150, 176, clamp((u - 3.15) / .35));
+  g.restore();
+  g.strokeStyle = C.sumi; g.lineWidth = 6; g.strokeRect(PX, PY, PW, PH);
+  g.globalAlpha = a3; htext(c.note, PX, 1856, 28, k.rgba(C.sumi, .85), 500, SERIF, 'left', W - PX * 2 - 190, 1); g.globalAlpha = 1;
+  for (let j = 0; j < N; j++) { g.fillStyle = j === i ? C.c3 : k.rgba(C.sumi, .25); g.fillRect(W - PX - 157 + j * 33, 1838, 24, 12); }
+  if (dim > 0) { g.fillStyle = 'rgba(30,22,16,' + (.3 * dim) + ')'; g.fillRect(0, 0, W, H); }
+  g.restore();
+}
+function shotAt(t) { t = pm(t, T); return PLAN[Math.min(N - 1, Math.floor(t / SCENE))][0]; }
+function render(t) {
+  t = pm(t, T);
+  const i = Math.min(N - 1, Math.floor(t / SCENE)), u = t - i * SCENE;
+  g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+  if (u > SCENE - TURN) { const e = ease((u - (SCENE - TURN)) / TURN); sheet(i, u, -150 * e, e); sheet((i + 1) % N, u - SCENE, W * (1 - e), 0); }
+  else sheet(i, u, 0, 0);
+  g.globalCompositeOperation = 'multiply'; g.drawImage(page, 0, 0, W, H); g.globalCompositeOperation = 'source-over';
+}
+window.render = render; window.LOOP_SECONDS = T; window.START_SECONDS = 0; window.PLAN = PLAN;
+const RECORD = new URLSearchParams(location.search).has('record');
+const allText = COPY.map(c => c.name + c.year + c.l1 + c.l2 + c.note).join('') + '拉面小史其一二三四五南京そば来々軒广东料理中華面';
+const fontsReady = (document.fonts && document.fonts.load ? Promise.race([
+  Promise.all([document.fonts.load('400 70px "Ma Shan Zheng"', allText), document.fonts.load('700 38px "Noto Serif SC"', allText),
+    document.fonts.load('500 28px "Noto Serif SC"', allText), document.fonts.load('600 22px Sora', 'RAMEN A SHORT HISTORY 0123456789')]).catch(() => 0),
+  new Promise(r => setTimeout(r, 4000))]) : Promise.resolve()).then(() => document.fonts ? document.fonts.ready : 0, () => 0);
+render(0);
+fontsReady.then(() => {
+  render(0); window.READY = true;
+  if (RECORD) return;
+  let playing = true, base = performance.now(), held = 0;
+  const tick = now => { if (playing) render((now - base) / 1000); requestAnimationFrame(tick); };
+  const toggle = () => { const now = performance.now(); if (playing) held = now - base; else base = now - held; playing = !playing; };
+  cv.addEventListener('click', toggle);
+  addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); toggle(); } });
+  requestAnimationFrame(tick);
+});
+</script>
+</body>
+</html>
