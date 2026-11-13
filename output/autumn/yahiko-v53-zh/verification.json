@@ -1,0 +1,69 @@
+{
+  "duration_seconds": 28.1,
+  "encoded_sample_peak": 0.3337218761444092,
+  "alignment": [
+    {
+      "range": [
+        1.9,
+        2.6
+      ],
+      "lag_ms": 0.0,
+      "correlation": 0.998997688293457
+    },
+    {
+      "range": [
+        4.2,
+        5.8
+      ],
+      "lag_ms": 0.0,
+      "correlation": 0.9999387264251709
+    },
+    {
+      "range": [
+        18.4,
+        20.6
+      ],
+      "lag_ms": 0.0,
+      "correlation": 0.9999401569366455
+    },
+    {
+      "range": [
+        24.4,
+        25.1
+      ],
+      "lag_ms": 0.0,
+      "correlation": 0.9984243512153625
+    },
+    {
+      "range": [
+        27.6,
+        28.1
+      ],
+      "lag_ms": 0.0,
+      "correlation": 0.998783528804779
+    }
+  ],
+  "mp4_atoms": [
+    {
+      "type": "ftyp",
+      "offset": 0
+    },
+    {
+      "type": "moov",
+      "offset": 32
+    },
+    {
+      "type": "free",
+      "offset": 32188
+    },
+    {
+      "type": "mdat",
+      "offset": 32196
+    }
+  ],
+  "fast_start": true,
+  "sampled_visual_proofs": [
+    "proof-town-encoded.jpg"
+  ],
+  "limits": "Technical audio alignment plus the edited town frame; no platform-upload UI check or claim of a new human auditory review."
+}

@@ -14,10 +14,17 @@ GitHub 文件页显示源码，不会直接播放 HTML。克隆或下载本仓�
 |---|---|---|
 | 春 | [高田夜樱 v2](viz/spring/takada-yozakura-v2.html) · [台湾繁体](viz/spring/takada-yozakura-v2-tw.html) | 当前 v2 页面与新稿 |
 | 夏 | [长冈花火 A](viz/summer/nagaoka-hanabi-a.html) · [台湾繁体](viz/summer/nagaoka-hanabi-a-tw.html) | 保留原已发布版本，不改画面或文案 |
-| 秋 | [弥彦 V38](viz/autumn/yahiko-v38.html) · [English](viz/autumn/yahiko-v38-en.html) · [繁體](viz/autumn/yahiko-v38-tw.html) | 27.8 秒首尾循环，红叶谷与温泉街风叶互动；环境音、海浪、风铃、鸟鸣、猫叫与窗框声，**无配乐** |
+| 秋 | [弥彦 V53 中文版](viz/autumn/yahiko-v53-zh.html) · [中文 MP4](output/autumn/yahiko-v53-zh/yahiko-v53-zh-1080x1920-30fps.mp4) | 28.1秒，已认可B式音效与Reverie配乐；风铃-2dB，温泉街两句文字位置互换 |
 | 冬 | [越后汤泽](viz/winter/yuzawa-yukiguni.html) · [台湾繁体](viz/winter/yuzawa-yukiguni-tw.html) | 三维滑雪、SNS 运镜与新稿；保留原 20 秒循环 |
 
-### 弥彦 V52：当前中文修改版
+### 弥彦 V53：当前中文发布版
+
+- **[打开当前中文动画](viz/autumn/yahiko-v53-zh.html)** · **[下载1080×1920／30fps中文MP4](output/autumn/yahiko-v53-zh/yahiko-v53-zh-1080x1920-30fps.mp4)** · [轻量播放页](output/autumn/yahiko-v53-zh/index.html)。
+- 采用已认可的B式音效、修正脚步、替换后的索道/猫叫，以及Reverie配乐融合版。本轮只将风铃降低2dB，其他音频PCM底层冻结。
+- 温泉街两句原文互换：上方「有的旅馆 已经开了 300 多年」；下方「不赶时间的话，住一晚再走吧。」。字体、镜头、时长不变。
+- [本轮记录与重建](stories/yahiko-v53.md) · [完整音乐／音效来源](viz/autumn/audio/yahiko-v53/LICENSES.md) · [发布时复制的署名](output/autumn/yahiko-v53-zh/PUBLISH-CREDITS.txt)。音乐及海声为CC BY素材，发布须署名。
+
+### 弥彦 V52：此前中文修改版
 
 - **[打开 V52 轻微风版](viz/autumn/yahiko-v52.html)** · [本轮记录](stories/yahiko-v52.md) · [音效来源与授权](viz/autumn/audio/yahiko-v52/LICENSES.md)。
 - 28.1 秒，沿用修正拉门、鞠躬和手机灯光后的 V50 画面；全片采用用户认可的轻微风实录，删除额外树林风与旧风声叠层。相机、脚步保留加大后的音量，风铃、拉门、猫叫等保留。

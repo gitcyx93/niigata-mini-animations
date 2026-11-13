@@ -1,0 +1,52 @@
+{
+  "file": "yahiko-v53-zh-1080x1920-30fps.mp4",
+  "bytes": 28994061,
+  "sha256": "6d54ecbde0424c29635ff579f3503ca8488bcbf9a9936e362e5aef89d3d64e2d",
+  "inputHashes": {
+    "visual": "235e9ef6c7db50ea951e4eb9544845b5b41a62fb64d69a2a878aaf6f54e176ae",
+    "audio": "5e8543c01bd08a3bd69783f1b0179bb2c5d8e291613b28cbff9f048892445f24"
+  },
+  "preflight": {
+    "width": 1080,
+    "height": 1920,
+    "duration": 28.1,
+    "fonts": "loaded",
+    "record": true
+  },
+  "fps": 30,
+  "frames": 843,
+  "duration": 28.1,
+  "video": {
+    "codec": "H.264 High",
+    "level": "4.1",
+    "width": 1080,
+    "height": 1920,
+    "pix_fmt": "yuv420p",
+    "color": "BT.709 limited",
+    "crf": 18,
+    "transport": "Lossless PNG frames from original render(t), not enlarged preview"
+  },
+  "audio": {
+    "codec": "AAC-LC",
+    "bitrate": 256000,
+    "sample_rate": 48000,
+    "channels": 2,
+    "source": "viz/autumn/audio/yahiko-v53/master.flac",
+    "processing": "32kHz to 48kHz resampling and AAC encoding only; no gain, EQ, limiter, normalization or remix"
+  },
+  "checks": [
+    "input hashes unchanged",
+    "843 deterministic frames",
+    "fonts loaded",
+    "full audio/video decode without errors",
+    "both streams start at zero",
+    "duration and codecs checked"
+  ],
+  "textCheck": {
+    "top": "有的旅馆 已经开了 300 多年",
+    "subtitle": "不赶时间的话，住一晚再走吧。",
+    "width": 584
+  },
+  "pageErrors": [],
+  "render_seconds": 237
+}

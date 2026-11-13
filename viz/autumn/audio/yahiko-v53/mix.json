@@ -1,0 +1,21 @@
+{
+  "version": "V53 Chinese release",
+  "duration": 28.1,
+  "sample_rate": 32000,
+  "chime_gain_db": -2,
+  "chime_measured_db": -2.000012455473989,
+  "music_frozen": true,
+  "other_audio_pcm_frozen": true,
+  "master_pcm_sha256": "8832a5202f741be95875fdc7fb34ee45fc4fd8a36ea8c5c87624c4438a287a37",
+  "text_changes": {
+    "top": "有的旅馆 已经开了 300 多年",
+    "subtitle": "不赶时间的话，住一晚再走吧。"
+  },
+  "checks": [
+    "exact non-chime integer PCM residual retained",
+    "chime level verified within 0.01dB",
+    "visual FX unchanged except two strings",
+    "13 current stems retained as lossless FLAC"
+  ],
+  "notes": "Master is authoritative; summing independently quantized historical stems may differ by a few LSB. No remix or music re-ducking after chime adjustment."
+}
