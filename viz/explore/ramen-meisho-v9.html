@@ -71,7 +71,7 @@ function makeKit(g, S) {
 </script>
 <script>
 'use strict';
-/* 拉面小史：江户名所绘风格的八张册页（给中国观众）。v10：提问开场、六页、每页一句话加一栏注。v3 放宽了人物、动法和两个辅色，见 stories/explore-ramen.md。
+/* 拉面小史：江户名所绘风格的八张册页（给中国观众）。v11：想法云开场、六页、每页一句话加一栏注。v3 放宽了人物、动法和两个辅色，见 stories/explore-ramen.md。
    印刷工具来自上方 print-kit（STYLES.meisho）。render(t) 确定性：同一 t 同一画面。 */
 const W = 1080, H = 1920, TURN = 0.5;
 const PLAN = [['question', 0, 4.6], ['yokohama', 4.6, 9.6], ['asakusa', 9.6, 14.6], ['shop', 14.6, 21.6], ['name', 21.6, 28], ['map', 28, 35]];
@@ -88,7 +88,7 @@ const LATIN = 'Sora,"Helvetica Neue",Arial,sans-serif';
 const HEADF = 'Sora,' + SERIF, SUBF = 'Sora,' + SANS;       // 大字、小字、注里的数字和英文走 Sora
 const NUM = ['一', '二', '三', '四', '五', '六', '七', '八'];
 const COPY = [
-  {name: '北海道', l1: '拉面，为什么叫「拉面」？', l2: '也许，和北海道的一家小店有关。',
+  {name: '缘起', l1: '拉面，为什么叫「拉面」？', l2: '也许，和北海道的一家小店有关。', l2t: 2.2,
     note: '日语里拉面写作「ラーメン」。这个名字的由来有好几种说法，这里讲流传最广的一种'},
   {name: '横滨', year: '1859', l1: '拉面的老家，在中国。', l2: '横滨开港，中国厨师的汤面被叫作「南京面」。',
     note: '1859 年横滨开港 ·「南京面」是对「南京そば」的意译'},
@@ -463,6 +463,7 @@ function pYoko(u) {
   figure(548, 1452, 4.3, {kind: 'meiji', robe: C.c5, hat: 'bowler', sniff: 1, still: 1});
   figure(985 - step12(u) * 14, 1540, 4.5, {dir: -1, robe: C.pink, obi: C.c3, hair: 'bun', parasol: C.c4, walk: u * 2});
   figure(150 + step12(u) * 14, 1560, 4.8, {kind: 'tang', robe: C.c1, hat: 'tang', walk: u * 2});
+  figure(-40 + step12(u) * 190, 1600, 3.0, {robe: C.c3, obi: C.c4, hair: 'short', walk: u * 4.5});
   say(360, 1030, '现拉的南京面！', win(u, 1.0, 3.6), {bg: C.pink, size: 44, dy: 30});
 }
 function pAsa(u) {
@@ -492,6 +493,9 @@ function pAsa(u) {
   k.shape(C.sumi, rect(-170, 640, 340, 50), 0); k.blk(C.c4, rect(-170, 656, 340, 9));
   vt('雷门', 0, 200, 180, C.sumi, BRUSH, 400, 1.12);
   g.restore();
+  figure(872, 1580, 3.2, {robe: C.c3, obi: C.c4, hair: 'short', dir: -1, still: 1, wave: 1});
+  k.key(() => { g.moveTo(830, 1318); g.lineTo(830, 1250); }, 3);
+  g.save(); g.translate(830, 1250); g.rotate(t * 2.6); [C.c4, C.c1, C.c3, C.c2].forEach((c, i) => { g.rotate(Math.PI / 2); k.shape(c, () => poly([[0, 0], [44, -8], [26, -34]]), 1.6); }); g.restore(); kp.shape(C.sumi, circ(830, 1250, 5), 0);
   // 队伍：从门口排到近景，一格一格往前挪
   const sN = ss(u, 1.5, 2.0) + ss(u, 3.4, 3.9);
   const Q = [{kind: 'kimono', robe: C.c2, hair: 'bun', obi: C.c3}, {kind: 'meiji', robe: C.sumi, hat: 'bowler'}, {kind: 'kimono', robe: C.c1, hat: 'kasa'}, {kind: 'kimono', robe: C.pink, hair: 'bun', obi: C.c1, parasol: C.c4},
@@ -592,6 +596,78 @@ function pName(u) {
   kp.shape(C.skin, () => g.ellipse(bx + 78, by - 122, 50, 40, -.5, 0, TAU), 2.6);
   kp.shape(C.skin, () => g.ellipse(bx + 48, by - 108, 26, 15, -.9, 0, TAU), 2.2); kp.shape(C.skin, () => g.ellipse(bx + 62, by - 84, 26, 14, -.7, 0, TAU), 2.2);
 }
+const ISL_ALL = [
+      [[130.2, 33.9], [131.0, 33.95], [131.9, 33.3], [131.6, 32.5], [131.3, 31.4], [130.7, 31.0], [130.2, 31.3], [130.3, 32.1], [129.7, 32.7], [129.6, 33.3]],
+      [[132.5, 33.3], [133.0, 34.1], [134.0, 34.4], [134.7, 34.2], [134.7, 33.8], [134.2, 33.3], [133.3, 33.0], [132.7, 32.8]],
+      [[130.9, 34.0], [131.2, 34.6], [132.1, 35.0], [133.2, 35.6], [134.4, 35.6], [135.3, 35.6], [135.9, 35.9], [136.1, 36.4], [136.7, 37.0], [136.9, 37.4], [137.3, 37.4], [137.0, 36.8], [137.5, 36.9], [138.5, 37.4], [139.1, 37.9], [139.5, 38.5], [139.9, 39.3], [140.0, 40.2], [139.9, 40.6], [140.3, 41.2], [140.9, 41.4], [141.4, 41.3], [141.5, 40.5], [141.9, 39.5], [141.6, 38.4], [141.0, 38.0], [141.0, 37.0], [140.8, 36.6], [140.6, 35.7], [140.0, 35.2], [139.8, 35.0], [139.6, 35.3], [139.2, 35.2], [138.8, 34.7], [138.3, 34.6], [137.3, 34.6], [136.9, 34.3], [136.8, 34.0], [136.0, 33.5], [135.3, 33.7], [135.2, 34.3], [134.3, 34.7], [133.3, 34.4], [132.3, 34.2], [131.5, 34.0]],
+      [[140.0, 41.5], [140.6, 41.8], [141.2, 41.8], [140.9, 42.5], [141.7, 42.6], [143.2, 42.0], [143.9, 42.9], [145.5, 43.3], [145.3, 44.0], [144.3, 44.0], [143.0, 44.6], [141.7, 45.4], [141.6, 44.3], [141.4, 43.3], [140.5, 43.2], [140.0, 42.7], [139.9, 42.2]],
+      [[138.2, 38.3], [138.5, 38.3], [138.55, 37.9], [138.25, 37.8]]];
+/* 第一页：今天的拉面店里，一位客人夹起面，冒出一个念头 */
+function cloud(cx, cy, w, h) {                                // 想法云：几团椭圆并成一朵
+  const E = [[0, 0, w * .36, h * .42], [-w * .3, h * .06, w * .24, h * .34], [w * .3, h * .04, w * .25, h * .36], [-w * .12, -h * .2, w * .24, h * .3], [w * .14, -h * .22, w * .22, h * .28], [0, h * .2, w * .3, h * .28]];
+  E.forEach(([x, y, rx, ry]) => kp.key(() => g.ellipse(cx + x, cy + y, rx, ry, 0, 0, TAU), 7));
+  E.forEach(([x, y, rx, ry]) => kp.blk(C.white, () => g.ellipse(cx + x, cy + y, rx, ry, 0, 0, TAU)));
+}
+function neko(x, y, s, t) {                                   // 招财猫，6 格/秒招手
+  g.save(); g.translate(x, y); g.scale(s, s);
+  kp.shape(C.white, () => g.ellipse(0, -34, 34, 36, 0, 0, TAU), 2.2);
+  g.save(); g.translate(26, -78); g.rotate(Math.floor(t * 6) % 2 ? -.5 : .1); kp.shape(C.white, () => g.roundRect(-9, -40, 18, 46, 9), 2.2); kp.key(() => { g.moveTo(-4, -34); g.lineTo(-4, -28); g.moveTo(3, -34); g.lineTo(3, -28); }, 1.4); g.restore();
+  kp.shape(C.white, () => poly([[-28, -92], [-22, -116], [-8, -98]]), 2.2); kp.shape(C.white, () => poly([[28, -92], [22, -116], [8, -98]]), 2.2); kp.blk(C.c3, () => poly([[-24, -96], [-21, -108], [-14, -98]])); kp.blk(C.c3, () => poly([[24, -96], [21, -108], [14, -98]]));
+  kp.shape(C.white, () => g.ellipse(0, -80, 32, 26, 0, 0, TAU), 2.2);
+  kp.key(() => { g.moveTo(-18, -82); g.quadraticCurveTo(-12, -88, -6, -82); g.moveTo(6, -82); g.quadraticCurveTo(12, -88, 18, -82); g.moveTo(-5, -72); g.quadraticCurveTo(0, -68, 5, -72); }, 1.8);
+  kp.blk(C.c3, circ(0, -76, 3)); kp.shape(C.c3, rect(-24, -58, 48, 8), 1.4); kp.shape(C.c4, circ(0, -48, 8), 1.6);
+  kp.shape(C.c4, () => g.ellipse(-14, -24, 12, 18, 0, 0, TAU), 1.8);
+  g.restore();
+}
+function pQuestion(u) {
+  const t = step(u), q = step12(u);
+  g.fillStyle = C.white; g.fillRect(0, 0, PW, PH); k.bokashi(0, 0, PW, 700, C.c4, .75, .15);
+  k.key(() => { for (let y = 760; y < 1200; y += 88) { g.moveTo(0, y); g.lineTo(PW, y); } for (let x = 60; x < PW; x += 176) { g.moveTo(x, 760); g.lineTo(x, 1200); } }, 1, rgba(C.c5, .7));
+  // 墙上的菜牌和灯笼
+  ['酱油', '味噌', '豚骨'].forEach((s, i) => { const x = 742 + i * 84, y = 330 + (i % 2) * 22; k.shape(C.white, rect(x - 34, y, 68, 230), 2.4); kp.shape(C.sumi, circ(x, y + 16, 5), 0); vt(s, x, y + 86, 46, C.sumi, BRUSH, 400, 1.5); });
+  lantern(70, 420, 110, 150, C.c3, '拉面', Math.sin(t * 1.6) * .05);
+  // 左右两位只顾着吃的客人
+  [[110, C.c1, 0], [884, C.purple, .5]].forEach(([x, robe, ph]) => { const dn = (q * .9 + ph) % 1 < .5 ? 10 : 0;
+    chef(x, 1236 + dn, 5.2, {band: false, robe, eyes: 'down', arms: [[[-34, -26], [-16, -14]], [[34, -26], [16, -14]]]}); steam(x, 1120, 1.3, u + ph * 3, 2, 30); });
+  // 中间的客人：夹起面，停住，想
+  const cyc = (q * .55) % 1, lift = cyc < .3 ? ss(cyc, 0, .3) : cyc < .8 ? 1 : 1 - ss(cyc, .8, 1), L = lift * 16;
+  const cx = 496, cy = 1236, cs = 6.2;
+  chef(cx, cy, cs, {band: false, robe: C.orange, eyes: 'open', mouth: lift > .9 && cyc > .62 ? 'open' : '',
+    arms: [[[-36, -24], [-24, -10]], [[38, -36 - L * .4], [13, -44 - L]]],
+    tool: () => { kp.key(() => { g.moveTo(20, -38 - L); g.lineTo(2, -62 - L); g.moveTo(23, -40 - L); g.lineTo(6, -64 - L); }, 1.6, C.brown); }});
+  // 柜台和碗
+  k.shape(C.brown, rect(-10, 1200, PW + 20, 84), 3); k.key(() => { g.moveTo(-10, 1216); g.lineTo(PW + 10, 1216); }, 1.4, C.c4);
+  k.shape(C.brown, rect(-10, 1284, PW + 20, PH), 3); k.blk(C.sumi, rect(0, 1284, PW, PH), .28);
+  k.key(() => { for (let x = 110; x < PW; x += 170) { g.moveTo(x, 1284); g.lineTo(x, PH); } }, 1.2, rgba(C.sumi, .5));
+  bowl(110, 1150, 74, C.c1); bowl(884, 1150, 74, C.c2);
+  const tipX = cx + 4 * cs, tipY = cy + (-63 - L) * cs;
+  for (let i = 0; i < 5; i++) { const p = () => { g.moveTo(tipX + (i - 2) * 5, tipY); g.bezierCurveTo(tipX + (i - 2) * 16 + Math.sin(t * 5 + i) * 6, tipY + 60, cx + (i - 2) * 30, 1070, cx + (i - 2) * 22, 1122); }; kp.key(p, 8); kp.key(p, 5, C.c4); }
+  bowl(cx, 1120, 150, C.c3);
+  steam(cx - 150, 1090, 1.8, u, 2, 190);
+  neko(742, 1200, 1.5, u);
+  // 想法云：先是「拉面？」，再是北海道的一家小店
+  const cl = ss(u, .5, .9);
+  if (cl > 0) { g.save(); g.globalAlpha = cl; const bob = Math.round(Math.sin(t * 2) * 4);
+    kp.shape(C.white, circ(438, 618, 12), 3); kp.shape(C.white, circ(402, 578, 20), 3.4);
+    cloud(360, 400 + bob, 640, 300);
+    const B = ss(u, 2.3, 2.6);
+    if (B < 1) { g.save(); g.globalAlpha = cl * (1 - B); vt('拉面', 250, 350 + bob, 120, C.sumi, BRUSH, 400, 1.02); g.save(); g.translate(440, 410 + bob); g.rotate(Math.floor(t * 3) % 2 ? .12 : -.08); htext('？', 0, 50, 170, C.c3, 900, SERIF, 'center'); g.restore(); g.restore(); }
+    if (B > 0) { g.save(); g.globalAlpha = cl * B; const M = (lo, la) => [360 + (lo - 142.4) * 54, 404 + bob - (la - 43.3) * 66];
+      k.shape(C.c2, () => poly(ISL_ALL[3].map(p => M(p[0], p[1]))), 2.6);
+      const [sx, sy] = M(141.35, 43.06); k.shape(C.c4, circ(sx, sy, Math.floor(t * 3) % 2 ? 22 : 15), 2); k.shape(C.c3, circ(sx, sy, 8), 1.6);
+      k.shape(C.brown, rect(sx - 130, sy - 70, 80, 50), 2); k.shape(C.white, () => poly([[sx - 140, sy - 70], [sx - 116, sy - 100], [sx - 64, sy - 100], [sx - 40, sy - 70]]), 2); k.blk(C.c4, rect(sx - 118, sy - 56, 30, 24)); k.key(() => { g.moveTo(sx - 50, sy - 30); g.lineTo(sx - 12, sy - 8); }, 2);
+      htext('？', sx - 150, sy + 60, 76, C.c3, 900, SERIF, 'center');
+      for (let i = 0; i < 7; i++) kp.shape(C.white, circ(170 + hash(i + 40) * 380, 310 + bob + ((hash(i + 50) * 180 + t * 40) % 180), 5), 1.2);
+      g.restore(); }
+    g.restore(); }
+  // 上沿的暖帘（切边）
+  for (let i = 0; i < 4; i++) { const x = -10 + i * 172, sw = Math.round(Math.sin(t * 1.8 + i) * 6); k.shape(C.c1, () => poly([[x, -10], [x + 166, -10], [x + 166 + sw, 190], [x + sw, 190]]), 3); htext('ラーメン'[i], x + 83 + sw * .5, 138, 104, C.white, 900, SANS, 'center'); }
+  // 近景：灶上的大锅
+  k.shape(C.c5, () => { g.moveTo(-40, 1560); g.lineTo(-10, PH + 10); g.lineTo(440, PH + 10); g.lineTo(470, 1560); g.closePath(); }, 3.4);
+  k.shape(C.white, ell(215, 1560, 256, 46), 3); k.blk(C.soup, ell(215, 1566, 226, 34), .9);
+  k.key(() => { g.moveTo(330, 1548); g.lineTo(560, 1400); }, 14); k.key(() => { g.moveTo(330, 1548); g.lineTo(560, 1400); }, 9, C.brown);
+  steam(215, 1530, 2.6, u, 4, 60);
+}
 const N5 = [['燕', '背脂', '#7a4a26', C.c1], ['长冈', '生姜酱油', '#5f3319', C.c3], ['新潟', '浓厚味噌', C.orange, C.c2], ['新潟', '清淡酱油', C.c4, C.purple], ['三条', '咖喱', '#c98a1e', C.c3]];
 function pMap(u) {
   const t = step(u);
@@ -600,14 +676,11 @@ function pMap(u) {
   for (let i = 0; i < 17; i++) { const y = 150 + i * 90, off = t * 14 * (i % 2 ? 1 : -1) + hash(i) * 60; k.key(() => k.humpRow(y, 60, 6, off, PW), 1.6, rgba(C.white, .55)); }
   const P = (lon, lat) => [84 + (lon - 129) * 47, 270 + (45.8 - lat) * 56];
   const land = pts => () => poly(pts.map(p => P(p[0], p[1])));
-  const ISL = [
-      [[130.2, 33.9], [131.0, 33.95], [131.9, 33.3], [131.6, 32.5], [131.3, 31.4], [130.7, 31.0], [130.2, 31.3], [130.3, 32.1], [129.7, 32.7], [129.6, 33.3]],
-      [[132.5, 33.3], [133.0, 34.1], [134.0, 34.4], [134.7, 34.2], [134.7, 33.8], [134.2, 33.3], [133.3, 33.0], [132.7, 32.8]],
-      [[130.9, 34.0], [131.2, 34.6], [132.1, 35.0], [133.2, 35.6], [134.4, 35.6], [135.3, 35.6], [135.9, 35.9], [136.1, 36.4], [136.7, 37.0], [136.9, 37.4], [137.3, 37.4], [137.0, 36.8], [137.5, 36.9], [138.5, 37.4], [139.1, 37.9], [139.5, 38.5], [139.9, 39.3], [140.0, 40.2], [139.9, 40.6], [140.3, 41.2], [140.9, 41.4], [141.4, 41.3], [141.5, 40.5], [141.9, 39.5], [141.6, 38.4], [141.0, 38.0], [141.0, 37.0], [140.8, 36.6], [140.6, 35.7], [140.0, 35.2], [139.8, 35.0], [139.6, 35.3], [139.2, 35.2], [138.8, 34.7], [138.3, 34.6], [137.3, 34.6], [136.9, 34.3], [136.8, 34.0], [136.0, 33.5], [135.3, 33.7], [135.2, 34.3], [134.3, 34.7], [133.3, 34.4], [132.3, 34.2], [131.5, 34.0]],
-      [[140.0, 41.5], [140.6, 41.8], [141.2, 41.8], [140.9, 42.5], [141.7, 42.6], [143.2, 42.0], [143.9, 42.9], [145.5, 43.3], [145.3, 44.0], [144.3, 44.0], [143.0, 44.6], [141.7, 45.4], [141.6, 44.3], [141.4, 43.3], [140.5, 43.2], [140.0, 42.7], [139.9, 42.2]],
-      [[138.2, 38.3], [138.5, 38.3], [138.55, 37.9], [138.25, 37.8]]];
+  const ISL = ISL_ALL;
   ISL.forEach(pts => k.shape(C.c2, land(pts), 3));
   k.far(C.white, () => { const [x, y] = P(138.73, 35.36); poly([[x - 16, y + 10], [x, y - 14], [x + 16, y + 10]]); });
+  { const x = 90 + t * 14, y = 700; k.shape(C.white, () => poly([[x - 4, y - 6], [x - 4, y - 70], [x + 34, y - 16]]), 2); k.shape(C.brown, () => poly([[x - 36, y], [x + 40, y], [x + 26, y + 14], [x - 24, y + 14]]), 2); }
+  birds(u, 240, 3, 4);
   const [yx, yy] = P(139.64, 35.44), la = ss(u, .1, 1.0);
   g.save(); g.setLineDash([2, 18]); g.lineCap = 'round';
   k.key(() => { const sx = -10, sy = 960; const ex = sx + (yx - sx) * la, ey = sy + (yy - sy) * la; g.moveTo(sx, sy); g.quadraticCurveTo(sx + (ex - sx) * .5, Math.min(sy, ey) + 110, ex, ey); }, 9, C.c3);
@@ -636,7 +709,7 @@ function pMap(u) {
     g.restore(); }
   seal(872, 930, 150, ss(u, 5.6, 5.9));
 }
-const DRAW = [pSnow, pYoko, pAsa, pShop, pName, pMap];
+const DRAW = [pQuestion, pYoko, pAsa, pShop, pName, pMap];
 
 /* ---------- 纸、题签、版面 ---------- */
 let texP, texF;
@@ -662,13 +735,13 @@ function sheet(i, u, dx, dim) {
   const a1 = ss(u, .05, .45), a3 = ss(u, 1.0, 1.5);
   g.font = '900 100px ' + HEADF; const s1 = Math.min(56, Math.floor(100 * CW / g.measureText(c.l1).width));
   g.globalAlpha = a1; htext(c.l1, PX - 2 + (1 - a1) * 18, 176, s1, C.sumi, 900, HEADF, 'left');
-  const L2 = c.l2b ? [[c.l2, .6, c.swap], [c.l2b, c.swap, 99]] : [[c.l2, .6, 99]];
+  const l2t = c.l2t || .6, L2 = c.l2b ? [[c.l2, l2t, c.swap], [c.l2b, c.swap, 99]] : [[c.l2, l2t, 99]];
   L2.forEach(([txt, t0, t1]) => { const ai = ss(u, t0, t0 + .5), a = ai * (1 - ss(u, t1 - .35, t1));
     if (a > 0) { g.globalAlpha = a; htext(txt, PX + (1 - ai) * 18, 230, 33, rgba(C.sumi, .86), 500, SUBF, 'left', CW, 1); } });
   g.globalAlpha = 1;
   // 画心（按 992×1626 画，整体缩到 SC）
   g.save(); g.beginPath(); g.rect(PX, PY, PW * SC, PH * SC); g.clip(); g.translate(PX, PY); g.scale(SC, SC);
-  DRAW[i](u);
+  { const z = 1 + .04 * clamp(u / (PLAN[i][2] - PLAN[i][1])); g.save(); g.translate(PW / 2, PH * .6); g.scale(z, z); g.translate(-PW / 2, -PH * .6); DRAW[i](u); g.restore(); }   // 每页慢慢推近一点
   g.globalAlpha = 1; g.drawImage(texP.wear, 0, 0);
   const n = c.name.length, ch = n * 84 + 50, tx = PW - 120, ty = 40;
   k.shape(C.c3, rect(tx, ty, 92, ch), 3);
@@ -706,7 +779,7 @@ window.render = render; window.LOOP_SECONDS = T; window.START_SECONDS = 0; windo
 /* ---------- 启动 ---------- */
 texP = k.texture(PW, PH); texF = k.texture(W, H);
 const RECORD = new URLSearchParams(location.search).has('record');
-const allText = COPY.map(c => c.name + c.l1 + c.l2 + (c.l2b || '') + c.note).join('') + '来碗「中国佬的荞麦面」。注' + N5.map(n => n[0] + n[1]).join('') +
+const allText = COPY.map(c => c.name + c.l1 + c.l2 + (c.l2b || '') + c.note).join('') + '来碗「中国佬的荞麦面」。注缘起？酱油味噌豚骨ラーメン' + N5.map(n => n[0] + n[1]).join('') +
   '拉面小史其一二三四五六考竹家食堂好了！面南京町现拉的南京面來々軒来軒麺処雷门听说请了中国师傅。王文彩（山东）老板娘大久タツうどんそばめし的尾音自中国→横滨札幌喜多方博多味噌酱油豚骨新潟五碗';
 const fontsReady = (document.fonts && document.fonts.load ? Promise.race([
   Promise.all([document.fonts.load('400 60px "Ma Shan Zheng"', allText), document.fonts.load('900 56px "Noto Serif SC"', allText), document.fonts.load('700 36px "Noto Sans SC"', allText), document.fonts.load('500 33px "Noto Sans SC"', allText), document.fonts.load('800 56px Sora', '0123456789'), document.fonts.load('500 33px Sora', '0123456789 la men'), document.fonts.load('900 31px "Noto Sans SC"', allText),
