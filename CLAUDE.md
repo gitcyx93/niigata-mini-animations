@@ -16,4 +16,3 @@
 已有工具：
 
 - `viz/tools/inspect-animation.cjs`：无需依赖截图，通过渲染采样、像素哈希、运行状态和错误检测检查动画。
-- 使用说明：`docs/AI_INSPECTION.md`。
