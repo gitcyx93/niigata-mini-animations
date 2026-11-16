@@ -87,7 +87,7 @@ def faces_of(family, chars, spec, css_name, weight):
         yield [family, weight, rng.replace(' ', ''), base64.b64encode(buf.getvalue()).decode()]
 
 
-SERIES = Path(__file__).resolve().parent.parent / 'common' / 'series.js'
+SERIES = Path(__file__).resolve().parent.parent.parent / 'archive' / 'series.js'
 
 
 def inline_series(html):
