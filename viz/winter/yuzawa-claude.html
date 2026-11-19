@@ -873,7 +873,7 @@ const warmAt = t => keys(t, [[14.6, 0], [15.4, 1]]);      // 回环是直切，�
 const mixCol = (a, b, k, al = 1) => `rgba(${a.map((v, i) => Math.round(lerp(v, b[i], k))).join(',')},${al})`;
 function palette(t) {
   const k = warmAt(t);
-  return {k, head: mixCol([22, 22, 26], [255, 240, 220], k), sub: mixCol([22, 22, 26], [255, 228, 198], k), narr: mixCol([22, 22, 26], [255, 232, 204], k, .96),
+  return {k, head: mixCol([22, 22, 26], [255, 240, 220], k), sub: mixCol([22, 22, 26], [255, 228, 198], k), narr: mixCol([22, 22, 26], [255, 232, 204], k),
     accent: mixCol([84, 84, 92], [240, 180, 132], k), key: mixCol([178, 74, 6], [237, 139, 47], k)};
 }
 // ---- 标题上落雪：在字的横笔上沿积一层雪（越平的地方积得越厚，斜笔和笔画两头几乎不积）----
@@ -930,31 +930,12 @@ function shadowOnly(img, x, y, color, blur, oy = 0) {     // 只画图形的「�
   g.save(); g.shadowColor = color; g.shadowBlur = blur; g.shadowOffsetX = 5000; g.shadowOffsetY = oy;
   g.drawImage(img, x - 5000, y); g.restore();
 }
-function drawHeaderSnow(t, P) {
-  titleText = HEADER.title;
-  if (!titleMask) titleMask = titleCanvas(x => { x.fillStyle = '#fff'; x.fillText(titleText, TX, TB); });
+function drawHeaderSnow(t, P) {   // 标题用系列统一的银色金属字（不透明、不用黑色），关掉字面反射，横笔上积雪
   const day = clamp(1 - 2 * P.k), nite = clamp(2 * P.k - 1);
-  g.save(); g.shadowColor = `rgba(244,248,255,${.8 * day})`; g.shadowBlur = 10;
-  if (nite > 0) g.shadowColor = `rgba(6,10,26,${.6 * nite})`;
-  const ew = text('NIIGATA', 80, 262, 26, P.accent, 500, 'left', 8);
-  text(HEADER.place, 80 + ew + 22, 262, 26, P.narr, 400, 'left', 4);
-  g.restore();
-  const X = 74 - TX, Y = 404 - TB;
-  // 字外的柔光：白天一圈淡白（从雪地里托出来），夜里一层暖色微光加很淡的深影
-  if (day > 0) { shadowOnly(titleMask, X, Y, `rgba(244,248,255,${.85 * day})`, 28); shadowOnly(titleMask, X, Y, `rgba(244,248,255,${.5 * day})`, 10); }
-  if (nite > 0) { shadowOnly(titleMask, X, Y, `rgba(6,10,26,${.45 * nite})`, 18, 4); shadowOnly(titleMask, X, Y, `rgba(255,186,116,${.4 * nite})`, 34); }
-  // 字面
-  twx.globalCompositeOperation = 'source-over'; twx.globalAlpha = 1; twx.clearRect(0, 0, 860, 300);
-  if (P.k < 1) twx.drawImage(titleFace('ink', [[0, '#4a4a52'], [.55, '#26262c'], [1, '#141418']]), 0, 0);
-  if (P.k > 0) { twx.globalAlpha = P.k; twx.drawImage(titleFace('warm', [[0, '#fff8ec'], [.55, '#f6dcb8'], [1, '#e6bd8c']]), 0, 0); twx.globalAlpha = 1; }
-  const sc = TSHEEN.getContext('2d'); sc.setTransform(1, 0, 0, -1, 0, 24); sc.drawImage(cv, 60, 300, W - 120, 420, 0, 0, 96, 24);   // 场景顶部的颜色
-  twx.globalCompositeOperation = 'soft-light'; twx.globalAlpha = .28; twx.drawImage(TSHEEN, TX - 20, TB - 130, 660, 160);
-  twx.globalAlpha = 1; twx.globalCompositeOperation = 'destination-in'; twx.drawImage(titleMask, 0, 0);
-  twx.globalCompositeOperation = 'source-over';
-  g.drawImage(TWORK, X, Y);
-  if (!titleCaps) titleCaps = snowCaps(titleMask, 10);
-  g.drawImage(titleCaps, X, Y);
-  drawStory(t, STORY, P.narr, P.accent, nite > 0 ? `rgba(6,10,26,${.7 * nite})` : `rgba(244,248,255,${.75 * day})`);
+  drawHeader(t, {light: 0, lc: [255, 255, 255], x: 540}, {title: HEADER.title, place: HEADER.place, story: STORY, reflect: false,
+    storyColor: P.narr, accent: P.accent, storyShadow: nite > 0 ? `rgba(6,10,26,${.7 * nite})` : `rgba(244,248,255,${.75 * day})`});
+  if (!titleCaps) titleCaps = snowCaps(mask(), 12);
+  g.drawImage(titleCaps, 74 - TX, 404 - TB);
 }
 
 const HLY = {size: 74, weight: 400, sp: 7, sub: 38, subW: 500, subSp: 4};   // 同弥彦 V54 的大字
