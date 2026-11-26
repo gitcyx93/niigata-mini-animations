@@ -337,7 +337,7 @@ function boot(render) {
 // render(t) 是确定性的：同一个 t 永远画出同一帧。
 
 const T = 26;
-const START = 0.9;                         // 视频和网页都从雪雾散开后的车站开始（第一帧就是完整画面，可以当封面）；漫白和冲出来的过渡落在片尾，循环播放时无缝
+const START = 0;                           // 从隧道里的黑开始：冲出隧道的一下过曝是全片的开场钩子
 const DY = 1440;                           // 车站和温泉之间插进一条温泉街：温泉那一段整体下移这么多
 const OY = 860, WH = 7660 + DY;                 // 长图覆盖的世界范围（y 向下）
 const RIDGE = 1120, BASE = 5060;           // 山脊、山脚
@@ -689,7 +689,7 @@ const fx = FRAME.getContext('2d'), mx = MASK.getContext('2d');
 const main = g;
 
 // ---- 新干线 ----
-const TR0 = .5, TR1 = 2.9;                 // 列车进画面、停稳的时间（视频从 0.9 秒开始，第一帧车头刚冲进来）
+const TR0 = .62, TR1 = 2.9;                 // 列车进画面、停稳的时间（视频从 0.9 秒开始，第一帧车头刚冲进来）
 const trainU = t => clamp((t - TR0) / (TR1 - TR0)), trainSpeed = t => t < TR0 || t > TR1 ? 0 : Math.pow(1 - trainU(t), 2);
 function trainNose(t) {                     // 高速冲进来、急刹，停稳时车身往前轻轻一点头
   const settle = t > TR1 ? 9 * Math.sin(Math.PI * clamp((t - TR1) / .4)) * (1 - clamp((t - TR1) / .4)) : 0;
@@ -781,39 +781,32 @@ function drawPowder(t, lit) {                    // lit=false：雪雾落在雪�
   }
   g.globalAlpha = 1;
 }
-// 一团团有厚度的雪块：按抛物线飞起来、落下去，落地后留一小会儿再化掉。不透明，下面一圈发蓝的暗面，不是雾
-// 每一块：[出发时间, x, y, 横向速度, 向上的速度, 大小]
-function snowChunks(t, list, ground) {
-  const G = 1700;
-  list.forEach(([t0, x0, y0, vx, vy, r], i) => {
-    const age = t - t0; if (age < 0) return;
-    const land = 2 * vy / G + .0001, a = Math.min(age, land), fade = 1 - clamp((age - land) / .5);
-    if (fade <= 0) return;
-    const x = x0 + vx * a, y = y0 - vy * a + .5 * G * a * a, squash = age > land ? .55 : 1, rr = r * (age > land ? 1.15 : 1);
-    g.globalAlpha = fade;
-    g.fillStyle = '#a9bbe0'; g.beginPath(); g.ellipse(x + 1.5, y + rr * .28 * squash, rr, rr * .8 * squash, 0, 0, TAU); g.fill();
-    g.fillStyle = '#ffffff'; g.beginPath(); g.ellipse(x, y - rr * .12 * squash, rr * .92, rr * .72 * squash, 0, 0, TAU); g.fill();
-  });
-  g.globalAlpha = 1;
+// 雪沫：一粒粒被甩出去的碎雪。每一粒都带着出发时的速度往前冲，被空气拖慢、往下掉，画成顺着速度方向的一道短线（越快越长）。
+// 每一粒：[出发时间, x, y, 横向速度, 向上的速度, 粗细, 寿命]
+function flecks(t, list, ground, drag = 2.4, grav = 1100) {     // ground：落到这条线以下就算落地，不再画
+  g.lineCap = 'round';
+  for (const [t0, x0, y0, vx, vy, w, life] of list) {
+    const a = t - t0; if (a < 0 || a > life) continue;
+    const e = Math.exp(-drag * a), x = x0 + vx * (1 - e) / drag, y = y0 - vy * a + .5 * grav * a * a, cvx = vx * e, cvy = -vy + grav * a;
+    if (y > ground + (x0 * 7.3 % 14)) continue;
+    const k = a / life;
+    g.strokeStyle = `rgba(255,255,255,${.95 * (1 - k * k)})`; g.lineWidth = w * (1 - .4 * k);
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x - cvx * .03, y - cvy * .03); g.stroke();
+  }
 }
-let TRAIN_CHUNKS = null;
-function trainChunks() {
-  if (TRAIN_CHUNKS) return TRAIN_CHUNKS;
+let TRAIN_FLECKS = null;
+function trainFlecks() {                         // 车头像犁一样把雪往前、往上掀：雪沫的速度比车还快一点，所以总是飞在车头前面
+  if (TRAIN_FLECKS) return TRAIN_FLECKS;
   const L = [];
-  for (let i = 0; i < 150; i++) {                 // 刹车途中：车头和车身两侧一路掀起来
-    const t0 = Math.max(TR0 + .2, TR1 - 1.9 * Math.pow(rnd(i, 231), 1.4)), v = trainSpeed(t0), x0 = trainNose(t0) - 30 - rnd(i, 232) * rnd(i, 233) * 800;
-    if (x0 < -80) continue;
-    L.push([t0, x0, TRAIN_Y + 6 + rnd(i, 238) * 22, (160 + rnd(i, 234) * 620) * (.25 + v), 320 + rnd(i, 235) * 620, 6 + rnd(i, 236) * rnd(i, 237) * 22]);
+  for (let i = 0; i < 520; i++) {
+    const t0 = TR0 + .12 + (TR1 - TR0 - .1) * Math.pow(rnd(i, 231), 1.25), v = 4500 / (TR1 - TR0) * trainSpeed(t0) + 40, low = i % 3 > 0;
+    L.push([t0, trainNose(t0) - 8 - rnd(i, 232) * 46, TRAIN_Y + 8 - rnd(i, 233) * (low ? 22 : 62), v * (.95 + rnd(i, 234) * .75), (low ? 60 : 220) + rnd(i, 235) * (low ? 260 : 620) * Math.sqrt(trainSpeed(t0) + .05), 2.5 + rnd(i, 236) * 5.5, .5 + rnd(i, 237) * .7]);
   }
-  for (let i = 0; i < 150; i++) {                 // 停稳的那一下：沿着整列车掀起最大的一蓬
-    const x0 = 1012 - rnd(i, 241) * 1040, front = x0 > 880;
-    L.push([TR1 - .22 + rnd(i, 242) * .3, x0, TRAIN_Y + 6 + rnd(i, 247) * 22, (rnd(i, 243) - (front ? .15 : .4)) * 420, 380 + rnd(i, 244) * 760, 7 + rnd(i, 245) * rnd(i, 246) * 26]);
-  }
-  return TRAIN_CHUNKS = L;
+  return TRAIN_FLECKS = L;
 }
-function drawTrainSpray(t) {                     // 进站：掀起来的雪块、贴着车身的速度线、车灯在雪里打出的光柱
+function drawTrainSpray(t) {                     // 进站：车头掀到前面去的雪沫、贴着车身的速度线、车灯在雪里打出的光柱
   const v = trainSpeed(t), nose = t < 8 ? trainNose(t) : 1012;
-  if (t >= TR0 && t < TR1 + 2.4) snowChunks(t, trainChunks());
+  if (t >= TR0 && t < TR1 + 1.2) flecks(t, trainFlecks(), TRAIN_Y + 18);
   if (v > .02) {                                 // 速度线
     g.lineCap = 'round';
     for (let i = 0; i < 26; i++) {
@@ -875,11 +868,14 @@ function drawPisteSkiers(t) {
   });
 }
 const skierScale = t => t < TD0 ? .5 : lerp(.5, 1, easeOut((t - TD0) / .7));
-let LAND_CHUNKS = null;
-function drawLanding(t) {                        // 落地砸起来的一蓬雪块
-  if (t < JUMP_B - .02 || t > JUMP_B + 2) return;
-  if (!LAND_CHUNKS) { const x = skiX(SKI0), y = SKI0 + 6; LAND_CHUNKS = []; for (let i = 0; i < 46; i++) LAND_CHUNKS.push([JUMP_B + rnd(i, 251) * .06, x + (rnd(i, 252) - .5) * 50, y - 14 + rnd(i, 257) * 44, (rnd(i, 253) - .5) * 520, 180 + rnd(i, 254) * 520, 4 + rnd(i, 255) * rnd(i, 256) * 15]); }
-  snowChunks(t, LAND_CHUNKS);
+let LAND_FLECKS = null;
+function drawLanding(t) {                        // 落地：雪板两侧各溅起一扇雪沫
+  if (t < JUMP_B - .02 || t > JUMP_B + 1) return;
+  if (!LAND_FLECKS) {
+    const x = skiX(SKI0), y = SKI0 + 4; LAND_FLECKS = [];
+    for (let i = 0; i < 90; i++) { const side = i % 2 ? 1 : -1, sp = 120 + rnd(i, 252) * 520; LAND_FLECKS.push([JUMP_B + rnd(i, 251) * .05, x + side * (6 + rnd(i, 253) * 16), y, side * sp * (.3 + rnd(i, 254) * .5) - 70, 170 + rnd(i, 255) * 420, 1.5 + rnd(i, 256) * 3, .4 + rnd(i, 257) * .45]); }
+  }
+  flecks(t, LAND_FLECKS, SKI0 + 12, 3.2, 1000);
 }
 function drawSkier(t, noShadow) {
   if (t < JUMP_A) return;
@@ -1083,6 +1079,29 @@ const FOG = mk(W + 800, 700);
   for (let i = 0; i < 70; i++) { const r = 160 + rnd(i, 101) * 220; x.globalAlpha = .34; x.drawImage(radialSprite([255, 255, 255], 1.2), rnd(i, 102) * (W + 800 - r * 2), rnd(i, 103) * (700 - r * 1.2), r * 2, r * 1.2); }
 })();
 const FOGC = 3000;
+// ---- 开场：隧道。黑暗里壁灯一道道往后飞，出口的光从前方涨过来，冲出去的一瞬间整幅画面过曝成白，再落回雪国 ----
+const TUN = .62, FLASH = .8;                 // 冲出隧道的时刻、白光退掉要多久
+function drawTunnel(t) {
+  if (t >= TUN + FLASH) return;
+  if (t < TUN) {
+    const u = t / TUN;
+    g.fillStyle = '#05070f'; g.fillRect(0, 0, W, H);
+    g.lineCap = 'round';
+    for (let i = 0; i < 46; i++) {               // 壁灯和隧道壁的反光：越来越快地往后掠过
+      const row = i % 6, y = 520 + row * 190 + (rnd(i, 261) - .5) * 60, sp = 2600 + rnd(i, 262) * 2600, len = 160 + rnd(i, 263) * 520 * (.5 + u);
+      const x = W + 300 - fract(rnd(i, 264) + t * sp / 2200) * (W + 900);
+      g.strokeStyle = row % 2 ? `rgba(255,214,150,${.5 + .4 * rnd(i, 265)})` : `rgba(150,180,235,${.28 + .3 * rnd(i, 265)})`; g.lineWidth = row % 2 ? 5 : 2.5;
+      g.beginPath(); g.moveTo(x, y); g.lineTo(x + len, y); g.stroke();
+    }
+    g.globalCompositeOperation = 'lighter';     // 出口：前方一团越涨越大的白光
+    const r = 40 + 2600 * Math.pow(u, 3.2);
+    glowAt([226, 236, 255], .95, 900, 1150, r * 1.2, r * 1.6, 1.1); glowAt([255, 255, 255], 1, 900, 1150, r * .55, r * .75, 1.4);
+    g.globalCompositeOperation = 'source-over';
+    g.globalAlpha = ease(clamp((u - .78) / .22)); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.globalAlpha = 1;
+  } else {                                       // 过曝：全白，眼睛适应过来以后雪国才显出来
+    g.globalAlpha = Math.pow(1 - (t - TUN) / FLASH, 1.8); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.globalAlpha = 1;
+  }
+}
 function drawFog(t, tint) {
   const d = Math.exp(-Math.pow((camNow + 960 - FOGC) / 950, 2)) * (t < 9 ? .8 : 0);      // 云层只在上山时穿过；下山时不要（夜色里一条条亮带之间会显得像影子）
   if (d > .02) {
@@ -1095,8 +1114,8 @@ function drawFog(t, tint) {
     }
     g.globalAlpha = 1;
   }
-  // 回环：片尾温泉的热气漫成一片白，开头从这片白里冲出来（出了隧道，眼前一白）
-  const w = Math.max(1 - easeOut(t / .9), ease(clamp((t - (T - 1.4)) / 1.35)));
+  // 回环：片尾温泉的热气漫成一片白，切到开头隧道里的黑（见 drawTunnel）
+  const w = ease(clamp((t - (T - 1.4)) / 1.35));
   if (w > .01) {
     g.globalAlpha = Math.min(1, w * 1.5);
     for (let k = 0; k < 4; k++) g.drawImage(FOG, -400 + 260 * Math.sin(k * 2.1 + t), H - w * 2700 + k * 560, W + 800, 900);
@@ -1116,7 +1135,7 @@ const LINE1 = 1440;
 // 字：两种颜色——暖白是正文，金色是强调（数字和每句的关键词）；不垫遮罩、暗角、字影，可读性靠字号和字重。
 // 数字是主角：70 分钟、2.5 公里、5 月都用 Sora 放大，单位跟在后面小一号。
 // 标题下的旁白和角标不用白色（照弥彦）：白天是藏青，入暮后是奶白；角标是木头色，旁白前的竖线是冰蓝，旁白里的数字和英文另用一个暖色。
-const duskK = t => keys(t, [[11.4, 0], [11.9, 1], [T - 1.1, 1], [T - .3, 0]]);
+const duskK = t => keys(t, [[.62, 1], [.9, 0], [11.4, 0], [11.9, 1], [T - 1.1, 1], [T - .3, 0]]);
 const mixCol = (a, b, k, al = 1) => `rgba(${a.map((v, i) => Math.round(lerp(v, b[i], k))).join(',')},${al})`;
 // ---- 标题上落雪：在字的横笔上沿积一层雪（越平的地方积得越厚，斜笔和笔画两头几乎不积）----
 // 从字形的遮罩算一次，之后每帧贴图
@@ -1342,7 +1361,8 @@ function render(t) {
   if (cam > 4300) drawSteam(t);
   applyZoom(zoomAt(t));
   drawFog(t, tint);
-  drawSnow(t, snowAt(t), vcam);                                                             // 推镜只作用于画面，文字不动
+  drawSnow(t, snowAt(t), vcam);
+  drawTunnel(t);                                                             // 推镜只作用于画面，文字不动
   if (params.has('notext')) return;
   drawHeaderSnow(t);
   typo(t);                                 // 大字下面不垫任何东西：白天深墨蓝，夜里暖白
