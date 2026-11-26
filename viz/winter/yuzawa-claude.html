@@ -688,7 +688,12 @@ const fx = FRAME.getContext('2d'), mx = MASK.getContext('2d');
 const main = g;
 
 // ---- 新干线 ----
-function trainNose(t) { return 1012 - 620 * Math.pow(1 - clamp(t / 2.6), 3); }   // 第 0 帧车头已进画面，快速减速进站
+const TR0 = .5, TR1 = 2.9;                 // 列车进画面、停稳的时间（视频从 0.9 秒开始，第一帧车头刚冲进来）
+const trainU = t => clamp((t - TR0) / (TR1 - TR0)), trainSpeed = t => t < TR0 || t > TR1 ? 0 : Math.pow(1 - trainU(t), 2);
+function trainNose(t) {                     // 高速冲进来、急刹，停稳时车身往前轻轻一点头
+  const settle = t > TR1 ? 9 * Math.sin(Math.PI * clamp((t - TR1) / .4)) * (1 - clamp((t - TR1) / .4)) : 0;
+  return 1012 - 1500 * Math.pow(1 - trainU(t), 3) + settle;
+}
 function drawTrain(t) {
   const nose = t < 8 ? trainNose(t) : 1012, y = TRAIN_Y, hgt = 80, car = 400;
   if (nose < -40) return;
@@ -708,6 +713,10 @@ function drawTrain(t) {
     g.fillStyle = '#39445f'; g.fillRect(x1 - 6, y - hgt + 4, 6, hgt - 12);
     g.fillStyle = 'rgba(70,84,120,.55)'; [x0 + 10, x1 - 26].forEach(dx => { g.fillRect(dx, y - 66, 2, 58); g.fillRect(dx + 13, y - 66, 2, 58); g.fillRect(dx + 4, y - 56, 7, 16); });   // 车门
     g.fillStyle = '#232c48'; g.fillRect(x0 + 34, y - 8, 76, 9); g.fillRect(x1 - 118, y - 8, 76, 9);                      // 转向架
+    if (k === 0 && t > TR1 && t < 4.4) {                                              // 停稳后车门打开，车里的暖光漏出来
+      const d = ease(clamp((t - TR1 - .05) / .22)) * (1 - ease(clamp((t - 4.0) / .35))), dx = x1 - 30;
+      g.fillStyle = '#1c2540'; g.fillRect(dx, y - 68, 23, 60); g.fillStyle = `rgba(255,214,150,${.95 * d})`; g.fillRect(dx + 11.5 - 10 * d, y - 66, 20 * d, 58);
+    }
     if (k === 1) { g.strokeStyle = '#39445f'; g.lineWidth = 3; g.beginPath(); g.moveTo(x0 + 150, y - hgt); g.lineTo(x0 + 178, y - hgt - 9); g.lineTo(x0 + 206, y - hgt); g.moveTo(x0 + 158, y - hgt - 9); g.lineTo(x0 + 198, y - hgt - 9); g.stroke(); }   // 受电弓
   }
   g.fillStyle = '#c58a4e'; g.fillRect(nose - 2300, y - 32, 2300 - 92, 4);
@@ -722,23 +731,25 @@ function trainLights(t, k) {
 }
 // ---- 缆车 ----
 const CAB_D = 520, CAB_N = 8, CAB_V = 7 * CAB_D / T;
+const upLine = t => 1 - ease(clamp((t - 3.3) / .5)) * (1 - ease(clamp((t - 8.8) / .6)));   // 镜头跟着主角那一节上山时，上行线上别的车厢先让开
 function cabins(t, fn) {
   for (let i = 0; i < CAB_N; i++) {
     const d = fract((t * CAB_V + i * CAB_D) / (CAB_N * CAB_D)) * CAB_N * CAB_D;
     const yu = G0[1] - d, yd = G1[1] + d;
-    if (yu > G1[1] + 30) fn(gondX(yu) - 17, yu, i);
+    if (yu > G1[1] + 30 && upLine(t) > .02) fn(gondX(yu) - 17, yu, i, upLine(t));
     if (yd < G0[1] - 30) fn(gondX(yd) + 17, yd, i + 8);
   }
 }
 function drawGondola(t) {
   g.strokeStyle = 'rgba(52,62,92,.85)'; g.lineWidth = 2.2;
   [-17, 17].forEach(d => { g.beginPath(); g.moveTo(G0[0] + d, G0[1]); g.lineTo(G1[0] + d, G1[1]); g.stroke(); });
-  cabins(t, (x, y) => {
-    g.globalAlpha = .16; g.drawImage(radialSprite([40, 50, 110], 1.2), x + 40, y + 120, 90, 34); g.globalAlpha = 1;
+  cabins(t, (x, y, i, al = 1) => {
+    g.save(); g.globalAlpha = .16 * al; g.drawImage(radialSprite([40, 50, 110], 1.2), x + 40, y + 120, 90, 34); g.globalAlpha = al;
     g.strokeStyle = '#4b5674'; g.lineWidth = 4; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + 24); g.stroke();
     g.fillStyle = '#e9edf5'; roundRect(x - 27, y + 22, 54, 60, 12); g.fill();
     g.fillStyle = '#24304f'; roundRect(x - 22, y + 30, 44, 26, 6); g.fill();
     g.fillStyle = '#d2893f'; g.fillRect(x - 27, y + 62, 54, 6);
+    g.restore();
   });
 }
 // ---- 滑雪的人 ----
@@ -769,23 +780,86 @@ function drawPowder(t, lit) {                    // lit=false：雪雾落在雪�
   }
   g.globalAlpha = 1;
 }
-function drawTrainSpray(t) {                     // 进站时车头卷起的雪
-  if (t > 3.3) return;
-  const nose = trainNose(t), power = Math.pow(1 - t / 3.3, 1.5), sp = radialSprite([255, 255, 255], 1.25);
-  for (let i = 0; i < 70; i++) {
-    const a = fract(t * (1.1 + rnd(i, 3) * .8) + rnd(i, 1)), back = rnd(i, 2) * rnd(i, 4) * 1500;
-    const x = nose - 30 - back - a * 160, y = TRAIN_Y + 14 - a * (40 + rnd(i, 5) * 130), r = 30 + a * 110 + back * .03;
-    if (x < -200) continue;
-    g.globalAlpha = .55 * power * (1 - a) * (1 - back / 1700); g.drawImage(sp, x - r, y - r * .7, r * 2, r * 1.4);
+function drawTrainSpray(t) {                     // 进站：车头卷起的雪浪、贴着车身的速度线、车灯在雪里打出的光柱
+  const v = trainSpeed(t), nose = t < 8 ? trainNose(t) : 1012, sp = radialSprite([255, 255, 255], 1.25);
+  if (t >= TR0 && t < TR1 + 1.2) {
+    const linger = t > TR1 ? 1 - (t - TR1) / 1.2 : 1, power = Math.max(Math.pow(v, .65), .25 * linger) * linger;
+    for (let i = 0; i < 110; i++) {
+      const a = fract(t * (1.1 + rnd(i, 3) * .8) + rnd(i, 1)), back = rnd(i, 2) * rnd(i, 4) * 1700, up = i % 4 === 0 ? 2.1 : 1;     // 每四团里有一团被掀得更高
+      const x = nose - 30 - back - a * 190, y = TRAIN_Y + 14 - a * (40 + rnd(i, 5) * 150) * up, r = 34 + a * 130 + back * .03;
+      if (x < -240) continue;
+      g.globalAlpha = .62 * power * (1 - a) * (1 - back / 1900); g.drawImage(sp, x - r, y - r * .7, r * 2, r * 1.4);
+    }
+    g.globalAlpha = 1;
   }
-  g.globalAlpha = 1;
+  if (v > .02) {                                 // 速度线
+    g.lineCap = 'round';
+    for (let i = 0; i < 26; i++) {
+      const a = fract(t * (2.2 + rnd(i, 221)) + rnd(i, 222)), len = (120 + rnd(i, 223) * 260) * v, x = nose - 60 - a * 1300, y = TRAIN_Y - 96 + rnd(i, 224) * 118;
+      g.strokeStyle = `rgba(255,255,255,${.55 * v * (1 - a)})`; g.lineWidth = 2 + rnd(i, 225) * 2.5; g.beginPath(); g.moveTo(x, y); g.lineTo(x - len, y); g.stroke();
+    }
+  }
+  if (t >= TR0 && t < 4.4 && nose > -40) {       // 车灯的光柱：照亮前面的飘雪
+    const k = (.35 + .65 * v) * (1 - ease(clamp((t - 3.6) / .8)));
+    g.globalCompositeOperation = 'lighter';
+    glowAt([255, 240, 205], .55 * k, nose + 190, TRAIN_Y - 26, 330, 58, 1.2); glowAt([255, 248, 226], .8 * k, nose + 20, TRAIN_Y - 22, 90, 40, 1.6);
+    g.globalCompositeOperation = 'source-over';
+  }
+}
+// ---- 主角下车：跳出车门、冲进车站、坐上缆车（镜头跟着这一节缆车上山）、到山顶走出来 ----
+function miniHero(x, y, sc, run, alpha = 1, carry = true) {
+  g.save(); g.globalAlpha = alpha; g.translate(x, y); g.scale(sc, sc); g.lineCap = 'round';
+  const sw = Math.sin(run);
+  g.strokeStyle = '#1b2545'; g.lineWidth = 6; g.beginPath(); g.moveTo(-2, -17); g.lineTo(-2 + sw * 9, 0); g.moveTo(2, -17); g.lineTo(2 - sw * 9, 0); g.stroke();
+  if (carry) { g.strokeStyle = '#e9a13b'; g.lineWidth = 4; g.beginPath(); g.moveTo(-12, -10); g.lineTo(10, -66); g.moveTo(-7, -8); g.lineTo(15, -64); g.stroke(); }   // 肩上扛着雪板
+  g.fillStyle = '#f0a23a'; roundRect(-8.5, -42, 17, 27, 6); g.fill();
+  g.fillStyle = '#1d2746'; g.beginPath(); g.arc(0, -49, 8, 0, TAU); g.fill();
+  g.fillStyle = '#ff8f7a'; roundRect(-1, -52, 9, 4.5, 2); g.fill();
+  g.restore();
+}
+const HERO_A = 3.05, HERO_B = 3.52, CAB_A = 3.95, CAB_B = 8.35;      // 冲进车站的起止、缆车出发和到站
+const heroCabY = t => lerp(G0[1], G1[1], smoother((t - CAB_A) / (CAB_B - CAB_A)));
+function drawHero(t) {
+  if (t > HERO_A - .12 && t < HERO_B + .12) {                         // 从车门到车站入口：一个带残影的小跳步
+    const door = [1012 - 230 - 18, TRAIN_Y - 8], gate = [475, 5390];
+    for (let q = 3; q >= 0; q--) {
+      const u = clamp((t - HERO_A - q * .045) / (HERO_B - HERO_A)), p = ease(u);
+      if (t - q * .045 < HERO_A - .12) continue;
+      const pop = clamp((t - (HERO_A - .12)) / .12) * (1 - clamp((t - HERO_B) / .12));
+      miniHero(lerp(door[0], gate[0], p), lerp(door[1], gate[1], p) - 46 * Math.sin(Math.PI * p), 1.45, t * 26, (q ? .22 - q * .05 : 1) * pop);
+    }
+  }
+  if (t > 3.6 && t < 8.9) {                                           // 他坐的那一节缆车：比别的大一点，亮着灯，窗里看得见橙色的雪服
+    const y = heroCabY(t), x = gondX(y) - 17, a = clamp((t - 3.6) / .2) * (1 - clamp((t - 8.6) / .3)), sway = .05 * Math.sin(t * 3.3) * clamp((t - CAB_A) / .5);
+    g.save(); g.globalAlpha = a; g.translate(x, y); g.rotate(sway); g.scale(1.3, 1.3);
+    g.strokeStyle = '#4b5674'; g.lineWidth = 4; g.beginPath(); g.moveTo(0, 0); g.lineTo(0, 24); g.stroke();
+    g.fillStyle = '#f4f6fb'; roundRect(-27, 22, 54, 60, 12); g.fill();
+    g.fillStyle = '#ffe2b0'; roundRect(-22, 30, 44, 26, 6); g.fill();                                   // 亮着灯的车窗
+    g.fillStyle = '#f0a23a'; roundRect(-9, 42, 18, 14, 5); g.fill(); g.fillStyle = '#1d2746'; g.beginPath(); g.arc(0, 38, 6.5, 0, TAU); g.fill();
+    g.fillStyle = '#d2893f'; g.fillRect(-27, 62, 54, 6);
+    g.strokeStyle = '#e9a13b'; g.lineWidth = 3; g.beginPath(); g.moveTo(30, 28); g.lineTo(30, 80); g.moveTo(35, 28); g.lineTo(35, 80); g.stroke();   // 挂在车厢外的雪板
+    g.restore();
+  }
+}
+// ---- 开场雪道上滑下来的几个人（远远的小点，一直在动）----
+function drawPisteSkiers(t) {
+  [['#e0574a', 0], ['#3f7bd6', 1.3], ['#4fb08a', 2.5], ['#8b6fd0', 3.6]].forEach(([col, off], i) => {
+    const ph = fract((t + off) / 4.6), y = 4180 + ph * 800, x = pisteX(y) + (60 + i * 18) * Math.sin(y / 62 + i * 2), lean = Math.cos(y / 62 + i * 2) * .5;
+    g.save(); g.globalAlpha = Math.min(1, ph * 6, (1 - ph) * 6); g.translate(x, y); g.rotate(lean * .5);
+    g.strokeStyle = '#2a3352'; g.lineWidth = 3; g.beginPath(); g.moveTo(-9, 2); g.lineTo(9, 2); g.stroke();
+    g.fillStyle = '#1b2545'; g.fillRect(-4, -14, 8, 14); g.fillStyle = col; roundRect(-6, -32, 12, 20, 4); g.fill();
+    g.fillStyle = '#1d2746'; g.beginPath(); g.arc(0, -37, 5.5, 0, TAU); g.fill();
+    g.restore();
+  });
 }
 function drawSkier(t, noShadow) {
-  if (t < 7.8) return;
+  if (t < 8.55) return;
   const s = skiState(clamp(t, TD0, TD1)), head = Math.atan(s.dx);
+  const walk = ease(clamp((t - 8.55) / 1.25)), wsc = t < TD0 ? lerp(.4, 1, walk) : 1;      // 从山顶站走出来，滑到出发点（越走越近，人越来越大）
   const crouch = s.moving ? .78 + .1 * Math.cos((s.y - SKI0) / TURN * 2) : t < TD0 ? 1 + .012 * Math.sin(t * 3.1) - .2 * ease(clamp((t - (TD0 - .7)) / .7)) : 1;   // 出发前呼吸、最后压低身子
   const brake = clamp((t - (TD1 - .6)) / .5), arm = clamp((t - TD1 - .15) / .4) * (1 - clamp((t - TD1 - 1.6) / .5));
-  g.save(); g.translate(s.x, s.y);
+  g.save(); g.translate(lerp(G1[0] - 40, s.x, t < TD0 ? walk : 1), lerp(G1[1] + 40, s.y, t < TD0 ? walk : 1)); g.scale(wsc, wsc);
+  if (t < TD0 && walk < 1) g.rotate(.09 * Math.sin(t * 11) * (1 - walk));                 // 蹬着雪板滑过来，左右一摆一摆
   if (!noShadow) { const a = g.globalAlpha; g.globalAlpha = t < TD0 ? .28 : .1; g.drawImage(radialSprite([30, 40, 110], 1.3), -30, -12, 120, 36); g.globalAlpha = a; }
   g.save(); g.rotate(-head * .9 + brake * 1.2 * (t < TD1 + 2 ? 1 : 1));         // 雪板朝着前进方向；刹停时横过来
   g.fillStyle = '#e9a13b'; roundRect(-13, -30, 7, 96, 3.5); g.fill(); roundRect(6, -30, 7, 96, 3.5); g.fill();
@@ -955,7 +1029,7 @@ function drawLights(t, night) {
     glowAt([255, 170, 90], .6 * night, 905, 6594 + DY - camNow, 460, 360, 1.5); glowAt([255, 170, 90], .6 * night, 64, 7254 + DY - camNow, 460, 360, 1.5);
     glowAt([255, 150, 70], .12 * night, 540, 6840 + DY - camNow, 1100, 900, 1.1);         // 池子周围一层很淡的暖光
   }
-  cabins(t, (x, y) => glowAt([255, 214, 150], .5 * night, x, y + 44 - camNow, 34, 26));
+  cabins(t, (x, y, i, al = 1) => glowAt([255, 214, 150], .5 * night * al, x, y + 44 - camNow, 34, 26));
   g.save(); g.translate(0, -camNow); trainLights(t, night); g.restore();
   g.globalCompositeOperation = 'source-over';
 }
@@ -966,7 +1040,7 @@ function drawSnow(t, k, vcam) {
   for (let i = 0; i < 300; i++) {
     const L = i % 3, par = .3 + L * .25, cyc = 3 + L * 2 + Math.floor(rnd(i, 3) * 2);
     const y = fract(rnd(i, 2) + cyc * t / T - camNow * par / 2100) * 2100 - 90;
-    const x = fract(rnd(i, 1) + .04 * Math.sin(TAU * (2 * t / T + rnd(i, 4))) + (2 + L) * t / T) * 1240 - 80;
+    const x = fract(rnd(i, 1) + .04 * Math.sin(TAU * (2 * t / T + rnd(i, 4))) + (2 + L) * t / T + (.1 + L * .05) * ease(clamp((t - TR0 - .5) / 1.6))) * 1240 - 80;   // 列车冲进来的一阵风把雪往前推
     const r = (1.4 + L * 1.2) * (.7 + rnd(i, 5) * .7), st = clamp(vcam * par * .022, -60, 60);
     g.strokeStyle = `rgba(240,246,255,${k * (.45 + L * .2)})`; g.lineWidth = r * 2;
     g.beginPath(); g.moveTo(x, y); g.lineTo(x + .5, y - st + .5); g.stroke();
@@ -1136,7 +1210,7 @@ const LINE2 = 1516;
 const NAME = [82, 500, 6], SUB = [40, 500, 2], NUM = [172, 300, -4], UNIT = [54, 500, 4];   // [字号, 字重, 字距]
 function nameLine(s, segs, sub) {               // 一句话的大字：segs = [[文字, 是否金色], ...]，整行居中
   rise(s, () => {
-    line(segs.map(([q, key]) => [q, NAME[0], key ? TYPE.gold : WHITE, NAME[1], NAME[2]]), LINE1);
+    line(segs.map(([q, key]) => [q, NAME[0], key ? keyCol : WHITE, NAME[1], NAME[2]]), LINE1);
     if (sub) text(sub, W / 2, LINE2, SUB[0], WHITE, SUB[1], 'center', SUB[2]);
   });
 }
@@ -1148,7 +1222,9 @@ function snowflake(x, y, r, col) {               // 片尾小字前的一片雪�
   for (let i = 0; i < 6; i++) { g.rotate(TAU / 6); g.beginPath(); g.moveTo(0, 0); g.lineTo(0, -r); g.moveTo(0, -r * .55); g.lineTo(-r * .3, -r * .8); g.moveTo(0, -r * .55); g.lineTo(r * .3, -r * .8); g.stroke(); }
   g.restore();
 }
+let keyCol = TYPE.gold;
 function typo(t) {
+  keyCol = mixCol([243, 199, 118], [232, 132, 30], sunAt(t) * .9);      // 晚霞里的雪是暖色的，金色压深成橙色才分得开
   g.save();
   numLine(t < 3.3 ? {p: 1, out: clamp((3.3 - t) / .35)} : 0, '70', '  分钟', '东京坐新干线，出了隧道就是雪国');   // 第 0 帧就在，当封面
   nameLine(scene(t, 3.45, 4.95), [['下车就是', 0], ['雪场', 1]], 'GALA 汤泽站 · 冬天有直达车');
@@ -1169,7 +1245,7 @@ function typo(t) {
 
 // 给检查工具看的分镜
 const PLAN = [
-  {name: '新干线进站', from: 0, to: 3.2}, {name: '沿缆车上山', from: 3.2, to: 8.4}, {name: '山顶云海晚霞', from: 8.4, to: 10.7},
+  {name: '新干线进站，主角下车', from: 0, to: 3.95}, {name: '跟着主角的缆车上山', from: 3.95, to: 8.4}, {name: '山顶云海晚霞', from: 8.4, to: 10.7},
   {name: '滑回山脚', from: 10.7, to: 16.3}, {name: '温泉街', from: 16.3, to: 19.8}, {name: '露天温泉', from: 19.8, to: 23.6}, {name: '提醒与回环', from: 23.6, to: 26},
 ];
 let camNow = 0;
@@ -1197,7 +1273,7 @@ function render(t) {
   g.drawImage(WORLD, 0, OY - cam);
   g.save(); g.translate(0, -cam);
   drawTracks(t); drawPowder(t, false); drawSkier(t);
-  if (cam > 3200) drawTrain(t);
+  if (cam > 3200) { drawPisteSkiers(t); drawTrain(t); }
   if (cam > STREET - 2100 && cam < STREET + 300) drawStreetPeople(t);
   drawGondola(t);
   g.restore();
@@ -1223,7 +1299,7 @@ function render(t) {
     g.globalCompositeOperation = 'source-over';
   } else { g.fillStyle = '#0a1024'; g.fillRect(0, 0, W, H); }
   g.drawImage(FRAME, 0, 0);
-  g.save(); g.translate(0, -cam); drawPowder(t, true); if (cam > 3200) drawTrainSpray(t); g.globalAlpha = .5; drawSkier(t, true); g.restore();      // 人物保留一半本色，暮色里也看得清
+  g.save(); g.translate(0, -cam); drawPowder(t, true); if (cam > 3200) drawTrainSpray(t); drawHero(t); g.globalAlpha = .5; drawSkier(t, true); g.restore();      // 人物保留一半本色，暮色里也看得清
   if (sun > .02 && cam < 2600) {                                  // 逆光的一片暖光
     g.globalCompositeOperation = 'lighter'; glowAt([255, 170, 110], .3 * sun, sunX, sunY + (cam < 1400 ? 60 : 300), 900, 700, 1.3); g.globalCompositeOperation = 'source-over';
   }
