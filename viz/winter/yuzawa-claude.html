@@ -367,7 +367,8 @@ const G0 = [880, 5150], G1 = [985, 1215];   // 山顶一端靠右，缆车线不
 const gondX = y => lerp(G0[0], G1[0], (G0[1] - y) / (G0[1] - G1[1]));
 
 // ======== 滑雪的人：路线和时间 ========
-const TD0 = 10.7, TD1 = 16.3, SKI0 = 1150, SKI1 = 5030;
+const CLIMB1 = 7.8;                        // 上山结束、到山顶的时间
+const TD0 = 10.7, TD1 = 15.7, SKI0 = 1150, SKI1 = 5030;
 function skiE(u) {                          // 起步加速、匀速、最后刹停
   u = clamp(u); const a = .18, d = .12, v = 1 / (1 - a / 2 - d / 2);
   return u < a ? v * u * u / (2 * a) : u < 1 - d ? v * (u - a / 2) : 1 - v * (1 - u) * (1 - u) / (2 * d);
@@ -384,14 +385,14 @@ function skiState(t) {
 }
 
 // ======== 镜头 ========
-const TD = 15.5, TS1 = 17.6, TS2 = 19.4, TO = 21.0, VST = 28;   // 落到温泉街缓一拍（慢慢往下漂），再落进温泉
+const TD = 14.9, TS1 = 17.0, TS2 = 19.3, TO = 20.9, VST = 24;   // 落到温泉街缓一拍（慢慢往下漂），再落进温泉
 const herm = (u, p0, v0, p1, v1, d) => { const u2 = u * u, u3 = u2 * u; return (2 * u3 - 3 * u2 + 1) * p0 + (u3 - 2 * u2 + u) * v0 * d + (-2 * u3 + 3 * u2) * p1 + (u3 - u2) * v1 * d; };
 const camFollow = t => skiY(t) - (980 + 90 * ease(clamp((t - TD0) / 2)));
 const CAM_P0 = camFollow(TD), CAM_V0 = (camFollow(TD) - camFollow(TD - .002)) / .002;
 function camY(t) {
   if (t < 4.2) return YS - 40 * ease(t / 4.2);
-  if (t < 8.4) return lerp(YS - 40, YTOP, smoother((t - 4.2) / 4.2));
-  if (t < TD0) return YTOP - 30 * ease((t - 8.4) / (TD0 - 8.4));
+  if (t < CLIMB1) return lerp(YS - 40, YTOP, smoother((t - 4.2) / (CLIMB1 - 4.2)));
+  if (t < TD0) return YTOP - 30 * ease((t - CLIMB1) / (TD0 - CLIMB1));
   if (t < TD) return camFollow(t);
   if (t < TS1) return herm((t - TD) / (TS1 - TD), CAM_P0, CAM_V0, YST, VST, TS1 - TD);   // 人在山脚刹停，镜头带着原来的速度继续往下
   if (t < TS2) return YST + VST * (t - TS1);
@@ -400,10 +401,10 @@ function camY(t) {
 }
 
 // ======== 光线时间表 ========
-const tintAt = t => keys(t, [[4.4, [146, 170, 224]], [5.6, [176, 192, 226]], [7.3, [250, 200, 170]], [10.4, [244, 176, 152]], [13.0, [128, 132, 190]], [15.6, [78, 94, 158]], [18, [96, 106, 152]]]);
-const sunAt = t => keys(t, [[5.6, 0], [7.2, 1], [10.6, .9], [11.1, 0]]);   // 人一离开山顶，夕阳的长影就收掉（下滑途中慢慢褪会像一块块来历不明的影子）
-const nightAt = t => keys(t, [[0, .34], [5, .34], [6.5, 0], [11.5, 0], [14.5, .6], [17.5, 1]]);
-const snowAt = t => keys(t, [[0, 1], [4.6, 1], [6.2, 0], [13.2, 0], [16, .55], [18, .75], [T, .75]]);
+const tintAt = t => keys(t, [[4.4, [146, 170, 224]], [5.6, [176, 192, 226]], [7.0, [250, 200, 170]], [10.4, [244, 176, 152]], [12.8, [128, 132, 190]], [15.1, [78, 94, 158]], [17.4, [96, 106, 152]]]);
+const sunAt = t => keys(t, [[5.6, 0], [6.9, 1], [10.6, .9], [11.1, 0]]);   // 人一离开山顶，夕阳的长影就收掉（下滑途中慢慢褪会像一块块来历不明的影子）
+const nightAt = t => keys(t, [[0, .34], [5, .34], [6.5, 0], [11.5, 0], [14, .6], [16.9, 1]]);
+const snowAt = t => keys(t, [[0, 1], [4.6, 1], [6.2, 0], [13.2, 0], [15.5, .55], [17.4, .75], [T, .75]]);
 const duskAt = t => keys(t, [[10.2, 0], [13.4, 1]]);          // 天空：晚霞 → 夜
 
 // ======== 树 ========
@@ -659,8 +660,8 @@ const zbx = ZBUF.getContext('2d');
 // 返回 {z, fx, fy, ax, ay, roll}：画面里 (fx,fy) 这一点放到屏幕 (ax,ay)，放大 z 倍
 function zoomAt(t) {
   const ax = W / 2, ay = 1150;
-  if (t > TD0 && t < 15.8) {
-    const k = easeOut((t - TD0) / .7) * (1 - ease(clamp((t - 15.0) / .8)));
+  if (t > TD0 && t < 15.2) {
+    const k = easeOut((t - TD0) / .7) * (1 - ease(clamp((t - 14.4) / .8)));
     const s = skiState(t), lag = skiX(skiY(Math.max(TD0, t - .3))), cy = camY(t);
     const z = 1 + k * (.8 + .05 * Math.sin((s.y - SKI0) / TURN * 2));
     const shake = k * 1.6 * (Math.sin(t * 47.3) + .6 * Math.sin(t * 71.9 + 1.3));
@@ -713,8 +714,8 @@ function drawTrain(t) {
     g.fillStyle = '#39445f'; g.fillRect(x1 - 6, y - hgt + 4, 6, hgt - 12);
     g.fillStyle = 'rgba(70,84,120,.55)'; [x0 + 10, x1 - 26].forEach(dx => { g.fillRect(dx, y - 66, 2, 58); g.fillRect(dx + 13, y - 66, 2, 58); g.fillRect(dx + 4, y - 56, 7, 16); });   // 车门
     g.fillStyle = '#232c48'; g.fillRect(x0 + 34, y - 8, 76, 9); g.fillRect(x1 - 118, y - 8, 76, 9);                      // 转向架
-    if (k === 0 && t > TR1 && t < 4.4) {                                              // 停稳后车门打开，车里的暖光漏出来
-      const d = ease(clamp((t - TR1 - .05) / .22)) * (1 - ease(clamp((t - 4.0) / .35))), dx = x1 - 30;
+    if (k < 2 && t > TR1 && t < 4.4) {                                               // 停稳后列车中间的两扇车门打开（两节车厢相接处，正对着车站入口），车里的暖光漏出来
+      const d = ease(clamp((t - TR1 - .05) / .22)) * (1 - ease(clamp((t - 4.0) / .35))), dx = k ? x1 - 30 : x0 + 6;
       g.fillStyle = '#1c2540'; g.fillRect(dx, y - 68, 23, 60); g.fillStyle = `rgba(255,214,150,${.95 * d})`; g.fillRect(dx + 11.5 - 10 * d, y - 66, 20 * d, 58);
     }
     if (k === 1) { g.strokeStyle = '#39445f'; g.lineWidth = 3; g.beginPath(); g.moveTo(x0 + 150, y - hgt); g.lineTo(x0 + 178, y - hgt - 9); g.lineTo(x0 + 206, y - hgt); g.moveTo(x0 + 158, y - hgt - 9); g.lineTo(x0 + 198, y - hgt - 9); g.stroke(); }   // 受电弓
@@ -731,7 +732,7 @@ function trainLights(t, k) {
 }
 // ---- 缆车 ----
 const CAB_D = 520, CAB_N = 8, CAB_V = 7 * CAB_D / T;
-const upLine = t => 1 - ease(clamp((t - 3.3) / .5)) * (1 - ease(clamp((t - 8.8) / .6)));   // 镜头跟着主角那一节上山时，上行线上别的车厢先让开
+const upLine = t => 1 - ease(clamp((t - 3.3) / .5)) * (1 - ease(clamp((t - CAB_B - .4) / .6)));   // 镜头跟着主角那一节上山时，上行线上别的车厢先让开
 function cabins(t, fn) {
   for (let i = 0; i < CAB_N; i++) {
     const d = fract((t * CAB_V + i * CAB_D) / (CAB_N * CAB_D)) * CAB_N * CAB_D;
@@ -780,18 +781,39 @@ function drawPowder(t, lit) {                    // lit=false：雪雾落在雪�
   }
   g.globalAlpha = 1;
 }
-function drawTrainSpray(t) {                     // 进站：车头卷起的雪浪、贴着车身的速度线、车灯在雪里打出的光柱
-  const v = trainSpeed(t), nose = t < 8 ? trainNose(t) : 1012, sp = radialSprite([255, 255, 255], 1.25);
-  if (t >= TR0 && t < TR1 + 1.2) {
-    const linger = t > TR1 ? 1 - (t - TR1) / 1.2 : 1, power = Math.max(Math.pow(v, .65), .25 * linger) * linger;
-    for (let i = 0; i < 110; i++) {
-      const a = fract(t * (1.1 + rnd(i, 3) * .8) + rnd(i, 1)), back = rnd(i, 2) * rnd(i, 4) * 1700, up = i % 4 === 0 ? 2.1 : 1;     // 每四团里有一团被掀得更高
-      const x = nose - 30 - back - a * 190, y = TRAIN_Y + 14 - a * (40 + rnd(i, 5) * 150) * up, r = 34 + a * 130 + back * .03;
-      if (x < -240) continue;
-      g.globalAlpha = .62 * power * (1 - a) * (1 - back / 1900); g.drawImage(sp, x - r, y - r * .7, r * 2, r * 1.4);
-    }
-    g.globalAlpha = 1;
+// 一团团有厚度的雪块：按抛物线飞起来、落下去，落地后留一小会儿再化掉。不透明，下面一圈发蓝的暗面，不是雾
+// 每一块：[出发时间, x, y, 横向速度, 向上的速度, 大小]
+function snowChunks(t, list, ground) {
+  const G = 1700;
+  list.forEach(([t0, x0, y0, vx, vy, r], i) => {
+    const age = t - t0; if (age < 0) return;
+    const land = 2 * vy / G + .0001, a = Math.min(age, land), fade = 1 - clamp((age - land) / .5);
+    if (fade <= 0) return;
+    const x = x0 + vx * a, y = y0 - vy * a + .5 * G * a * a, squash = age > land ? .55 : 1, rr = r * (age > land ? 1.15 : 1);
+    g.globalAlpha = fade;
+    g.fillStyle = '#a9bbe0'; g.beginPath(); g.ellipse(x + 1.5, y + rr * .28 * squash, rr, rr * .8 * squash, 0, 0, TAU); g.fill();
+    g.fillStyle = '#ffffff'; g.beginPath(); g.ellipse(x, y - rr * .12 * squash, rr * .92, rr * .72 * squash, 0, 0, TAU); g.fill();
+  });
+  g.globalAlpha = 1;
+}
+let TRAIN_CHUNKS = null;
+function trainChunks() {
+  if (TRAIN_CHUNKS) return TRAIN_CHUNKS;
+  const L = [];
+  for (let i = 0; i < 150; i++) {                 // 刹车途中：车头和车身两侧一路掀起来
+    const t0 = Math.max(TR0 + .2, TR1 - 1.9 * Math.pow(rnd(i, 231), 1.4)), v = trainSpeed(t0), x0 = trainNose(t0) - 30 - rnd(i, 232) * rnd(i, 233) * 800;
+    if (x0 < -80) continue;
+    L.push([t0, x0, TRAIN_Y + 6 + rnd(i, 238) * 22, (160 + rnd(i, 234) * 620) * (.25 + v), 320 + rnd(i, 235) * 620, 6 + rnd(i, 236) * rnd(i, 237) * 22]);
   }
+  for (let i = 0; i < 150; i++) {                 // 停稳的那一下：沿着整列车掀起最大的一蓬
+    const x0 = 1012 - rnd(i, 241) * 1040, front = x0 > 880;
+    L.push([TR1 - .22 + rnd(i, 242) * .3, x0, TRAIN_Y + 6 + rnd(i, 247) * 22, (rnd(i, 243) - (front ? .15 : .4)) * 420, 380 + rnd(i, 244) * 760, 7 + rnd(i, 245) * rnd(i, 246) * 26]);
+  }
+  return TRAIN_CHUNKS = L;
+}
+function drawTrainSpray(t) {                     // 进站：掀起来的雪块、贴着车身的速度线、车灯在雪里打出的光柱
+  const v = trainSpeed(t), nose = t < 8 ? trainNose(t) : 1012;
+  if (t >= TR0 && t < TR1 + 2.4) snowChunks(t, trainChunks());
   if (v > .02) {                                 // 速度线
     g.lineCap = 'round';
     for (let i = 0; i < 26; i++) {
@@ -817,20 +839,20 @@ function miniHero(x, y, sc, run, alpha = 1, carry = true) {
   g.fillStyle = '#ff8f7a'; roundRect(-1, -52, 9, 4.5, 2); g.fill();
   g.restore();
 }
-const HERO_A = 3.05, HERO_B = 3.52, CAB_A = 3.95, CAB_B = 8.35;      // 冲进车站的起止、缆车出发和到站
+const HERO_A = 3.05, HERO_B = 3.52, CAB_A = 3.95, CAB_B = CLIMB1 - .05, JUMP_A = CLIMB1 + .15, JUMP_B = JUMP_A + .75;      // 冲进车站、缆车出发和到站、从山顶站跳出去      // 冲进车站的起止、缆车出发和到站
 const heroCabY = t => lerp(G0[1], G1[1], smoother((t - CAB_A) / (CAB_B - CAB_A)));
 function drawHero(t) {
   if (t > HERO_A - .12 && t < HERO_B + .12) {                         // 从车门到车站入口：一个带残影的小跳步
-    const door = [1012 - 230 - 18, TRAIN_Y - 8], gate = [475, 5390];
+    const door = [1012 - 230 - 400 + 18, TRAIN_Y - 8], gate = [475, 5390];      // 从列车中间的车门下车
     for (let q = 3; q >= 0; q--) {
       const u = clamp((t - HERO_A - q * .045) / (HERO_B - HERO_A)), p = ease(u);
       if (t - q * .045 < HERO_A - .12) continue;
       const pop = clamp((t - (HERO_A - .12)) / .12) * (1 - clamp((t - HERO_B) / .12));
-      miniHero(lerp(door[0], gate[0], p), lerp(door[1], gate[1], p) - 46 * Math.sin(Math.PI * p), 1.45, t * 26, (q ? .22 - q * .05 : 1) * pop);
+      miniHero(lerp(door[0], gate[0], p), lerp(door[1], gate[1], p) - 54 * Math.sin(Math.PI * p), 1.45, t * 26, (q ? .22 - q * .05 : 1) * pop);
     }
   }
-  if (t > 3.6 && t < 8.9) {                                           // 他坐的那一节缆车：比别的大一点，亮着灯，窗里看得见橙色的雪服
-    const y = heroCabY(t), x = gondX(y) - 17, a = clamp((t - 3.6) / .2) * (1 - clamp((t - 8.6) / .3)), sway = .05 * Math.sin(t * 3.3) * clamp((t - CAB_A) / .5);
+  if (t > 3.6 && t < CAB_B + .7) {                                           // 他坐的那一节缆车：比别的大一点，亮着灯，窗里看得见橙色的雪服
+    const y = heroCabY(t), x = gondX(y) - 17, a = clamp((t - 3.6) / .2) * (1 - clamp((t - CAB_B - .35) / .3)), sway = .05 * Math.sin(t * 3.3) * clamp((t - CAB_A) / .5);
     g.save(); g.globalAlpha = a; g.translate(x, y); g.rotate(sway); g.scale(1.3, 1.3);
     g.strokeStyle = '#4b5674'; g.lineWidth = 4; g.beginPath(); g.moveTo(0, 0); g.lineTo(0, 24); g.stroke();
     g.fillStyle = '#f4f6fb'; roundRect(-27, 22, 54, 60, 12); g.fill();
@@ -852,15 +874,23 @@ function drawPisteSkiers(t) {
     g.restore();
   });
 }
+const skierScale = t => t < TD0 ? .5 : lerp(.5, 1, easeOut((t - TD0) / .7));
+let LAND_CHUNKS = null;
+function drawLanding(t) {                        // 落地砸起来的一蓬雪块
+  if (t < JUMP_B - .02 || t > JUMP_B + 2) return;
+  if (!LAND_CHUNKS) { const x = skiX(SKI0), y = SKI0 + 6; LAND_CHUNKS = []; for (let i = 0; i < 46; i++) LAND_CHUNKS.push([JUMP_B + rnd(i, 251) * .06, x + (rnd(i, 252) - .5) * 50, y - 14 + rnd(i, 257) * 44, (rnd(i, 253) - .5) * 520, 180 + rnd(i, 254) * 520, 4 + rnd(i, 255) * rnd(i, 256) * 15]); }
+  snowChunks(t, LAND_CHUNKS);
+}
 function drawSkier(t, noShadow) {
-  if (t < 8.55) return;
+  if (t < JUMP_A) return;
   const s = skiState(clamp(t, TD0, TD1)), head = Math.atan(s.dx);
-  const walk = ease(clamp((t - 8.55) / 1.25)), wsc = t < TD0 ? lerp(.4, 1, walk) : 1;      // 从山顶站走出来，滑到出发点（越走越近，人越来越大）
-  const crouch = s.moving ? .78 + .1 * Math.cos((s.y - SKI0) / TURN * 2) : t < TD0 ? 1 + .012 * Math.sin(t * 3.1) - .2 * ease(clamp((t - (TD0 - .7)) / .7)) : 1;   // 出发前呼吸、最后压低身子
+  // 山顶：人和缆车站是同一个比例（小），从站里一个大跳直接落到出发点，大小不变；出发时镜头猛推，人跟着镜头一起变大
+  const ju = clamp((t - JUMP_A) / (JUMP_B - JUMP_A)), fsc = skierScale(t);
+  const crouch = s.moving ? .78 + .1 * Math.cos((s.y - SKI0) / TURN * 2) : t < TD0 ? 1 + .012 * Math.sin(t * 3.1) - .2 * ease(clamp((t - (TD0 - .7)) / .7)) - .22 * Math.sin(Math.PI * clamp((t - JUMP_B) / .35)) : 1;   // 出发前呼吸、最后压低身子
   const brake = clamp((t - (TD1 - .6)) / .5), arm = clamp((t - TD1 - .15) / .4) * (1 - clamp((t - TD1 - 1.6) / .5));
-  g.save(); g.translate(lerp(G1[0] - 40, s.x, t < TD0 ? walk : 1), lerp(G1[1] + 40, s.y, t < TD0 ? walk : 1)); g.scale(wsc, wsc);
-  if (t < TD0 && walk < 1) g.rotate(.09 * Math.sin(t * 11) * (1 - walk));                 // 蹬着雪板滑过来，左右一摆一摆
-  if (!noShadow) { const a = g.globalAlpha; g.globalAlpha = t < TD0 ? .28 : .1; g.drawImage(radialSprite([30, 40, 110], 1.3), -30, -12, 120, 36); g.globalAlpha = a; }
+  g.save(); g.translate(lerp(G1[0] - 70, s.x, ju), lerp(G1[1] + 16, s.y, ju) - 230 * Math.sin(Math.PI * ju)); g.scale(fsc, fsc);
+  if (ju < 1) g.rotate(-.5 * Math.sin(Math.PI * ju));                                     // 跳在空中时身体前倾
+  if (!noShadow && ju >= 1) { const a = g.globalAlpha; g.globalAlpha = t < TD0 ? .28 : .1; g.drawImage(radialSprite([30, 40, 110], 1.3), -30, -12, 120, 36); g.globalAlpha = a; }
   g.save(); g.rotate(-head * .9 + brake * 1.2 * (t < TD1 + 2 ? 1 : 1));         // 雪板朝着前进方向；刹停时横过来
   g.fillStyle = '#e9a13b'; roundRect(-13, -30, 7, 96, 3.5); g.fill(); roundRect(6, -30, 7, 96, 3.5); g.fill();
   g.restore();
@@ -1077,9 +1107,9 @@ function drawFog(t, tint) {
 
 // ======== 文字 ========
 const STORY = [            // 旁白只在画面需要解释时出现，一场最多一句；不写价格（每年都变）
-  [4.7, 8.0, '出了检票口，就是上山的缆车。'],
-  [17.5, 19.6, '越后汤泽站西口，一出站就是温泉街。'],
-  [21.3, 23.4, '不住旅馆，也有当天能泡的温泉。'],
+  [4.5, 7.5, '出了检票口，就是上山的缆车。'],
+  [17.0, 19.3, '越后汤泽站西口，一出站就是温泉街。'],
+  [21.1, 23.2, '不住旅馆，也有当天能泡的温泉。'],
 ];
 const HEADER = {title: '越后汤泽', place: '新潟县汤泽町', story: STORY, sheen: [60, 300, W - 120, 420]};
 const LINE1 = 1440;
@@ -1228,31 +1258,31 @@ function typo(t) {
   g.save();
   numLine(t < 3.3 ? {p: 1, out: clamp((3.3 - t) / .35)} : 0, '70', '  分钟', '东京坐新干线，出了隧道就是雪国');   // 第 0 帧就在，当封面
   nameLine(scene(t, 3.45, 4.95), [['下车就是', 0], ['雪场', 1]], 'GALA 汤泽站 · 冬天有直达车');
-  nameLine(scene(t, 8.8, 10.9), [['空手来 ', 0], ['滑一天', 1]], '雪板、雪服，车站里都能租');
-  let s = scene(t, 12.0, 14.4);
+  nameLine(scene(t, 8.6, 10.6), [['空手来 ', 0], ['滑一天', 1]], '雪板、雪服，车站里都能租');
+  let s = scene(t, 11.8, 14.0);
   numLine(s, s ? (2.5 * easeOut(s.age / 1.3)).toFixed(1) : '', '  公里', '最长的雪道，一路滑回车站', '2.5');   // 数字跟着人往下滑数上去
-  nameLine(scene(t, 17.5, 19.7), [['滑完雪 ', 0], ['逛温泉街', 1]], '从 GALA 坐一站 · 越后汤泽站');
-  nameLine(scene(t, 21.1, 23.4), [['雪地里 ', 0], ['泡温泉', 1]], '白天滑雪，晚上泡温泉');
-  rise(scene(t, 23.6, 25.5), () => {              // 片尾提醒：左对齐两行，月份放大
+  nameLine(scene(t, 17.0, 19.4), [['滑完雪 ', 0], ['逛温泉街', 1]], '从 GALA 坐一站 · 越后汤泽站');
+  nameLine(scene(t, 21.0, 23.2), [['雪地里 ', 0], ['泡温泉', 1]], '白天滑雪，晚上泡温泉');
+  rise(scene(t, 23.4, 25.4), () => {              // 片尾提醒：左对齐两行，月份放大
     text('东京樱花开了，', 80, 1386, 66, WHITE, 500, 'left', 4);
     let x = 80 + text('这里还能滑到', 80, 1506, 66, WHITE, 500, 'left', 4) + 22;
     x += text('5', x, 1506, 156, TYPE.gold, 300, 'left', 0) + 18;
     text('月。', x, 1506, 66, WHITE, 500, 'left', 4);
   });
-  rise(scene(t, 23.9, 25.5), () => text('开放日期每年不同，出发前看官网', 80, 1584, SUB[0], WHITE, SUB[1], 'left', SUB[2]));
+  rise(scene(t, 23.7, 25.4), () => text('开放日期每年不同，出发前看官网', 80, 1584, SUB[0], WHITE, SUB[1], 'left', SUB[2]));
   g.restore();
 }
 
 // 给检查工具看的分镜
 const PLAN = [
-  {name: '新干线进站，主角下车', from: 0, to: 3.95}, {name: '跟着主角的缆车上山', from: 3.95, to: 8.4}, {name: '山顶云海晚霞', from: 8.4, to: 10.7},
-  {name: '滑回山脚', from: 10.7, to: 16.3}, {name: '温泉街', from: 16.3, to: 19.8}, {name: '露天温泉', from: 19.8, to: 23.6}, {name: '提醒与回环', from: 23.6, to: 26},
+  {name: '新干线进站，主角下车', from: 0, to: 3.95}, {name: '跟着主角的缆车上山', from: 3.95, to: 7.8}, {name: '山顶云海晚霞，主角跳出缆车站', from: 7.8, to: 10.7},
+  {name: '滑回山脚', from: 10.7, to: 15.7}, {name: '温泉街', from: 15.7, to: 19.6}, {name: '露天温泉', from: 19.6, to: 23.4}, {name: '提醒与回环', from: 23.4, to: 26},
 ];
 let camNow = 0;
 function inspectAt(t) {
   t = ((t % T) + T) % T; const s = skiState(clamp(t, TD0, TD1)), cy = camY(t), Z = zoomAt(t);
   return {time: t, shot: (PLAN.find(p => t >= p.from && t < p.to) || {}).name, cameraY: cy,
-    zoom: Z.z, skier: t >= 7.8 ? {screenX: (s.x - Z.fx) * Z.z + Z.ax, screenY: (s.y - cy - Z.fy) * Z.z + Z.ay, height: 186 * Z.z, moving: s.moving} : null,
+    zoom: Z.z, skier: t >= JUMP_A ? {screenX: (s.x - Z.fx) * Z.z + Z.ax, screenY: (s.y - cy - Z.fy) * Z.z + Z.ay, height: 186 * Z.z * skierScale(t), moving: s.moving} : null,
     narration: (STORY.find(r => t >= r[0] && t <= r[1]) || [])[2] || null, sun: sunAt(t), night: nightAt(t)};
 }
 
@@ -1292,14 +1322,14 @@ function render(t) {
     const dy = cam - YTOP;
     g.drawImage(verticalSprite('skyA', SKY_A), 0, -dy * .2, W, 1000);
     if (dusk > 0) { g.globalAlpha = dusk; g.drawImage(verticalSprite('skyB', SKY_B), 0, -dy * .2, W, 1000); g.globalAlpha = 1; }
-    sunY = 640 + (t - 8.4) * 16 - dy * .3;
+    sunY = 640 + (t - CLIMB1) * 16 - dy * .3;
     g.globalCompositeOperation = 'lighter';
     glowAt([255, 196, 120], .9 * (1 - dusk), sunX, sunY, 520, 420, 1.5); glowAt([255, 244, 214], 1 - dusk, sunX, sunY, 86, 86, 2.2);
     if (dusk > .3) for (let i = 0; i < 70; i++) { g.fillStyle = `rgba(255,255,255,${(dusk - .3) * (.2 + rnd(i, 3) * .6)})`; g.fillRect(rnd(i, 1) * W, rnd(i, 2) * 620 - dy * .2, 2, 2); }
     g.globalCompositeOperation = 'source-over';
   } else { g.fillStyle = '#0a1024'; g.fillRect(0, 0, W, H); }
   g.drawImage(FRAME, 0, 0);
-  g.save(); g.translate(0, -cam); drawPowder(t, true); if (cam > 3200) drawTrainSpray(t); drawHero(t); g.globalAlpha = .5; drawSkier(t, true); g.restore();      // 人物保留一半本色，暮色里也看得清
+  g.save(); g.translate(0, -cam); drawPowder(t, true); if (cam > 3200) drawTrainSpray(t); drawHero(t); g.globalAlpha = .5; drawSkier(t, true); g.globalAlpha = 1; drawLanding(t); g.restore();      // 人物保留一半本色，暮色里也看得清
   if (sun > .02 && cam < 2600) {                                  // 逆光的一片暖光
     g.globalCompositeOperation = 'lighter'; glowAt([255, 170, 110], .3 * sun, sunX, sunY + (cam < 1400 ? 60 : 300), 900, 700, 1.3); g.globalCompositeOperation = 'source-over';
   }
