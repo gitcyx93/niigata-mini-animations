@@ -439,6 +439,8 @@ const GLOWS = [];           // 柔光：[x, y, 半径, 强度]
 const TREES = [];
 const POOL = {x: 540, y: 6790 + DY, rx: 430, ry: 235};
 const TRAIN_Y = 5494, FENCE_Y = 6260;
+const MOUTH = 208;                         // 隧道口的位置：车头要到 0.85 秒左右才从这里露出来，之前只看得到洞里的车灯
+const PORTAL = mk(320, 380), PORTAL_X = -30, PORTAL_Y = 5180;     // 隧道口（盖在列车前面的一层）
 (function buildWorld() {
   const o = WORLD.getContext('2d'), s = SHADE.getContext('2d');
   o.translate(0, -OY); s.translate(0, -OY);
@@ -519,10 +521,23 @@ const TRAIN_Y = 5494, FENCE_Y = 6260;
   o.fillStyle = '#5a6684'; for (let x = 40; x < W; x += 130) o.fillRect(x, 5408, 7, 92);
   box(0, 5408, W, 92, 'rgba(40,52,84,.5)');
   o.strokeStyle = 'rgba(30,38,64,.8)'; o.lineWidth = 1.6; o.beginPath(); o.moveTo(0, 5411); o.lineTo(W, 5411); o.stroke();      // 架线
-  for (let x = 105; x < W; x += 260) { box(x, 5470, 5, 24, '#39445f'); box(x - 22, 5462, 50, 10, '#e9edf5'); LIGHTS.push([x - 20, 5464, 46, 6, 0]); }   // 站台上的站名牌
+  for (let x = 365; x < W; x += 260) { box(x, 5470, 5, 24, '#39445f'); box(x - 22, 5462, 50, 10, '#e9edf5'); LIGHTS.push([x - 20, 5464, 46, 6, 0]); }   // 站台上的站名牌
   box(0, TRAIN_Y, W, 22, '#4a5574'); snowCap(-10, TRAIN_Y + 20, W + 20, 10);
+  (function buildPortal() {                                               // 铁道左端的隧道口：一座盖着雪的小山，混凝土的洞门朝着车站
+    const c = PORTAL.getContext('2d'); c.translate(-PORTAL_X, -PORTAL_Y);
+    const hill = c.createLinearGradient(0, 5230, 0, 5560); hill.addColorStop(0, '#f6f9fe'); hill.addColorStop(1, '#dbe4f4');
+    c.fillStyle = hill; c.beginPath(); c.moveTo(-30, 5560); c.lineTo(-30, 5262); c.bezierCurveTo(40, 5210, 120, 5236, 170, 5300); c.bezierCurveTo(196, 5336, 206, 5360, 210, 5386); c.lineTo(186, 5560); c.closePath(); c.fill();
+    for (let i = 0; i < 10; i++) { c.globalAlpha = .28; c.drawImage(radialSprite([170, 188, 226], 1.4), rnd(i, 271) * 170 - 60, 5290 + rnd(i, 272) * 220, 170, 60); } c.globalAlpha = 1;
+    [[30, 5318, 78], [92, 5300, 96], [140, 5338, 64]].forEach(([x, y, h], i) => tree(c, x, y, h, 760 + i));
+    c.fillStyle = '#7f8ba6'; c.beginPath(); c.moveTo(150, 5388); c.lineTo(MOUTH + 8, 5388); c.lineTo(MOUTH + 8, 5524); c.lineTo(150, 5524); c.fill();      // 洞门
+    c.fillStyle = '#9aa6bf'; c.fillRect(150, 5388, MOUTH - 150 - 6, 136);
+    c.fillStyle = '#5d6984'; c.fillRect(MOUTH - 6, 5404, 14, 120);                                                                                       // 洞口的内沿，往里是黑的
+    c.fillStyle = '#6f7b96'; c.fillRect(140, 5376, MOUTH - 140 + 16, 16);
+    c.fillStyle = '#f6f9fe'; c.beginPath(); c.moveTo(134, 5380); c.quadraticCurveTo(180, 5346, MOUTH + 22, 5380); c.quadraticCurveTo(180, 5388, 134, 5380); c.fill();
+    c.fillStyle = 'rgba(60,72,104,.5)'; for (let y = 5420; y < 5520; y += 34) c.fillRect(150, y, MOUTH - 156, 2);                                         // 混凝土的模板缝
+  })();
   box(0, TRAIN_Y + 26, W, 40, '#cfd9ec');
-  for (let x = 60; x < W; x += 180) GLOWS.push([x, 5420, 70, .5]);
+  for (let x = 240; x < W; x += 180) GLOWS.push([x, 5420, 70, .5]);
   // ---- 温泉街：一排亮着灯的木造旅馆，屋檐下挂着暖帘和灯笼，街上有足汤 ----
   for (let i = 0; i < 12; i++) tree(o, 20 + i * 95 + (rnd(i, 121) - .5) * 50, STREET - 560 - rnd(i, 122) * 60, 130 + rnd(i, 123) * 40, 720 + i);   // 车站和温泉街之间的一排雪松（开场时压在画面底边）
   [[70, -350, 120], [215, -320, 95], [470, -335, 130], [690, -310, 100], [820, -340, 125], [1010, -315, 110]].forEach(([x, y, h], i) => tree(o, x, STREET + y, h, 700 + i));   // 屋后的几棵雪松
@@ -689,7 +704,7 @@ const fx = FRAME.getContext('2d'), mx = MASK.getContext('2d');
 const main = g;
 
 // ---- 新干线 ----
-const TR0 = .62, TR1 = 2.9;                 // 列车进画面、停稳的时间（视频从 0.9 秒开始，第一帧车头刚冲进来）
+const TR0 = .4, TR1 = 2.9;                 // 列车进画面、停稳的时间（视频从 0.9 秒开始，第一帧车头刚冲进来）
 const trainU = t => clamp((t - TR0) / (TR1 - TR0)), trainSpeed = t => t < TR0 || t > TR1 ? 0 : Math.pow(1 - trainU(t), 2);
 function trainNose(t) {                     // 高速冲进来、急刹，停稳时车身往前轻轻一点头
   const settle = t > TR1 ? 9 * Math.sin(Math.PI * clamp((t - TR1) / .4)) * (1 - clamp((t - TR1) / .4)) : 0;
@@ -727,7 +742,7 @@ function trainLights(t, k) {
   const nose = t < 8 ? trainNose(t) : 1012, y = TRAIN_Y;
   if (nose < -40) return;
   g.fillStyle = `rgba(255,220,160,${.75 * k})`;
-  for (let c = 0; c < 6; c++) for (let w = 0; w < 9; w++) { const x = nose - 230 - c * 400 - 394 + 26 + w * 40; if (x > -30) g.fillRect(x, y - 56, 28, 18); }
+  for (let c = 0; c < 6; c++) for (let w = 0; w < 9; w++) { const x = nose - 230 - c * 400 - 394 + 26 + w * 40; if (x > MOUTH + 6) g.fillRect(x, y - 56, 28, 18); }   // 还在隧道里的车窗不亮出来
   glowAt([255, 240, 210], .5 + .4 * k, nose - 22, y - 20, 60, 34);
 }
 // ---- 缆车 ----
@@ -794,32 +809,65 @@ function flecks(t, list, ground, drag = 2.4, grav = 1100) {     // ground：落�
     g.beginPath(); g.moveTo(x, y); g.lineTo(x - cvx * .03, y - cvy * .03); g.stroke();
   }
 }
-let TRAIN_FLECKS = null;
+let TRAIN_FLECKS = null, TRAIN_CLOUD = null;
 function trainFlecks() {                         // 车头像犁一样把雪往前、往上掀：雪沫的速度比车还快一点，所以总是飞在车头前面
   if (TRAIN_FLECKS) return TRAIN_FLECKS;
   const L = [];
   for (let i = 0; i < 520; i++) {
-    const t0 = TR0 + .12 + (TR1 - TR0 - .1) * Math.pow(rnd(i, 231), 1.25), v = 4500 / (TR1 - TR0) * trainSpeed(t0) + 40, low = i % 3 > 0;
-    L.push([t0, trainNose(t0) - 8 - rnd(i, 232) * 46, TRAIN_Y + 8 - rnd(i, 233) * (low ? 22 : 62), v * (.95 + rnd(i, 234) * .75), (low ? 60 : 220) + rnd(i, 235) * (low ? 260 : 620) * Math.sqrt(trainSpeed(t0) + .05), 2.5 + rnd(i, 236) * 5.5, .5 + rnd(i, 237) * .7]);
+    const t0 = TR0 + .12 + (TR1 - TR0 - .1) * Math.pow(rnd(i, 231), 1.25), v = 4500 / (TR1 - TR0) * trainSpeed(t0) + 40, low = i % 3 > 0, x0 = trainNose(t0) - 8 - rnd(i, 232) * 46;
+    if (x0 < MOUTH + 10) continue;               // 还在隧道里
+    L.push([t0, x0, TRAIN_Y + 8 - rnd(i, 233) * (low ? 22 : 62), v * (.95 + rnd(i, 234) * .75), (low ? 60 : 220) + rnd(i, 235) * (low ? 260 : 620) * Math.sqrt(trainSpeed(t0) + .05), 2.5 + rnd(i, 236) * 5.5, .5 + rnd(i, 237) * .7]);
   }
   return TRAIN_FLECKS = L;
 }
-function drawTrainSpray(t) {                     // 进站：车头掀到前面去的雪沫、贴着车身的速度线、车灯在雪里打出的光柱
+// 雪烟：真实的列车在雪地里高速通过时，整列车从车底卷起一道翻滚的雪烟——贴着轨道最浓，往上翻、往车尾方向越堆越高，车过去以后慢慢散掉。
+// 每一团在列车经过的地方生出来（位置不跟着车走），被车带着往前挪一点、往上翻、变大、变淡；下半是背光的灰蓝，上半是亮的白，看得出体积。
+function trainCloud() {
+  if (TRAIN_CLOUD) return TRAIN_CLOUD;
+  const L = [];
+  for (let i = 0; i < 620; i++) {
+    const t0 = TR0 + .3 + (TR1 - TR0 - .25) * Math.pow(rnd(i, 281), 1.1), v = trainSpeed(t0), x0 = trainNose(t0) - 20 - rnd(i, 282) * 1500;
+    if (x0 < MOUTH + 30 || x0 > W + 60) continue;
+    L.push([t0, x0, v, (22 + rnd(i, 283) * rnd(i, 289) * 210) * (.25 + v), 150 * v + rnd(i, 284) * 60, 16 + rnd(i, 285) * 22, 34 + rnd(i, 286) * 80, .8 + rnd(i, 287) * 1.1, rnd(i, 288)]);
+  }
+  return TRAIN_CLOUD = L;
+}
+function drawTrainCloud(t) {
+  if (t < TR0 || t > TR1 + 2) return;
+  const lo = radialSprite([150, 172, 220], 1.3), hi = radialSprite([255, 255, 255], 1.3);
+  for (const [t0, x0, v, rise, drift, r0, r1, life, sd] of trainCloud()) {
+    const a = t - t0; if (a < 0 || a > life) continue;
+    const e = 1 - Math.exp(-2.1 * a), x = x0 + drift * e + 14 * Math.sin(a * 4 + sd * 9), y = TRAIN_Y + 12 - rise * e, r = r0 + r1 * e;
+    const al = (.24 + .5 * v) * Math.min(1, a / .07) * Math.pow(1 - a / life, 1.5);
+    g.globalAlpha = al * .85; g.drawImage(lo, x - r * 1.05 + 8, y - r * .5, r * 2.1, r * 1.5);
+    g.globalAlpha = al; g.drawImage(hi, x - r, y - r * .95, r * 2, r * 1.5);
+  }
+  g.globalAlpha = 1;
+}
+function drawTrainSpray(t) {                     // 进站：整列车卷起的雪烟、车头掀到前面去的雪沫、贴着车身的速度线、车灯在雪里打出的光柱
   const v = trainSpeed(t), nose = t < 8 ? trainNose(t) : 1012;
+  drawTrainCloud(t);
   if (t >= TR0 && t < TR1 + 1.2) flecks(t, trainFlecks(), TRAIN_Y + 18);
   if (v > .02) {                                 // 速度线
     g.lineCap = 'round';
     for (let i = 0; i < 26; i++) {
-      const a = fract(t * (2.2 + rnd(i, 221)) + rnd(i, 222)), len = (120 + rnd(i, 223) * 260) * v, x = nose - 60 - a * 1300, y = TRAIN_Y - 96 + rnd(i, 224) * 118;
+      const a = fract(t * (2.2 + rnd(i, 221)) + rnd(i, 222)), len = (120 + rnd(i, 223) * 260) * v, x = nose - 60 - a * 1300; if (x - len < MOUTH + 20) continue; const y = TRAIN_Y - 96 + rnd(i, 224) * 118;
       g.strokeStyle = `rgba(255,255,255,${.55 * v * (1 - a)})`; g.lineWidth = 2 + rnd(i, 225) * 2.5; g.beginPath(); g.moveTo(x, y); g.lineTo(x - len, y); g.stroke();
     }
   }
-  if (t >= TR0 && t < 4.4 && nose > -40) {       // 车灯的光柱：照亮前面的飘雪
+  g.globalCompositeOperation = 'lighter';
+  if (t < 4.4 && nose <= MOUTH + 20) {           // 车还在隧道里：只看得到洞里的两点车灯越来越亮，光顺着铁轨泻出来
+    const k = clamp(t / (TR0 + .42)), fl = .85 + .15 * Math.sin(t * 60);
+    glowAt([255, 244, 214], .95 * k * fl, MOUTH + 16, TRAIN_Y - 26, 16 + 60 * k * k, 14 + 44 * k * k, 1.5);
+    glowAt([255, 250, 232], k, MOUTH + 12, TRAIN_Y - 34, 5 + 9 * k, 5 + 9 * k, 2); glowAt([255, 250, 232], k, MOUTH + 12, TRAIN_Y - 16, 5 + 9 * k, 5 + 9 * k, 2);
+    glowAt([255, 236, 196], .5 * k * k, MOUTH + 60 + 300 * k, TRAIN_Y - 6, 80 + 380 * k, 26, 1.2);
+  } else if (t >= TR0 && t < 4.4) {              // 出洞以后：车灯的光柱照亮前面的飘雪
     const k = (.35 + .65 * v) * (1 - ease(clamp((t - 3.6) / .8)));
-    g.globalCompositeOperation = 'lighter';
     glowAt([255, 240, 205], .55 * k, nose + 190, TRAIN_Y - 26, 330, 58, 1.2); glowAt([255, 248, 226], .8 * k, nose + 20, TRAIN_Y - 22, 90, 40, 1.6);
-    g.globalCompositeOperation = 'source-over';
   }
+  const tx = TR0 + (1 - Math.cbrt((1012 - MOUTH) / 1500)) * (TR1 - TR0), pop = Math.exp(-Math.pow((t - tx - .04) / .1, 2));    // 冲出洞口的一下：车灯在镜头里炸开
+  if (pop > .01) { glowAt([255, 246, 220], .8 * pop, MOUTH + 60, TRAIN_Y - 24, 720, 460, 1.5); g.globalAlpha = .2 * pop; g.fillStyle = '#fff'; g.fillRect(0, camNow, W, H); g.globalAlpha = 1; }
+  g.globalCompositeOperation = 'source-over';
 }
 // ---- 主角下车：跳出车门、冲进车站、坐上缆车（镜头跟着这一节缆车上山）、到山顶走出来 ----
 function miniHero(x, y, sc, run, alpha = 1, carry = true) {
@@ -1079,29 +1127,6 @@ const FOG = mk(W + 800, 700);
   for (let i = 0; i < 70; i++) { const r = 160 + rnd(i, 101) * 220; x.globalAlpha = .34; x.drawImage(radialSprite([255, 255, 255], 1.2), rnd(i, 102) * (W + 800 - r * 2), rnd(i, 103) * (700 - r * 1.2), r * 2, r * 1.2); }
 })();
 const FOGC = 3000;
-// ---- 开场：隧道。黑暗里壁灯一道道往后飞，出口的光从前方涨过来，冲出去的一瞬间整幅画面过曝成白，再落回雪国 ----
-const TUN = .62, FLASH = .8;                 // 冲出隧道的时刻、白光退掉要多久
-function drawTunnel(t) {
-  if (t >= TUN + FLASH) return;
-  if (t < TUN) {
-    const u = t / TUN;
-    g.fillStyle = '#05070f'; g.fillRect(0, 0, W, H);
-    g.lineCap = 'round';
-    for (let i = 0; i < 46; i++) {               // 壁灯和隧道壁的反光：越来越快地往后掠过
-      const row = i % 6, y = 520 + row * 190 + (rnd(i, 261) - .5) * 60, sp = 2600 + rnd(i, 262) * 2600, len = 160 + rnd(i, 263) * 520 * (.5 + u);
-      const x = W + 300 - fract(rnd(i, 264) + t * sp / 2200) * (W + 900);
-      g.strokeStyle = row % 2 ? `rgba(255,214,150,${.5 + .4 * rnd(i, 265)})` : `rgba(150,180,235,${.28 + .3 * rnd(i, 265)})`; g.lineWidth = row % 2 ? 5 : 2.5;
-      g.beginPath(); g.moveTo(x, y); g.lineTo(x + len, y); g.stroke();
-    }
-    g.globalCompositeOperation = 'lighter';     // 出口：前方一团越涨越大的白光
-    const r = 40 + 2600 * Math.pow(u, 3.2);
-    glowAt([226, 236, 255], .95, 900, 1150, r * 1.2, r * 1.6, 1.1); glowAt([255, 255, 255], 1, 900, 1150, r * .55, r * .75, 1.4);
-    g.globalCompositeOperation = 'source-over';
-    g.globalAlpha = ease(clamp((u - .78) / .22)); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.globalAlpha = 1;
-  } else {                                       // 过曝：全白，眼睛适应过来以后雪国才显出来
-    g.globalAlpha = Math.pow(1 - (t - TUN) / FLASH, 1.8); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.globalAlpha = 1;
-  }
-}
 function drawFog(t, tint) {
   const d = Math.exp(-Math.pow((camNow + 960 - FOGC) / 950, 2)) * (t < 9 ? .8 : 0);      // 云层只在上山时穿过；下山时不要（夜色里一条条亮带之间会显得像影子）
   if (d > .02) {
@@ -1114,8 +1139,8 @@ function drawFog(t, tint) {
     }
     g.globalAlpha = 1;
   }
-  // 回环：片尾温泉的热气漫成一片白，切到开头隧道里的黑（见 drawTunnel）
-  const w = ease(clamp((t - (T - 1.4)) / 1.35));
+  // 回环：片尾温泉的热气漫成一片白，开头这片白很快散开，露出隧道口
+  const w = Math.max(1 - easeOut(t / .4), ease(clamp((t - (T - 1.4)) / 1.35)));
   if (w > .01) {
     g.globalAlpha = Math.min(1, w * 1.5);
     for (let k = 0; k < 4; k++) g.drawImage(FOG, -400 + 260 * Math.sin(k * 2.1 + t), H - w * 2700 + k * 560, W + 800, 900);
@@ -1135,7 +1160,7 @@ const LINE1 = 1440;
 // 字：两种颜色——暖白是正文，金色是强调（数字和每句的关键词）；不垫遮罩、暗角、字影，可读性靠字号和字重。
 // 数字是主角：70 分钟、2.5 公里、5 月都用 Sora 放大，单位跟在后面小一号。
 // 标题下的旁白和角标不用白色（照弥彦）：白天是藏青，入暮后是奶白；角标是木头色，旁白前的竖线是冰蓝，旁白里的数字和英文另用一个暖色。
-const duskK = t => keys(t, [[.62, 1], [.9, 0], [11.4, 0], [11.9, 1], [T - 1.1, 1], [T - .3, 0]]);
+const duskK = t => keys(t, [[11.4, 0], [11.9, 1], [T - 1.1, 1], [T - .3, 0]]);
 const mixCol = (a, b, k, al = 1) => `rgba(${a.map((v, i) => Math.round(lerp(v, b[i], k))).join(',')},${al})`;
 // ---- 标题上落雪：在字的横笔上沿积一层雪（越平的地方积得越厚，斜笔和笔画两头几乎不积）----
 // 从字形的遮罩算一次，之后每帧贴图
@@ -1194,27 +1219,60 @@ function shadowOnly(img, x, y, color, blur, oy = 0) {     // 只画图形的「�
 const snowAmt = t => keys(t, [[0, 0], [1, .1], [5, .36], [13.2, .36], [24, 1], [T - 1.1, 1], [T - .2, 0]]);
 const SNOW_LEVELS = 16, snowLayers = [];
 let titleWood = null;
+// 木头是逐个像素算出来的：
+//   - 四个字是四块不同的板子：各自的底色深浅、年轮中心、纹理疏密都不一样；
+//   - 弦切板的「山形纹」：年轮是一圈圈被拉长的椭圆，早材浅、晚材深，晚材线细而清楚，带一点扭曲；
+//   - 顺着纹理的细导管（一道道很短的深色细丝）和整体的色差、木节周围纹理绕着走；
+//   - 倒角：字的边缘按「光从左上来」算明暗，左上的棱发亮、右下的棱压暗，内角有一点积暗；
+//   - 切面（厚度）：颜色更深，露出一层层端面的年轮线。
+function vnoise(x, y) {                         // 平滑的二维噪声，0~1
+  const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi, u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy);
+  const h = (a, b) => fract(Math.sin(a * 127.1 + b * 311.7) * 43758.5453);
+  return lerp(lerp(h(xi, yi), h(xi + 1, yi), u), lerp(h(xi, yi + 1), h(xi + 1, yi + 1), u), v);
+}
 function buildTitle() {
+  const w = 860, h = 300;
   titleMask = titleCanvas(x => { x.fillStyle = '#fff'; x.fillText(titleText, TX, TB); });
-  const face = titleCanvas(x => {
-    const m = x.createLinearGradient(0, TB - 112, 0, TB + 12); m.addColorStop(0, '#d6a56c'); m.addColorStop(.5, '#bb8850'); m.addColorStop(1, '#9b6b38');
-    x.fillStyle = m; x.fillText(titleText, TX, TB);
-    x.globalCompositeOperation = 'source-atop';
-    x.fillStyle = '#f3d6a6'; x.fillText(titleText, TX, TB);                       // 上沿亮边：整字铺亮色，再把木头面往下错开 2 像素盖回去
-    x.fillStyle = m; x.fillText(titleText, TX, TB + 2.5);
-    if ('letterSpacing' in x) x.letterSpacing = '0px';
-    for (let i = 0; i < 46; i++) {                                               // 木纹：一道道顺着木头长的细线，疏密、深浅不一
-      const y0 = 40 + i * 5.2 + rnd(i, 301) * 3;
-      x.strokeStyle = `rgba(98,58,24,${.14 + rnd(i, 302) * .3})`; x.lineWidth = .8 + rnd(i, 303) * 1.6;
-      x.beginPath(); for (let px = 0; px <= 860; px += 10) x.lineTo(px, y0 + 4 * Math.sin(px / 90 + i * .7) + 2.2 * Math.sin(px / 31 + i * 2.1));
-      x.stroke();
-    }
-    [[150, 150, 13], [470, 118, 10], [650, 168, 12]].forEach(([kx, ky, r]) => {    // 几个木节
-      for (let q = 3; q > 0; q--) { x.strokeStyle = `rgba(86,48,18,${.5 - q * .1})`; x.lineWidth = 1.5; x.beginPath(); x.ellipse(kx, ky, r * q * .6, r * q * .34, .2, 0, TAU); x.stroke(); }
-    });
-  });
+  const m = titleMask.getContext('2d').getImageData(0, 0, w, h).data;
+  // 每个字的左右边界（各是一块板）
+  const mc = titleMask.getContext('2d'); mc.font = TITLE_FONT; if ('letterSpacing' in mc) mc.letterSpacing = '4px';
+  const edges = [TX]; [...titleText].forEach((c, n) => edges.push(TX + mc.measureText(titleText.slice(0, n + 1)).width));
+  const boards = [...titleText].map((c, n) => ({cx: (edges[n] + edges[n + 1]) / 2 + (rnd(n, 311) - .5) * 90, cy: TB - 56 + (rnd(n, 312) - .5) * 190 + (n % 2 ? 150 : -150), tone: .9 + rnd(n, 313) * .2, pitch: 6.5 + rnd(n, 314) * 3.5, warm: rnd(n, 315), knot: [edges[n] + 30 + rnd(n, 316) * 70, TB - 20 - rnd(n, 317) * 80]}));
+  // 高度图：字形模糊一下，用来算倒角
+  const Hm = new Float32Array(w * h), Ao = new Float32Array(w * h);
+  for (let k = 0; k < w * h; k++) Hm[k] = Ao[k] = m[k * 4 + 3] / 255;
+  blurF(Hm, w, h, 2); blurF(Ao, w, h, 7);
+  const face = mk(w, h), fc = face.getContext('2d'), img = fc.createImageData(w, h), d = img.data;
+  const L = [-.55, -.72, .42], ll = Math.hypot(...L);
+  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+    const k = y * w + x, al = m[k * 4 + 3]; if (!al) continue;
+    let n = 0; while (n < boards.length - 1 && x > edges[n + 1]) n++;
+    const B = boards[n];
+    // 年轮：以板子外某一点为中心、横向拉长的椭圆；木节附近再叠一圈小的年轮，让纹理绕着它走
+    const wob = (vnoise(x / 70, y / 16 + n * 9) - .5) * 26 + (vnoise(x / 19, y / 7 + n * 5) - .5) * 5;
+    let ring = (Math.hypot((x - B.cx) * .16, y - B.cy) + wob) / B.pitch;
+    const kd = Math.hypot((x - B.knot[0]) * .7, y - B.knot[1]), kn = Math.exp(-kd * kd / 420);
+    ring += kn * (3.2 - kd / 5.5);
+    const f = fract(ring), late = Math.pow(Math.max(0, 1 - Math.abs(f - .86) / .14), 1.6);         // 晚材：每一圈靠外的一道深色细线
+    const early = .5 + .5 * Math.sin(f * Math.PI);                                                // 早材里很缓的深浅
+    const pore = Math.pow(vnoise(x / 23, y * 1.9 + n * 13), 5) * .9 + Math.pow(vnoise(x / 9, y * 3.1 + n * 31), 9) * 1.2;   // 顺纹的细导管
+    const patch = vnoise(x / 130 + n * 4, y / 60) - .5;                                           // 一块板子里大片的色差
+    let dark = clamp(.8 * late + .16 * (1 - early) + .34 * pore + .25 * kn);
+    let r = lerp(214, 132, dark), gg = lerp(168, 84, dark), b = lerp(112, 40, dark);
+    const tone = B.tone * (1 + patch * .14);
+    r *= tone; gg *= tone * (.97 + B.warm * .05); b *= tone * (.9 + B.warm * .16);
+    // 倒角和内角的暗
+    const gx = (Hm[k + 1] - Hm[k - 1]) * 3.2, gy = (Hm[k + w] - Hm[k - w]) * 3.2;
+    const sh = (-gx * L[0] - gy * L[1] + L[2]) / Math.hypot(gx, gy, 1) / ll - L[2] / ll;
+    const edge = 1 - clamp((Ao[k] - .55) / .4), lightK = sh > 0 ? sh * .9 : sh * .75;
+    const mul = 1 + lightK - .08 * edge * edge;
+    d[k * 4] = clamp(r * mul + (sh > 0 ? 26 * sh : 0), 0, 255); d[k * 4 + 1] = clamp(gg * mul + (sh > 0 ? 22 * sh : 0), 0, 255); d[k * 4 + 2] = clamp(b * mul + (sh > 0 ? 14 * sh : 0), 0, 255); d[k * 4 + 3] = al;
+  }
+  fc.putImageData(img, 0, 0);
   titleWood = titleCanvas(x => {
-    for (let d = 10; d >= 1; d--) { x.fillStyle = d > 8 ? '#3a2412' : '#6a4424'; x.fillText(titleText, TX + d * .6, TB + d); }   // 切面的厚度：往右下一层层叠
+    for (let dd = 11; dd >= 1; dd--) {                                           // 切面的厚度：往右下一层层叠，隔几层一道端面的年轮线
+      x.fillStyle = dd > 9 ? '#4a2e15' : dd % 3 === 0 ? '#63401f' : '#855a32'; x.fillText(titleText, TX + dd * .62, TB + dd);
+    }
   });
   titleWood.getContext('2d').drawImage(face, 0, 0);
 }
@@ -1322,7 +1380,12 @@ function render(t) {
   g.drawImage(WORLD, 0, OY - cam);
   g.save(); g.translate(0, -cam);
   drawTracks(t); drawPowder(t, false); drawSkier(t);
-  if (cam > 3200) { drawPisteSkiers(t); drawTrain(t); }
+  if (cam > 3200) {
+    drawPisteSkiers(t);
+    g.fillStyle = '#070b18'; g.beginPath(); g.ellipse(MOUTH + 2, TRAIN_Y - 40, 40, 66, 0, 0, TAU); g.fill();     // 洞里的黑（从洞门后面露出一弯）
+    drawTrain(t);
+    g.drawImage(PORTAL, PORTAL_X, PORTAL_Y);
+  }
   if (cam > STREET - 2100 && cam < STREET + 300) drawStreetPeople(t);
   drawGondola(t);
   g.restore();
@@ -1361,8 +1424,7 @@ function render(t) {
   if (cam > 4300) drawSteam(t);
   applyZoom(zoomAt(t));
   drawFog(t, tint);
-  drawSnow(t, snowAt(t), vcam);
-  drawTunnel(t);                                                             // 推镜只作用于画面，文字不动
+  drawSnow(t, snowAt(t), vcam);                                                             // 推镜只作用于画面，文字不动
   if (params.has('notext')) return;
   drawHeaderSnow(t);
   typo(t);                                 // 大字下面不垫任何东西：白天深墨蓝，夜里暖白
