@@ -338,9 +338,9 @@ function boot(render) {
 const T = 26;
 const START = 0;                           // 从隧道里的黑开始：冲出隧道的一下过曝是全片的开场钩子
 const DY = 1440;                           // 车站和温泉之间插进一条温泉街：温泉那一段整体下移这么多
-const OY = 860, WH = 7660 + DY;                 // 长图覆盖的世界范围（y 向下）
+const OY = 860, WH = 7840 + DY;                 // 长图覆盖的世界范围（y 向下）
 const RIDGE = 1120, BASE = 5060;           // 山脊、山脚
-const YS = 4270, YTOP = 200, YST = 5600, YO = 5720 + DY;    // 镜头四个停靠点：车站、山顶、温泉街、温泉
+const YS = 4270, YTOP = 200, YST = 5600, YO = 5880 + DY;    // 镜头四个停靠点：车站、山顶、温泉街、温泉
 const STREET = 6600;                       // 温泉街的地面
 const smoother = x => { x = clamp(x); return x * x * x * (x * (x * 6 - 15) + 10); };
 const keys = (t, ks) => {                  // 关键帧之间平滑过渡：[[时间, 值], ...]，值可以是数或数组
@@ -437,6 +437,8 @@ const LIGHTS = [];          // 窗灯：[x, y, w, h, 组]
 const GLOWS = [];           // 柔光：[x, y, 半径, 强度]
 const TREES = [];
 const POOL = {x: 540, y: 6790 + DY, rx: 430, ry: 235};
+const poolR = a => 1 + .1 * Math.sin(3 * a + .6) + .07 * Math.sin(5 * a + 2.1) + .04 * Math.sin(8 * a);      // 池子的轮廓不是规整的椭圆
+function poolPath(c, cx, cy) { c.beginPath(); for (let i = 0; i <= 72; i++) { const a = i / 72 * TAU, k = poolR(a); c.lineTo(cx + Math.cos(a) * POOL.rx * k, cy + Math.sin(a) * POOL.ry * k); } c.closePath(); }
 const TRAIN_Y = 5494, FENCE_Y = 6260;
 const MOUTH = -260;                        // 隧道挪到了开场的远景镜头里；车站这一镜列车从画面左边外面进来
 const PORTAL = mk(420, 520), PORTAL_X = -30, PORTAL_Y = 5060;     // 左边的山和隧道口（画在列车后面，列车从拱洞中间钻出来）
@@ -516,6 +518,15 @@ const PORTAL = mk(420, 520), PORTAL_X = -30, PORTAL_Y = 5060;     // 左边的�
     o.fillStyle = c; roundRectOn(o, x - 7, y - 36, 14, 22, 5); o.fill();
     o.fillStyle = '#1d2746'; o.beginPath(); o.arc(x, y - 42, 6.5, 0, TAU); o.fill();
   });
+  // 体积感：楼右侧和檐下的暗面、玻璃上斜着的天光、楼投在雪地上的影子
+  const shade = (x, y, w, h, a0, a1, horiz) => { const gr = horiz ? o.createLinearGradient(x, 0, x + w, 0) : o.createLinearGradient(0, y, 0, y + h); gr.addColorStop(0, `rgba(22,30,62,${a0})`); gr.addColorStop(1, `rgba(22,30,62,${a1})`); o.fillStyle = gr; o.fillRect(x, y, w, h); };
+  shade(130, 5220, 680, 30, .32, 0); shade(300, 5166, 330, 20, .28, 0); shade(790, 5124, 190, 34, .3, 0);          // 檐下
+  shade(560, 5196, 250, 198, 0, .22, true); shade(900, 5104, 80, 290, 0, .3, true);                                // 右侧背光
+  o.save(); o.beginPath(); o.rect(150, 5244, 640, 96); o.clip();
+  for (let i = 0; i < 9; i++) { const x = 130 + i * 86 + rnd(i, 181) * 30, wv = 10 + rnd(i, 182) * 26; o.fillStyle = `rgba(214,228,255,${.1 + rnd(i, 183) * .12})`; o.beginPath(); o.moveTo(x, 5340); o.lineTo(x + 60, 5244); o.lineTo(x + 60 + wv, 5244); o.lineTo(x + wv, 5340); o.fill(); }
+  o.restore();
+  o.fillStyle = 'rgba(60,78,140,.2)'; o.beginPath(); o.moveTo(810, 5394); o.lineTo(980, 5394); o.lineTo(1080, 5330); o.lineTo(1080, 5250); o.lineTo(980, 5250); o.fill();   // 缆车站投在右边雪坡上的影子
+  o.fillStyle = '#e9edf5'; o.fillRect(404, 5318, 142, 20); o.fillStyle = '#2a4a9c'; o.fillRect(412, 5324, 34, 8); o.fillStyle = '#39445f'; for (let i = 0; i < 5; i++) o.fillRect(454 + i * 17, 5325, 11, 6);   // 入口上方的站名牌
   box(0, 5394, W, 14, '#7c88a4'); snowCap(-10, 5394, W + 20, 14);                                         // 站台雨棚
   o.fillStyle = '#5a6684'; for (let x = 40; x < W; x += 130) o.fillRect(x, 5408, 7, 92);
   box(0, 5408, W, 92, 'rgba(40,52,84,.5)');
@@ -543,7 +554,7 @@ const PORTAL = mk(420, 520), PORTAL_X = -30, PORTAL_Y = 5060;     // 左边的�
   box(0, TRAIN_Y + 26, W, 40, '#cfd9ec');
   for (let x = 60; x < W; x += 180) GLOWS.push([x, 5420, 70, .5]);
   // ---- 温泉街：一排亮着灯的木造旅馆，屋檐下挂着暖帘和灯笼，街上有足汤 ----
-  for (let i = 0; i < 12; i++) tree(o, 20 + i * 95 + (rnd(i, 121) - .5) * 50, STREET - 560 - rnd(i, 122) * 60, 130 + rnd(i, 123) * 40, 720 + i);   // 车站和温泉街之间的一排雪松（开场时压在画面底边）
+  [[10, 0, 210], [96, -40, 120], [150, 14, 150], [262, -24, 96], [330, 20, 190], [455, -36, 110], [520, 6, 140], [650, -20, 230], [742, 18, 120], [800, -44, 96], [880, 10, 176], [990, -16, 130], [1060, 22, 220]].sort((a, b) => a[1] - b[1]).forEach(([x, dy, h], i) => tree(o, x, STREET - 540 + dy, h, 720 + i));   // 车站和温泉街之间的一排雪松（开场时压在画面底边）
   [[70, -350, 120], [215, -320, 95], [470, -335, 130], [690, -310, 100], [820, -340, 125], [1010, -315, 110]].forEach(([x, y, h], i) => tree(o, x, STREET + y, h, 700 + i));   // 屋后的几棵雪松
   box(0, STREET, W, 150, '#d3dcee');                                        // 踩实的雪路
   o.strokeStyle = 'rgba(128,150,200,.35)'; o.lineWidth = 3;
@@ -558,7 +569,12 @@ const PORTAL = mk(420, 520), PORTAL_X = -30, PORTAL_Y = 5060;     // 左边的�
     const top = STREET - h, cx = x + w / 2;
     box(x, top, w, h, col);
     o.fillStyle = 'rgba(40,28,24,.22)'; for (let px = x + 12; px < x + w; px += 24) o.fillRect(px, top, 2, h);   // 木板墙的竖缝
-    box(x - 16, top - 12, w + 32, 16, '#3d3028'); snowCap(x - 20, top - 12, w + 40, 30 + (n % 2) * 8);          // 屋檐和厚厚的积雪
+    const rh = 62 + (n % 2) * 14, e = 30;                                                                          // 坡屋顶：深色的瓦、出挑的屋檐、厚厚的积雪，檐口挂着冰凌
+    o.fillStyle = '#2b2230'; o.beginPath(); o.moveTo(x - e, top + 10); o.lineTo(x + w * .2, top - rh); o.lineTo(x + w * .8, top - rh); o.lineTo(x + w + e, top + 10); o.fill();
+    o.fillStyle = '#f6f9fe'; o.beginPath(); o.moveTo(x - e - 4, top - 2); o.quadraticCurveTo(x + w * .1, top - rh - 6, x + w * .2, top - rh - 20); o.quadraticCurveTo(x + w * .5, top - rh - 34, x + w * .8, top - rh - 20); o.quadraticCurveTo(x + w * .9, top - rh - 6, x + w + e + 4, top - 2); o.quadraticCurveTo(x + w * .5, top - 14, x - e - 4, top - 2); o.fill();
+    o.fillStyle = 'rgba(150,172,220,.5)'; o.beginPath(); o.moveTo(x - e - 4, top - 2); o.quadraticCurveTo(x + w * .5, top - 14, x + w + e + 4, top - 2); o.quadraticCurveTo(x + w * .5, top - 28, x - e - 4, top - 2); o.fill();
+    box(x - e, top + 4, w + e * 2, 8, '#1f1924'); o.fillStyle = 'rgba(20,14,26,.35)'; o.fillRect(x, top + 12, w, 16);
+    o.fillStyle = '#eaf2ff'; for (let q = 0; q < Math.floor((w + e * 2) / 26); q++) { const ix = x - e + 8 + q * 26 + rnd(n * 20 + q, 191) * 10, il = 8 + rnd(n * 20 + q, 192) * 22; o.beginPath(); o.moveTo(ix - 2.5, top + 12); o.lineTo(ix + 2.5, top + 12); o.lineTo(ix, top + 12 + il); o.fill(); }
     for (let f = 1; f < floors; f++) {                                       // 楼上：一排格子窗和栏杆
       const wy = STREET - 118 - f * 104;
       box(x + 20, wy, w - 40, 58, '#2a2536');
@@ -583,6 +599,18 @@ const PORTAL = mk(420, 520), PORTAL_X = -30, PORTAL_Y = 5060;     // 左边的�
     o.fillStyle = '#3a2a2a'; o.fillRect(x - 8, y - 15, 16, 4); o.fillRect(x - 8, y + 23, 16, 4);
     GLOWS.push([x, y + 6, 46, .75]);
   }
+  // 街下面的小河：深色的水映着街上的灯，石砌的河岸，一座小桥；过了桥一串踏脚石和石灯笼通向温泉
+  box(0, STREET + 172, W, 120, '#24345e'); box(0, STREET + 164, W, 12, '#8f9ab4'); box(0, STREET + 288, W, 10, '#7b86a2');
+  for (let x = 0; x < W; x += 54) { box(x, STREET + 164, 2, 12, 'rgba(40,50,84,.5)'); }
+  snowCap(-10, STREET + 164, W + 20, 9); snowCap(-10, STREET + 296, W + 20, 12);
+  for (let i = 0; i < 26; i++) { const rx = 20 + rnd(i, 195) * 1040, ry = STREET + 186 + rnd(i, 196) * 92; blob(o, i % 4 ? [255, 190, 110] : [226, 96, 58], .5, rx, ry, 30 + rnd(i, 197) * 46, 5); }
+  box(470, STREET + 150, 150, 162, '#6b533e'); for (let y = STREET + 150; y < STREET + 312; y += 18) box(470, y, 150, 2, '#4b3d30');
+  box(462, STREET + 150, 8, 162, '#3d3028'); box(620, STREET + 150, 8, 162, '#3d3028'); snowCap(458, STREET + 150, 16, 8); snowCap(616, STREET + 150, 16, 8);
+  for (let i = 0; i < 9; i++) { const y = STREET + 350 + i * 56, x = 545 + 46 * Math.sin(i * .9); o.fillStyle = '#aab6d2'; o.beginPath(); o.ellipse(x, y, 44, 15, 0, 0, TAU); o.fill(); o.fillStyle = '#f4f8fe'; o.beginPath(); o.ellipse(x - 3, y - 4, 40, 11, 0, 0, TAU); o.fill(); }
+  [[410, 380], [690, 520], [400, 660], [700, 800]].forEach(([lx, dy]) => { const ly = STREET + dy;
+    box(lx - 6, ly - 46, 12, 46, '#5a6278'); box(lx - 22, ly - 84, 44, 40, '#667089'); box(lx - 13, ly - 76, 26, 24, '#2b2f40'); LIGHTS.push([lx - 13, ly - 76, 26, 24, 2]);
+    o.fillStyle = '#f6f9fe'; o.beginPath(); o.moveTo(lx - 36, ly - 82); o.quadraticCurveTo(lx, ly - 128, lx + 36, ly - 82); o.quadraticCurveTo(lx, ly - 96, lx - 36, ly - 82); o.fill(); GLOWS.push([lx, ly - 60, 150, .5]); });
+  for (let i = 0; i < 16; i++) blob(o, [255, 255, 255], .9, rnd(i, 198) * W, STREET + 330 + rnd(i, 199) * 560, 90 + rnd(i, 200) * 120, 22 + rnd(i, 201) * 16);     // 雪地上的雪堆
   // 足汤：街边的一槽热水
   box(382, STREET + 44, 250, 34, '#7a6048'); box(392, STREET + 48, 230, 16, '#3b7d8c'); box(382, STREET + 74, 250, 5, '#4b3d30');
   GLOWS.push([507, STREET + 50, 150, .35]);
@@ -607,8 +635,8 @@ const PORTAL = mk(420, 520), PORTAL_X = -30, PORTAL_Y = 5060;     // 左边的�
     o.fillStyle = '#f4f8fe'; o.beginPath(); o.ellipse(x - r * .08, y - r * .38, r * 1.05, r * .46, 0, 0, TAU); o.fill();
   };
   // 通向池边的木栈道、放浴巾的竹篮、脚边的行灯：把画面下半部填起来，也多一处暖光
-  for (let y = 7070, i = 0; y < 7660; y += 44, i++) { const k = (y - 7070) / 590; box(lerp(560, 450, k), y, lerp(300, 560, k), 45, i % 2 ? '#7a6048' : '#6b533e'); box(lerp(560, 450, k), y + 41, lerp(300, 560, k), 4, '#4b3d30'); }
-  for (let i = 0; i < 26; i++) { const k = rnd(i, 111), y = 7080 + k * 580, left = i % 2; blob(o, [255, 255, 255], .95, left ? lerp(560, 450, k) - 6 : lerp(860, 1010, k) + 6, y, 46 + rnd(i, 112) * 40, 20 + rnd(i, 113) * 14); }
+  for (let y = 7090, i = 0; y < 7840; y += 44, i++) { const k = (y - 7090) / 750; box(lerp(610, 560, k), y, lerp(210, 330, k), 45, i % 2 ? '#a88a6a' : '#967a5c'); box(lerp(610, 560, k), y + 41, lerp(210, 330, k), 4, '#6b533e'); }   // 栈道：窄一些、浅一些，两边被雪埋住
+  for (let i = 0; i < 26; i++) { const k = rnd(i, 111), y = 7080 + k * 750, left = i % 2; blob(o, [255, 255, 255], .95, left ? lerp(610, 560, k) + 4 : lerp(820, 890, k) - 4, y, 46 + rnd(i, 112) * 40, 20 + rnd(i, 113) * 14); }
   o.fillStyle = '#8a6a44'; o.beginPath(); o.ellipse(660, 7400, 62, 30, 0, 0, TAU); o.fill(); box(598, 7372, 124, 28, '#8a6a44');
   o.fillStyle = '#6f5335'; o.beginPath(); o.ellipse(660, 7372, 62, 26, 0, 0, TAU); o.fill();
   o.fillStyle = '#f7f8fb'; roundRectOn(o, 616, 7352, 60, 26, 9); o.fill(); o.fillStyle = '#e9c7bd'; roundRectOn(o, 652, 7358, 52, 24, 9); o.fill();
@@ -618,12 +646,12 @@ const PORTAL = mk(420, 520), PORTAL_X = -30, PORTAL_Y = 5060;     // 左边的�
     box(x - 24, y - 8, 8, 40, '#3a3140'); box(x + 16, y - 8, 8, 40, '#3a3140'); box(x - 31, y - 88, 62, 84, '#3a3140'); box(x - 25, y - 82, 50, 72, '#e9dcc0'); box(x - 2, y - 82, 3, 72, '#3a3140');
     snowCap(x - 35, y - 88, 70, 16); LIGHTS.push([x - 25, y - 82, 50, 72, 2]);
   });
-  const rocks = []; for (let i = 0; i < 34; i++) { const a = i / 34 * TAU + rnd(i, 61) * .1, r = 34 + rnd(i, 62) * 34; rocks.push([P.x + Math.cos(a) * (P.rx + r * .5), P.y + Math.sin(a) * (P.ry + r * .3), r, i]); }
+  const rocks = []; for (let i = 0, a = 0; a < TAU; i++) { const big = rnd(i, 63) > .72, r = big ? 62 + rnd(i, 62) * 40 : 24 + rnd(i, 62) * 30, k = poolR(a); rocks.push([P.x + Math.cos(a) * (P.rx * k + r * (.35 + rnd(i, 64) * .5)), P.y + Math.sin(a) * (P.ry * k + r * (.2 + rnd(i, 65) * .4)), r, i]); a += (r * 1.5 + rnd(i, 61) * 26) / 330; }   // 石头有大有小、疏密不匀
   rocks.sort((a, b) => a[1] - b[1]);
   rocks.filter(r => r[1] < P.y).forEach(r => rock(...r));
   const wg = o.createRadialGradient(P.x - 120, P.y - 40, 40, P.x, P.y, P.rx);
   wg.addColorStop(0, '#5fa3a8'); wg.addColorStop(.6, '#3b7d8c'); wg.addColorStop(1, '#27586e');
-  o.fillStyle = wg; o.beginPath(); o.ellipse(P.x, P.y, P.rx, P.ry, 0, 0, TAU); o.fill();
+  o.fillStyle = wg; poolPath(o, P.x, P.y); o.fill();
   rocks.filter(r => r[1] >= P.y).forEach(r => rock(...r));
   // 出水口：池子后沿一块大石头，上面架着一截竹筒，热水从这里流进池子
   rock(P.x + 215, P.y - P.ry - 4, 78, 7); rock(P.x + 300, P.y - P.ry + 30, 52, 8);
@@ -679,16 +707,18 @@ const zbx = ZBUF.getContext('2d');
 // 返回 {z, fx, fy, ax, ay, roll}：画面里 (fx,fy) 这一点放到屏幕 (ax,ay)，放大 z 倍
 function zoomAt(t) {
   const ax = W / 2, ay = 1150;
+  const SZ = .4, SFX = 690, SFY = 1010;      // 山顶：到站后镜头慢慢推向出发点（人和缆车站一起变大）
+  if (t > CLIMB1 && t <= TD0) { const e = ease(clamp((t - CLIMB1 - .1) / 1.6)); return clampZoom({z: 1 + SZ * e, fx: lerp(ax, SFX, e), fy: lerp(ay, SFY, e), ax, ay, roll: 0}); }
   if (t > TD0 && t < 15.2) {
-    const k = easeOut((t - TD0) / .7) * (1 - ease(clamp((t - 14.4) / .8)));
+    const kin = easeOut((t - TD0) / .7), kout = 1 - ease(clamp((t - 14.4) / .8)), k = kin * kout;
     const s = skiState(t), lag = skiX(skiY(Math.max(TD0, t - .3))), cy = camY(t);
-    const z = 1 + k * (.8 + .05 * Math.sin((s.y - SKI0) / TURN * 2));
+    const z = 1 + lerp(SZ, .8 + .05 * Math.sin((s.y - SKI0) / TURN * 2), kin) * kout;
     const shake = k * 1.6 * (Math.sin(t * 47.3) + .6 * Math.sin(t * 71.9 + 1.3));
-    return clampZoom({z, fx: lerp(pisteX(s.y), lerp(s.x, lag, .5), .25) + shake / z, fy: s.y - cy - 40 + shake * .6 / z, ax, ay: 1060, roll: -s.lean * .036 * k});
+    return clampZoom({z, fx: lerp(SFX, lerp(pisteX(s.y), lerp(s.x, lag, .5), .25), kin) + shake / z, fy: lerp(SFY, s.y - cy - 40, kin) + shake * .6 / z, ax, ay: lerp(ay, 1060, kin), roll: -s.lean * .036 * k});
   }
   if (t > TO) {
     const z = 1 + .32 * ease(clamp((t - TO) / (T - TO)));
-    return clampZoom({z, fx: 535, fy: 6850 + DY - camY(t), ax, ay: 1120, roll: 0});
+    return clampZoom({z, fx: 535, fy: 6850 + DY - camY(t), ax, ay: 1000, roll: 0});
   }
   return {z: 1, fx: ax, fy: ay, ax, ay, roll: 0};
 }
@@ -795,7 +825,13 @@ function drawPowder(t, lit) {                    // lit=false：雪雾落在雪�
     const px = s.x + side * (14 + (50 + rnd(n, 1) * 230) * spread) * power + (rnd(n, 2) - .5) * 30;
     const py = s.y + 4 - (30 + rnd(n, 3) * 120) * spread * power + 70 * age * age + (brake > .3 ? 50 * rnd(n, 5) * age : 0);
     const r = (16 + 105 * k) * (.6 + rnd(n, 4) * .7) * (.7 + .5 * power);
-    if (lit) { g.globalAlpha = Math.min(1, .62 * power) * Math.pow(1 - k, 1.25); g.drawImage(sp, px - r, py - r * .85, r * 2, r * 1.7); }
+    if (lit) {                                   // 一层很淡的雪雾打底，上面是一粒粒甩出去的雪沫（短线，顺着甩出去的方向）
+      g.globalAlpha = Math.min(1, .2 * power) * Math.pow(1 - k, 1.6); g.drawImage(sp, px - r * .7, py - r * .6, r * 1.4, r * 1.2);
+      const fa = Math.min(1, power) * Math.pow(1 - k, .8), ln = (10 + 26 * power) * (1 - k * .5), ang = Math.atan2(-(60 + rnd(n, 3) * 120), side * (120 + rnd(n, 1) * 200));
+      g.globalAlpha = fa; g.strokeStyle = '#fff'; g.lineWidth = 2 + rnd(n, 6) * 3.5; g.lineCap = 'round';
+      const qx = px + (rnd(n, 7) - .5) * r * .9, qy = py + (rnd(n, 8) - .5) * r * .7;
+      g.beginPath(); g.moveTo(qx, qy); g.lineTo(qx - Math.cos(ang) * ln, qy - Math.sin(ang) * ln); g.stroke();
+    }
     else { g.globalAlpha = 0; g.drawImage(sp, px - r + 26, py + r * .25, r * 2.1, r * .9); }
   }
   g.globalAlpha = 1;
@@ -842,7 +878,7 @@ function drawTrainCloud(t) {
   for (const [t0, x0, v, rise, drift, r0, r1, life, sd] of trainCloud()) {
     const a = t - t0; if (a < 0 || a > life) continue;
     const e = 1 - Math.exp(-2.1 * a), x = x0 + drift * e + 14 * Math.sin(a * 4 + sd * 9), y = TRAIN_Y + 12 - rise * e, r = r0 + r1 * e;
-    const al = (.32 + .6 * v) * Math.min(1, a / .07) * Math.pow(1 - a / life, 1.5);
+    const al = (.2 + .36 * v) * Math.min(1, a / .07) * Math.pow(1 - a / life, 1.5);
     g.globalAlpha = al * .85; g.drawImage(lo, x - r * 1.05 + 8, y - r * .5, r * 2.1, r * 1.5);
     g.globalAlpha = al; g.drawImage(hi, x - r, y - r * .95, r * 2, r * 1.5);
   }
@@ -872,6 +908,15 @@ function drawTrainSpray(t) {                     // 进站：整列车卷起的�
   g.globalCompositeOperation = 'source-over';
 }
 const TX_OUT = TR0 + (1 - Math.cbrt((1012 - MOUTH) / 1500)) * (TR1 - TR0);      // 车头冲出洞口的时刻（约 0.86 秒）
+function drawSpeed(t) {                          // 下滑时贴着镜头掠过的雪线：给平整的雪面一点速度
+  if (t < TD0 + .2 || t > TD1 - .5) return;
+  const k = clamp((t - TD0 - .2) / .5) * clamp((TD1 - .5 - t) / .6);
+  g.lineCap = 'round';
+  for (let i = 0; i < 26; i++) {
+    const a = fract(rnd(i, 511) - t * (1.5 + rnd(i, 512) * 1.4)), x = rnd(i, 513) * W, y = a * (H + 500) - 250, len = 90 + rnd(i, 514) * 220;
+    g.strokeStyle = `rgba(255,255,255,${.16 * k * (.4 + rnd(i, 515) * .6)})`; g.lineWidth = 2 + rnd(i, 516) * 4; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (x - W / 2) * .06, y + len); g.stroke();
+  }
+}
 function drawBurst(t) {                          // 屏住呼吸：出洞前画面压暗；冲出来以后一阵风雪从洞口方向横扫过整幅画面（画在最上面，不跟镜头）
   const a = t - TX_OUT;
   if (a < 0 || a > 2.4) return;
@@ -896,7 +941,7 @@ function miniHero(x, y, sc, run, alpha = 1, carry = true) {
   g.fillStyle = '#ff8f7a'; roundRect(-1, -52, 9, 4.5, 2); g.fill();
   g.restore();
 }
-const HERO_A = 2.75, HERO_B = 3.2, CAB_A = 3.95, CAB_B = CLIMB1 - .05, JUMP_A = CLIMB1 + .15, JUMP_B = JUMP_A + .75;      // 冲进车站、缆车出发和到站、从山顶站跳出去      // 冲进车站的起止、缆车出发和到站
+const HERO_A = 2.75, HERO_B = 3.65, CAB_A = 4.15, CAB_B = CLIMB1 - .05, JUMP_A = CLIMB1 + .15, JUMP_B = JUMP_A + .75;      // 冲进车站、缆车出发和到站、从山顶站跳出去      // 冲进车站的起止、缆车出发和到站
 const heroCabY = t => lerp(G0[1], G1[1], smoother((t - CAB_A) / (CAB_B - CAB_A)));
 function drawHero(t) {
   if (t > HERO_A - .12 && t < HERO_B + .12) {                         // 从车门到车站入口：一个带残影的小跳步
@@ -905,12 +950,13 @@ function drawHero(t) {
       const u = clamp((t - HERO_A - q * .045) / (HERO_B - HERO_A)), p = ease(u);
       if (t - q * .045 < HERO_A - .12) continue;
       const pop = clamp((t - (HERO_A - .12)) / .12) * (1 - clamp((t - HERO_B) / .12));
-      miniHero(lerp(door[0], gate[0], p), lerp(door[1], gate[1], p) - 54 * Math.sin(Math.PI * p), 1.45, t * 26, (q ? .22 - q * .05 : 1) * pop);
+      miniHero(lerp(door[0], gate[0], p), lerp(door[1], gate[1], p) - 90 * Math.sin(Math.PI * p), 2.3, t * 22, (q ? .22 - q * .05 : 1) * pop);
     }
   }
-  if (t > 3.3 && t < CAB_B + .7) {                                           // 他坐的那一节缆车：比别的大一点，亮着灯，窗里看得见橙色的雪服
-    const y = heroCabY(t), x = gondX(y) - 17, a = clamp((t - 3.3) / .2) * (1 - clamp((t - CAB_B - .35) / .3)), sway = .05 * Math.sin(t * 3.3) * clamp((t - CAB_A) / .5);
-    g.save(); g.globalAlpha = a; g.translate(x, y); g.rotate(sway); g.scale(1.3, 1.3);
+  if (t > 3.7 && t < CAB_B + .7) {                                           // 他坐的那一节缆车：比别的大一点，亮着灯，窗里看得见橙色的雪服
+    const y = heroCabY(t), x = gondX(y) - 17, a = clamp((t - 3.7) / .2) * (1 - clamp((t - CAB_B - .35) / .3)), sway = .05 * Math.sin(t * 3.3) * clamp((t - CAB_A) / .5);
+    g.globalCompositeOperation = 'lighter'; glowAt([255, 206, 140], .5 * a * (.8 + .2 * Math.sin(t * 5)), x, y + 66, 120, 110, 1.3); g.globalCompositeOperation = 'source-over';   // 一圈暖光，一眼找得到
+    g.save(); g.globalAlpha = a; g.translate(x, y); g.rotate(sway); g.scale(1.6, 1.6);
     g.strokeStyle = '#4b5674'; g.lineWidth = 4; g.beginPath(); g.moveTo(0, 0); g.lineTo(0, 24); g.stroke();
     g.fillStyle = '#f4f6fb'; roundRect(-27, 22, 54, 60, 12); g.fill();
     g.fillStyle = '#ffe2b0'; roundRect(-22, 30, 44, 26, 6); g.fill();                                   // 亮着灯的车窗
@@ -931,13 +977,13 @@ function drawPisteSkiers(t) {
     g.restore();
   });
 }
-const skierScale = t => t < TD0 ? .5 : lerp(.5, 1, easeOut((t - TD0) / .7));
+const skierScale = t => t < TD0 ? .62 : lerp(.62, 1, easeOut((t - TD0) / .7));
 let LAND_FLECKS = null;
 function drawLanding(t) {                        // 落地：雪板两侧各溅起一扇雪沫
   if (t < JUMP_B - .02 || t > JUMP_B + 1) return;
   if (!LAND_FLECKS) {
     const x = skiX(SKI0), y = SKI0 + 4; LAND_FLECKS = [];
-    for (let i = 0; i < 90; i++) { const side = i % 2 ? 1 : -1, sp = 120 + rnd(i, 252) * 520; LAND_FLECKS.push([JUMP_B + rnd(i, 251) * .05, x + side * (6 + rnd(i, 253) * 16), y, side * sp * (.3 + rnd(i, 254) * .5) - 70, 170 + rnd(i, 255) * 420, 1.5 + rnd(i, 256) * 3, .4 + rnd(i, 257) * .45]); }
+    for (let i = 0; i < 90; i++) { const side = i % 2 ? 1 : -1, sp = 120 + rnd(i, 252) * 520; LAND_FLECKS.push([JUMP_B + rnd(i, 251) * .05, x + side * (6 + rnd(i, 253) * 16), y, side * sp * (.45 + rnd(i, 254) * .7) - 70, 240 + rnd(i, 255) * 560, 2 + rnd(i, 256) * 4, .45 + rnd(i, 257) * .5]); }
   }
   flecks(t, LAND_FLECKS, SKI0 + 12, 3.2, 1000);
 }
@@ -964,7 +1010,7 @@ function drawSkier(t, noShadow) {
   g.beginPath(); g.moveTo(-15, -84); g.lineTo(-28, -68 - arm * 22); g.lineTo(-30, -56 - arm * 70); g.moveTo(15, -84); g.lineTo(28, -68); g.lineTo(30, -56); g.stroke();
   g.fillStyle = '#f0a23a'; roundRect(-18, -92, 36, 50, 13); g.fill();          // 上身
   g.fillStyle = '#d98524'; g.fillRect(-18, -58, 36, 6);
-  g.fillStyle = '#1d2746'; g.beginPath(); g.arc(0, -106, 14.5, 0, TAU); g.fill();   // 头盔
+  g.fillStyle = '#1d2746'; g.beginPath(); g.arc(0, -105, 12.5, 0, TAU); g.fill();   // 头盔
   g.fillStyle = '#f6b8a0'; roundRect(-9, -106, 18, 10, 4); g.fill();
   g.fillStyle = '#ff8f7a'; roundRect(-11, -112, 22, 9, 4); g.fill();           // 雪镜
   g.restore();
@@ -1009,6 +1055,9 @@ function drawBathers(t) {
     g.fillRect(x - 12, y, 24, 30);
     g.beginPath(); g.arc(x, y - 14, 31, 0, TAU); g.fill();
     g.fillStyle = k ? '#261e29' : '#191621'; g.beginPath(); g.arc(x, y - 18, 32, Math.PI * .92, Math.PI * 2.08); g.quadraticCurveTo(x, y + 14, x - 31.5, y - 10); g.fill();
+    g.strokeStyle = '#c8a48d'; g.lineWidth = 17; g.lineCap = 'round'; g.beginPath();                    // 手臂：一个搭在池边的方向，一个伸向酒盘
+    if (k) { g.moveTo(x + 44, y + 30); g.quadraticCurveTo(x + 96, y + 34, x + 108, y + 58); } else { g.moveTo(x + 38, y + 34); g.quadraticCurveTo(x + 70, y + 70, x + 62 + 6 * Math.sin(TAU * 2 * t / T), y + 104); }
+    g.stroke();
     g.fillStyle = '#d4d5d8'; roundRect(x - 24, y - 56, 48, 17, 7); g.fill(); g.fillStyle = '#bbc0cb'; g.fillRect(x - 24, y - 46, 48, 3);   // 两个人头上都顶着叠好的毛巾
     g.strokeStyle = 'rgba(255,255,255,.43)'; g.lineWidth = 2.5; g.beginPath(); g.ellipse(x, y + 42, 74 + 6 * Math.sin(TAU * 3 * t / T + k), 13, 0, 0, TAU); g.stroke();
   });
@@ -1049,7 +1098,7 @@ function drawSake(t) {
 // ---- 水面：灯笼的倒影、雪花落进水里的小涟漪 ----
 function drawWater(t, night) {
   const P = POOL;
-  g.save(); g.beginPath(); g.ellipse(P.x, P.y - camNow, P.rx, P.ry, 0, 0, TAU); g.clip();
+  g.save(); poolPath(g, P.x, P.y - camNow); g.clip();
   if (night > .02) {                                   // 夜里的水：通透的深青色，中间被热气和灯照得发亮（不吃整体色调）
     const wg = g.createRadialGradient(P.x - 60, P.y - 40 - camNow, 30, P.x, P.y - camNow, P.rx);
     wg.addColorStop(0, '#2b7c82'); wg.addColorStop(.55, '#16525e'); wg.addColorStop(1, '#0a2935');
@@ -1135,6 +1184,12 @@ function drawSnow(t, k, vcam) {
     g.strokeStyle = `rgba(240,246,255,${k * (.45 + L * .2)})`; g.lineWidth = r * 2;
     g.beginPath(); g.moveTo(x, y); g.lineTo(x + .5, y - st + .5); g.stroke();
   }
+  const sp = radialSprite([255, 255, 255], 1.1);          // 贴着镜头飘过的几片大雪花：虚的、大的、快的，画面才有前后
+  for (let i = 0; i < 14; i++) {
+    const cyc = 5 + (i % 3), y = fract(rnd(i, 502) + cyc * t / T - camNow * 1.3 / 2100) * 2300 - 190, x = fract(rnd(i, 501) + (4 + i % 3) * t / T + .05 * Math.sin(t * 1.3 + i)) * 1400 - 160, r = 16 + rnd(i, 503) * 24;
+    g.globalAlpha = k * (.22 + rnd(i, 504) * .2); g.drawImage(sp, x - r, y - r * (1 + Math.min(1.5, Math.abs(vcam) * .0012)), r * 2, r * 2 * (1 + Math.min(1.5, Math.abs(vcam) * .0012)));
+  }
+  g.globalAlpha = 1;
 }
 // ---- 云雾：上山时穿过云层，循环首尾的雪雾/热气 ----
 const FOG = mk(W + 800, 700);
@@ -1153,10 +1208,14 @@ function drawFog(t, tint) {
       const y = fract((FOGC + k * 620 - camNow * 1.5) / 2600) * 2600 - 500, dx = -400 + 300 * Math.sin(TAU * (t / T + k * .23));
       g.drawImage(FOG, dx - 200, y, W + 800, 700);
     }
+    if (t < 9) {                                             // 更近的一层云（更大、更快），快到云顶时晚霞的光先透进来
+      g.globalAlpha = d * .7; for (let k = 0; k < 3; k++) { const y = fract((FOGC + k * 900 - camNow * 2.6) / 2700) * 2700 - 700; g.drawImage(FOG, -600 + 400 * Math.sin(TAU * (t / T + k * .31)), y, W + 1400, 1100); }
+      g.globalCompositeOperation = 'lighter'; glowAt([255, 190, 130], .55 * d * clamp((FOGC - camNow) / 1700), 300, -60, 1100, 900, 1.2); g.globalCompositeOperation = 'source-over';
+    }
     g.globalAlpha = 1;
   }
   // 回环：片尾温泉的热气漫成一片白，开头这片白很快散开，露出隧道口
-  const w = Math.max(Math.pow(1 - clamp(t / .13), 2), ease(clamp((t - (T - 1.4)) / 1.35)));     // 开头：从远景切过来的那一下白闪，0.13 秒就没了
+  const w = Math.max(Math.pow(1 - clamp(t / .13), 2), ease(clamp((t - (T - .55)) / .5)));     // 开头：从远景切过来的那一下白闪，0.13 秒就没了
   if (w > .01) {
     g.globalAlpha = Math.min(1, w * 1.5);
     for (let k = 0; k < 4; k++) g.drawImage(FOG, -400 + 260 * Math.sin(k * 2.1 + t), H - w * 2700 + k * 560, W + 800, 900);
@@ -1178,7 +1237,7 @@ const LINE1 = 1440;
 // 字：两种颜色——暖白是正文，金色是强调（数字和每句的关键词）；不垫遮罩、暗角、字影，可读性靠字号和字重。
 // 数字是主角：70 分钟、2.5 公里、5 月都用 Sora 放大，单位跟在后面小一号。
 // 标题下的旁白和角标跟着背景换色（照弥彦）：车站一镜背景是蓝雪和深色的树，用奶白；上山穿云到晚霞背景亮，用藏青；入暮后回到奶白。角标是木头色，竖线冰蓝，数字和英文另用暖色。
-const duskK = t => keys(t, [[0, 1], [4.3, 1], [4.6, 0], [11.4, 0], [11.9, 1], [T - 1.1, 1], [T - .3, 0]]);
+const duskK = t => keys(t, [[0, 1], [4.3, 1], [4.6, 0], [11.4, 0], [11.9, 1]]);
 const mixCol = (a, b, k, al = 1) => `rgba(${a.map((v, i) => Math.round(lerp(v, b[i], k))).join(',')},${al})`;
 // ---- 标题上落雪：在字的横笔上沿积一层雪（越平的地方积得越厚，斜笔和笔画两头几乎不积）----
 // 从字形的遮罩算一次，之后每帧贴图
@@ -1424,7 +1483,7 @@ const NAME = [82, 500, 6], SUB = [40, 500, 2], NUM = [172, 300, -4], UNIT = [54,
 function nameLine(s, segs, sub) {               // 一句话的大字：segs = [[文字, 是否金色], ...]，整行居中
   rise(s, () => {
     line(segs.map(([q, key]) => [q, NAME[0], key ? keyCol : WHITE, NAME[1], NAME[2]]), LINE1);
-    if (sub) text(sub, W / 2, LINE2, SUB[0], WHITE, SUB[1], 'center', SUB[2]);
+    if (sub) text(sub, W / 2, LINE2, SUB[0], subCol, SUB[1] + (subCol === WHITE ? 0 : 100), 'center', SUB[2]);
   });
 }
 function numLine(s, num, unit, sub, slot) {     // 放大的数字 + 单位
@@ -1435,9 +1494,10 @@ function snowflake(x, y, r, col) {               // 片尾小字前的一片雪�
   for (let i = 0; i < 6; i++) { g.rotate(TAU / 6); g.beginPath(); g.moveTo(0, 0); g.lineTo(0, -r); g.moveTo(0, -r * .55); g.lineTo(-r * .3, -r * .8); g.moveTo(0, -r * .55); g.lineTo(r * .3, -r * .8); g.stroke(); }
   g.restore();
 }
-let keyCol = TYPE.gold;
+let keyCol = TYPE.gold, subCol = WHITE;
 function typo(t) {
-  keyCol = mixCol([243, 199, 118], [232, 132, 30], sunAt(t) * .9);      // 晚霞里的雪是暖色的，金色压深成橙色才分得开
+  keyCol = mixCol([243, 199, 118], [232, 132, 30], sunAt(t) * .9);
+  subCol = sunAt(t) > .5 ? 'rgb(96,52,84)' : WHITE;                    // 晚霞里的小字换成深紫褐，暖色雪地上白字太淡      // 晚霞里的雪是暖色的，金色压深成橙色才分得开
   g.save();
   numLine(t < 1.0 ? {p: 1, out: clamp((1.0 - t) / .3)} : 0, '70', '  分钟', '东京坐新干线，出了隧道就是雪国');   // 从开场的远景一直留到切进车站后 1 秒
   nameLine(scene(t, 1.25, 4.95), [['下车就是', 0], ['雪场', 1]], 'GALA 汤泽站 · 冬天有直达车');
@@ -1446,13 +1506,13 @@ function typo(t) {
   numLine(s, s ? (2.5 * easeOut(s.age / 1.3)).toFixed(1) : '', '  公里', '最长的雪道，一路滑回车站', '2.5');   // 数字跟着人往下滑数上去
   nameLine(scene(t, 17.0, 19.4), [['滑完雪 ', 0], ['逛温泉街', 1]], '从 GALA 坐一站 · 越后汤泽站');
   nameLine(scene(t, 21.0, 23.2), [['雪地里 ', 0], ['泡温泉', 1]], '白天滑雪，晚上泡温泉');
-  rise(scene(t, 23.4, 25.4), () => {              // 片尾提醒：左对齐两行，月份放大
+  rise(scene(t, 23.4, 25.9), () => {              // 片尾提醒：左对齐两行，月份放大
     text('东京樱花开了，', 80, 1386, 66, WHITE, 500, 'left', 4);
     let x = 80 + text('这里还能滑到', 80, 1506, 66, WHITE, 500, 'left', 4) + 22;
     x += text('5', x, 1506, 156, TYPE.gold, 300, 'left', 0) + 18;
     text('月。', x, 1506, 66, WHITE, 500, 'left', 4);
   });
-  rise(scene(t, 23.7, 25.4), () => text('开放日期每年不同，出发前看官网', 80, 1584, SUB[0], WHITE, SUB[1], 'left', SUB[2]));
+  rise(scene(t, 23.7, 25.9), () => text('开放日期每年不同，出发前看官网', 80, 1584, SUB[0], WHITE, SUB[1], 'left', SUB[2]));
   g.restore();
 }
 
@@ -1467,13 +1527,15 @@ function openingBg() {
   const c = OPENBG = mk(W, H), x = c.getContext('2d');
   x.drawImage(verticalSprite('opsky', [[0, [6, 10, 30, 255]], [.6, [16, 28, 70, 255]], [1, [44, 62, 118, 255]]]), 0, 0, W, 900);
   for (let i = 0; i < 90; i++) { x.fillStyle = `rgba(255,255,255,${.15 + rnd(i, 401) * .5})`; x.fillRect(rnd(i, 402) * W, rnd(i, 403) * 560, 2, 2); }
-  const ridge = (base, amp, seed, col, snow) => {
-    const f = px => base - amp * (.55 * Math.abs(Math.sin(px / 190 + seed)) + .3 * Math.abs(Math.sin(px / 77 + seed * 2.3)) + .15 * Math.sin(px / 31 + seed));
-    x.beginPath(); x.moveTo(0, H); for (let px = 0; px <= W; px += 6) x.lineTo(px, f(px)); x.lineTo(W, H); x.closePath(); x.fillStyle = col; x.fill();
-    x.save(); x.clip();
-    x.strokeStyle = snow; x.lineWidth = 7; x.beginPath(); for (let px = 0; px <= W; px += 6) x.lineTo(px, f(px) + 4); x.stroke(); x.restore();
+  const peaks = (base, amp, seed, body, lit, n) => {      // 有棱有面的雪山：每座山一个受光面、一个背光面，山脊线带一点折
+    for (let i = 0; i < n; i++) {
+      const cx = (i + .5 + (rnd(i, seed) - .5) * .7) * W / n, hgt = amp * (.55 + rnd(i, seed + 1) * .6), half = 150 + rnd(i, seed + 2) * 150, top = base - hgt;
+      x.fillStyle = body; x.beginPath(); x.moveTo(cx - half, base + 40); x.lineTo(cx - half * .45, top + hgt * .42); x.lineTo(cx - 14, top); x.lineTo(cx + half * .4, top + hgt * .5); x.lineTo(cx + half, base + 40); x.fill();
+      x.fillStyle = lit; x.beginPath(); x.moveTo(cx - 14, top); x.lineTo(cx - half * .45, top + hgt * .42); x.lineTo(cx - half * .62, top + hgt * .66); x.lineTo(cx - half * .2, top + hgt * .52); x.lineTo(cx - half * .1, top + hgt * .78); x.lineTo(cx + 6, top + hgt * .4); x.lineTo(cx + half * .16, top + hgt * .58); x.lineTo(cx + 10, top + hgt * .16); x.fill();
+    }
+    x.fillStyle = body; x.fillRect(0, base + 30, W, 400);
   };
-  ridge(700, 250, 1.3, '#1b2a5c', 'rgba(170,190,235,.55)'); ridge(820, 210, 4.1, '#14204a', 'rgba(150,172,225,.5)');
+  peaks(760, 420, 461, '#1d2c60', 'rgba(176,196,240,.62)', 4); peaks(860, 300, 471, '#152150', 'rgba(150,174,228,.5)', 5);
   // 近处的大山：左高右低，洞口在山脚
   x.fillStyle = '#0a1230'; x.beginPath(); x.moveTo(0, 640); x.bezierCurveTo(180, 610, 380, 760, 520, 900); x.bezierCurveTo(600, 980, 660, 1040, 760, 1090); x.lineTo(0, 1090); x.fill();
   x.strokeStyle = 'rgba(160,182,232,.5)'; x.lineWidth = 6; x.beginPath(); x.moveTo(0, 644); x.bezierCurveTo(180, 614, 380, 764, 520, 904); x.stroke();
@@ -1485,6 +1547,14 @@ function openingBg() {
   // 雪原
   x.drawImage(verticalSprite('opfield', [[0, [58, 78, 138, 255]], [1, [30, 44, 92, 255]]]), 0, 1080, W, H - 1080);
   for (let i = 0; i < 26; i++) { x.globalAlpha = .1 + rnd(i, 421) * .12; x.drawImage(radialSprite([150, 176, 230], 1.4), rnd(i, 422) * W - 200, 1110 + rnd(i, 423) * 760, 300 + rnd(i, 424) * 300, 50 + rnd(i, 425) * 50); } x.globalAlpha = 1;
+  // 雪原上的东西：一条结了薄冰的河、田埂、散落的灯火
+  x.strokeStyle = 'rgba(24,36,84,.9)'; x.lineWidth = 46; x.lineCap = 'round'; x.beginPath(); x.moveTo(1140, 1150); x.bezierCurveTo(820, 1330, 420, 1380, 360, 1560); x.bezierCurveTo(320, 1700, 560, 1800, 520, 1960); x.stroke();
+  x.strokeStyle = 'rgba(150,178,236,.5)'; x.lineWidth = 5; x.beginPath(); x.moveTo(1140, 1128); x.bezierCurveTo(820, 1308, 400, 1358, 338, 1556); x.stroke();
+  x.strokeStyle = 'rgba(150,176,230,.16)'; x.lineWidth = 3; for (let i = 0; i < 9; i++) { x.beginPath(); x.moveTo(-20, 1180 + i * 74); x.lineTo(W + 20, 1150 + i * 86 + 40 * Math.sin(i)); x.stroke(); }
+  for (let i = 0; i < 22; i++) { const hx = 40 + rnd(i, 451) * 1000, hy = 1150 + rnd(i, 452) * 620, hw = 34 + rnd(i, 453) * 40;
+    x.fillStyle = '#0d1532'; x.fillRect(hx, hy - 20, hw, 20); x.fillStyle = '#93a8d8'; x.beginPath(); x.moveTo(hx - 6, hy - 18); x.lineTo(hx + hw / 2, hy - 36); x.lineTo(hx + hw + 6, hy - 18); x.fill();
+    x.fillStyle = 'rgba(255,206,140,.95)'; x.fillRect(hx + 7, hy - 14, 8, 8); if (hw > 50) x.fillRect(hx + 24, hy - 14, 8, 8);
+    x.globalCompositeOperation = 'lighter'; x.globalAlpha = .2; x.drawImage(radialSprite([255, 190, 120], 1.3), hx + hw / 2 - 60, hy - 50, 120, 80); x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; }
   // 高架：从洞口一直横到画面右边
   x.fillStyle = '#1c2850'; x.fillRect(OP.px, OP.deck, W, 12); x.fillRect(OP.px, OP.deck - 9, W, 4);
   for (let px = OP.px + 70; px < W + 40; px += 118) x.fillRect(px, OP.deck + 10, 13, 74);
@@ -1629,6 +1699,7 @@ function renderMain(t) {                       // 不能叫 render：boot 会把
   applyZoom(zoomAt(t));
   drawFog(t, tint);
   drawSnow(t, snowAt(t), vcam);
+  drawSpeed(t);
   drawBurst(t);                                                             // 推镜只作用于画面，文字不动
   if (params.has('notext')) return;
   drawHeaderSnow(t);
